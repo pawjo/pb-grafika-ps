@@ -103,7 +103,7 @@ section {
   height: 100%;
 }
 
-.rect {
+.svg-element {
   stroke-width: 3px;
   stroke: black;
   fill: none;

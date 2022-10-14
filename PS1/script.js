@@ -1,9 +1,7 @@
-// const canvas = document.querySelector("canvas"),
 const shapeBtns = document.querySelectorAll(".shape"),
     toolBtns = document.querySelectorAll(".tool"),
     fillColor = document.querySelector("#fill-color"),
     saveImg = document.querySelector(".save-img"),
-    // ctx = canvas.getContext("2d");
     svg = document.querySelector("#workspace");
 
 const svgns = "http://www.w3.org/2000/svg";
@@ -12,13 +10,29 @@ const x = "x";
 const y = "y";
 const width = "width";
 const height = "height";
+const svgElementClassName = "svg-element";
+
+const shapes = {
+    line: "line",
+    rectangle: "rectangle",
+    circle: "circle",
+    triangle: "triangle"
+};
+
+const tools = {
+    draw: "draw",
+    move: "move",
+    resize: "resize"
+};
+
 
 let mouseX = 0;
 let mouseY = 0;
-let currentRect = null;
+let currentElement = null;
+let currentElementShape = null;
 let currentAction = "none";
-let selectedShape = "rectangle";
-let selectedTool = "draw";
+let selectedShape = null;
+let selectedTool = null;
 
 function setSelectedShape(shape) {
     selectedShape = shape;
@@ -49,20 +63,40 @@ addEventListenersForButtons(toolBtns, "options", "activeTool", setSelectedTool);
 
 function startDraw(e) {
     currentAction = "draw";
+    currentElementShape = selectedShape;
     mouseX = e.offsetX;
     mouseY = e.offsetY;
 
-    startDrawRect(mouseX, mouseY);
+    switch (selectedShape) {
+        case shapes.rectangle:
+            startDrawRect(mouseX, mouseY);
+            break;
+        case shapes.circle:
+            startDrawCircle(mouseX, mouseY);
+            break;
+    }
+}
+
+function finalizeSvgElement() {
+    currentElement.classList.add(svgElementClassName);
+    svg.appendChild(currentElement);
 }
 
 function startDrawRect(startX, startY) {
-    currentRect = document.createElementNS(svgns, "rect");
-    currentRect.setAttribute(x, startX);
-    currentRect.setAttribute(y, startY);
-    currentRect.setAttribute(width, 0);
-    currentRect.setAttribute(height, 0);
-    currentRect.classList.add("rect");
-    svg.appendChild(currentRect);
+    currentElement = document.createElementNS(svgns, "rect");
+    currentElement.setAttribute(x, startX);
+    currentElement.setAttribute(y, startY);
+    currentElement.setAttribute(width, 0);
+    currentElement.setAttribute(height, 0);
+    finalizeSvgElement();
+}
+
+function startDrawCircle(startX, startY) {
+    currentElement = document.createElementNS(svgns, "circle");
+    currentElement.setAttribute("cx", startX);
+    currentElement.setAttribute("cy", startY);
+    currentElement.setAttribute("r", 0);
+    finalizeSvgElement();
 }
 
 function translateAttribute(element, attributeName, difference) {
@@ -71,101 +105,110 @@ function translateAttribute(element, attributeName, difference) {
 }
 
 function resizeRect(rect, dX, dY) {
-    // const currentWidth = parseInt(rect.getAttribute(width));
-    // const currentHeight = parseInt(rect.getAttribute(height));
-    // currentRect.setAttribute(width, currentWidth + dX);
-    // currentRect.setAttribute(height, currentHeight + dY);
-
     translateAttribute(rect, width, dX);
     translateAttribute(rect, height, dY);
 }
 
-function moveElement(element, dX, dY) {
-    translateAttribute(element, x, dX);
-    translateAttribute(element, y, dY);
+function pow2(val) {
+    return Math.pow(val, 2);
 }
 
+function resizeCircle(circle, offsetX, offsetY) {
+    const dX = offsetX - mouseX;
+    const dY = offsetY - mouseY;
+    const dR = Math.sqrt(pow2(dX) + pow2(dY));
+    circle.setAttribute("r", dR);
+}
+
+function drawing(e) {
+    switch (currentElementShape) {
+        case shapes.rectangle:
+            resizeRect(currentElement, e.movementX, e.movementY);
+            break;
+        case shapes.circle:
+            resizeCircle(currentElement, e.offsetX, e.offsetY);
+            break;
+    }
+}
+
+function moving(dX, dY) {
+    switch (currentElementShape) {
+        case shapes.rectangle:
+            translateAttribute(currentElement, x, dX);
+            translateAttribute(currentElement, y, dY);
+            break;
+        case shapes.circle:
+            translateAttribute(currentElement, "cx", dX);
+            translateAttribute(currentElement, "cy", dY);
+            break;
+    }
+}
 
 function startMoveRect(e) {
+    startMove(e, shapes.rectangle);
+}
+
+function startMoveCircle(e) {
+    startMove(e, shapes.circle);
+}
+
+function startMove(e, shape) {
     e.preventDefault();
-    currentRect = e.target;
-    currentAction = "move";
+    currentElement = e.target;
+    currentAction = tools.move;
+    currentElementShape = shape;
 }
 
 function stopDraw() {
-    currentRect.addEventListener("mousedown", startMoveRect);
+    let actionForSpecifiedType = null;
+    switch (currentElementShape) {
+        case shapes.rectangle:
+            actionForSpecifiedType = startMoveRect;
+            break;
+        case shapes.circle:
+            actionForSpecifiedType = startMoveCircle;
+            break;
+    }
+
+    currentElement.addEventListener("mousedown", actionForSpecifiedType);
 }
 
 function onMouseDown(e) {
-    if (selectedTool === "draw") {
+    if (selectedTool === tools.draw && selectedShape) {
         startDraw(e);
     }
 }
 
 function onMouseMove(e) {
-
-    switch (currentAction) {
-        case "none":
-            return;
-        case "draw":
-            resizeRect(currentRect, e.movementX, e.movementY);
-            break;
-        case "move":
-            moveElement(currentRect, e.movementX, e.movementY);
-            break;
+    if (!currentAction) {
+        return;
     }
 
-    // } else if(selectedTool === "rectangle"){
-    // } else if(selectedTool === "circle"){
-    //     drawCircle(e);
-    // } else if(selectedTool === "triangle"){
-    //     drawTriangle(e);
-    // } else if(selectedTool === "line"){
-    //     drawLine(e);
-    // }
+    switch (currentAction) {
+        case tools.draw:
+            drawing(e);
+            break;
+        case tools.move:
+            moving(e.movementX, e.movementY);
+            break;
+    }
 }
 
 function onMouseUp() {
     switch (selectedTool) {
-        case "draw":
+        case tools.draw:
             stopDraw();
             break;
     }
 
-    currentRect = null;
-    currentAction = "none";
+    currentElement = null;
+    currentAction = null;
 }
 
 svg.addEventListener("mousedown", onMouseDown);
 svg.addEventListener("mousemove", onMouseMove);
 svg.addEventListener("mouseup", onMouseUp);
 
-// const setCanvasBackground = () => {
-//     // setting whole canvas background to white, so the downloaded img background will be white
-//     ctx.fillStyle = "#fff";
-//     ctx.fillRect(0, 0, canvas.width, canvas.height);
-//      // setting fillstyle back to the selectedColor, it'll be the brush color
-// }
-
-
-// window.addEventListener("load", () => {
-//     // setting canvas width/height.. offsetwidth/height returns viewable width/height of an element
-//     canvas.width = canvas.offsetWidth;
-//     canvas.height = canvas.offsetHeight;
-//     setCanvasBackground();
-// });
-
-// const drawRect = (e) => {
-//         return ctx.strokeRect(e.offsetX, e.offsetY, prevMouseX - e.offsetX, prevMouseY - e.offsetY);
-// }
-
-// const drawCircle = (e) => {
-//     ctx.beginPath(); // creating new path to draw circle
-//     // getting radius for circle according to the mouse pointer
-//     let radius = Math.sqrt(Math.pow((prevMouseX - e.offsetX), 2) + Math.pow((prevMouseY - e.offsetY), 2));
-//     ctx.arc(prevMouseX, prevMouseY, radius, 0, 2 * Math.PI); // creating circle according to the mouse pointer
-//     fillColor.checked ? ctx.fill() : ctx.stroke(); // if fillColor is checked fill circle else draw border circle
-// }
 
 // const drawTriangle = (e) => {
 //     ctx.beginPath(); // creating new path to draw circle
@@ -175,47 +218,6 @@ svg.addEventListener("mouseup", onMouseUp);
 //     ctx.closePath(); // closing path of a triangle so the third line draw automatically
 //     fillColor.checked ? ctx.fill() : ctx.stroke(); // if fillColor is checked fill triangle else draw border
 // }
-
-// const drawLine = (e) => {
-//     ctx.beginPath(); // creating new path to draw circle
-//     ctx.moveTo(prevMouseX, prevMouseY); // moving triangle to the mouse pointer
-//     ctx.lineTo(e.offsetX, e.offsetY); // creating first line according to the mouse pointer
-//    // creating bottom line of triangle
-//     ctx.closePath(); // closing path of a triangle so the third line draw automatically
-//     fillColor.checked ? ctx.fill() : ctx.stroke(); // if fillColor is checked fill triangle else draw border
-// }
-
-// const startDraw = (e) => {
-//     isDrawing = true;
-//     prevMouseX = e.offsetX; // passing current mouseX position as prevMouseX value
-//     prevMouseY = e.offsetY; // passing current mouseY position as prevMouseY value
-//     ctx.beginPath(); // creating new path to draw
-//     ctx.lineWidth = brushWidth; // passing brushSize as line width
-//     // copying canvas data & passing as snapshot value.. this avoids dragging the image
-//     snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
-// }
-
-// const drawing = (e) => {
-//     if(!isDrawing) return; // if isDrawing is false return from here
-//     ctx.putImageData(snapshot, 0, 0); // adding copied canvas data on to this canvas
-
-//     if(selectedTool === "pencil") {
-//         // if selected tool is eraser then set strokeStyle to white
-//         // to paint white color on to the existing canvas content else set the stroke color to selected color
-//         ctx.strokeStyle = selectedTool === "eraser" ? "#fff" : selectedColor;
-//         ctx.lineTo(e.offsetX, e.offsetY); // creating line according to the mouse pointer
-//         ctx.stroke(); // drawing/filling line with color
-//     } else if(selectedTool === "rectangle"){
-//         drawRect(e);
-//     } else if(selectedTool === "circle"){
-//         drawCircle(e);
-//     } else if(selectedTool === "triangle"){
-//         drawTriangle(e);
-//     } else if(selectedTool === "line"){
-//         drawLine(e);
-//     }
-// }
-
 
 
 // saveImg.addEventListener("click", () => {
