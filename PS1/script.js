@@ -36,7 +36,10 @@ const scalingTypes = {
     rectRight: "rectRight",
     circle: "circle",
     line1: "line1",
-    line2: "line2"
+    line2: "line2",
+    triangle1: "triangle1",
+    triangle2: "triangle2",
+    triangle3: "triangle3"
 };
 
 
@@ -52,6 +55,8 @@ let currentCircleX = null;
 let currentCircleY = null;
 
 let currentScalingType = null;
+
+let currentTriangleAttributes = null;
 
 function setSelectedShape(shape) {
     selectedShape = shape;
@@ -96,6 +101,9 @@ function startDraw(e) {
         case shapes.line:
             startDrawLine(startX, startY);
             break;
+        case shapes.triangle:
+            startDrawTriangle(startX, startY);
+            break;
     }
 }
 
@@ -133,6 +141,45 @@ function startDrawLine(startX, startY) {
     finalizeSvgElement();
 }
 
+function setCurrentTriangleAttributes(x1, y1, x2, y2, x3, y3) {
+    currentTriangleAttributes = {
+        x1: x1,
+        y1: y1,
+        x2: x2,
+        y2: y2,
+        x3: x3,
+        y3: y3
+    };
+}
+
+function setCurrentTriangleAttributesFromCurrentElement() {
+    const splitted = currentElement.getAttribute("points").split(/\,|\s/);
+    const parsed = splitted.map(x => parseInt(x));
+    currentTriangleAttributes.x1 = parsed[0];
+    currentTriangleAttributes.y1 = parsed[1];
+    currentTriangleAttributes.x2 = parsed[2];
+    currentTriangleAttributes.y2 = parsed[3];
+    currentTriangleAttributes.x3 = parsed[4];
+    currentTriangleAttributes.y3 = parsed[5];
+}
+
+function getCurrentTriangleAttributes() {
+    return `${currentTriangleAttributes.x1},${currentTriangleAttributes.y1} `
+        + `${currentTriangleAttributes.x2},${currentTriangleAttributes.y2} `
+        + `${currentTriangleAttributes.x3},${currentTriangleAttributes.y3}`;
+}
+
+function setTriangleAttributes() {
+    currentElement.setAttribute("points", getCurrentTriangleAttributes());
+}
+
+function startDrawTriangle(startX, startY) {
+    currentElement = document.createElementNS(svgns, "polygon");
+    setCurrentTriangleAttributes(startX, startY, startX, startY, startX + 50, startY + 50);
+    setTriangleAttributes();
+    finalizeSvgElement();
+}
+
 function translateAttribute(element, attributeName, difference) {
     const currentValue = parseInt(element.getAttribute(attributeName));
     element.setAttribute(attributeName, currentValue + difference);
@@ -154,6 +201,12 @@ function resizeCircle(circle, offsetX, offsetY) {
     circle.setAttribute("r", dR);
 }
 
+function drawingTriangle(dX, dY) {
+    currentTriangleAttributes.x2 += dX;
+    currentTriangleAttributes.y2 += dY;
+    setTriangleAttributes();
+}
+
 function drawing(e) {
     switch (currentElement.tagName) {
         case "rect":
@@ -166,6 +219,11 @@ function drawing(e) {
         case "line":
             translateAttribute(currentElement, "x2", e.movementX);
             translateAttribute(currentElement, "y2", e.movementY);
+            break;
+        case "polygon":
+            currentTriangleAttributes.x2 += e.movementX;
+            currentTriangleAttributes.y2 += e.movementY;
+            setTriangleAttributes();
             break;
     }
 }
@@ -185,6 +243,15 @@ function moving(dX, dY) {
             translateAttribute(currentElement, "y1", dY);
             translateAttribute(currentElement, "x2", dX);
             translateAttribute(currentElement, "y2", dY);
+            break;
+        case "polygon":
+            currentTriangleAttributes.x1 += dX;
+            currentTriangleAttributes.y1 += dY;
+            currentTriangleAttributes.x2 += dX;
+            currentTriangleAttributes.y2 += dY;
+            currentTriangleAttributes.x3 += dX;
+            currentTriangleAttributes.y3 += dY;
+            setTriangleAttributes();
             break;
     }
 }
@@ -246,6 +313,21 @@ function scaling(e) {
         case scalingTypes.line2:
             translateAttribute(currentElement, "x2", dX);
             translateAttribute(currentElement, "y2", dY);
+            break;
+        case scalingTypes.triangle1:
+            currentTriangleAttributes.x1 += dX;
+            currentTriangleAttributes.y1 += dY;
+            setTriangleAttributes();
+            break;
+        case scalingTypes.triangle2:
+            currentTriangleAttributes.x2 += dX;
+            currentTriangleAttributes.y2 += dY;
+            setTriangleAttributes();
+            break;
+        case scalingTypes.triangle3:
+            currentTriangleAttributes.x3 += dX;
+            currentTriangleAttributes.y3 += dY;
+            setTriangleAttributes();
             break;
     }
 }
@@ -322,8 +404,12 @@ function onObjectMouseDown(e) {
     currentElement = e.target;
     currentAction = selectedTool;
 
+    if (currentElement.tagName === "polygon") {
+        setCurrentTriangleAttributesFromCurrentElement();
+    }
+
     if (currentAction === tools.scale)
-        switch (e.target.tagName) {
+        switch (currentElement.tagName) {
             case "rect":
                 prepareRectToScaling(e);
                 break;
@@ -343,6 +429,17 @@ function onObjectMouseDown(e) {
                 }
                 else if (checkIfIsNear(x2, e.offsetX, tolerance) && checkIfIsNear(y2, e.offsetY, tolerance)) {
                     currentScalingType = scalingTypes.line2;
+                }
+                break;
+            case "polygon":
+                if (checkIfIsNear(currentTriangleAttributes.x1, e.offsetX, tolerance) && checkIfIsNear(currentTriangleAttributes.y1, e.offsetY, tolerance)) {
+                    currentScalingType = scalingTypes.triangle1;
+                }
+                else if (checkIfIsNear(currentTriangleAttributes.x2, e.offsetX, tolerance) && checkIfIsNear(currentTriangleAttributes.y2, e.offsetY, tolerance)) {
+                    currentScalingType = scalingTypes.triangle2;
+                }
+                else if (checkIfIsNear(currentTriangleAttributes.x3, e.offsetX, tolerance) && checkIfIsNear(currentTriangleAttributes.y3, e.offsetY, tolerance)) {
+                    currentScalingType = scalingTypes.triangle3;
                 }
                 break;
         }
@@ -367,7 +464,6 @@ function onMouseMove(e) {
             moving(e.movementX, e.movementY);
             break;
         case tools.scale:
-            console.log("switch");
             scaling(e);
             break;
     }
