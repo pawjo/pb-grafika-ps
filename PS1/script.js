@@ -10,6 +10,8 @@ const width = "width";
 const height = "height";
 const svgElementClassName = "svg-element";
 
+const tolerance = 10;
+
 const shapes = {
     line: "line",
     rectangle: "rectangle",
@@ -32,7 +34,9 @@ const scalingTypes = {
     rectBottomRight: "rectBottomRight",
     rectLeft: "rectLeft",
     rectRight: "rectRight",
-    circle: "circle"
+    circle: "circle",
+    line1: "line1",
+    line2: "line2"
 };
 
 
@@ -89,6 +93,9 @@ function startDraw(e) {
         case shapes.circle:
             startDrawCircle(startX, startY);
             break;
+        case shapes.line:
+            startDrawLine(startX, startY);
+            break;
     }
 }
 
@@ -117,6 +124,15 @@ function startDrawCircle(startX, startY) {
     finalizeSvgElement();
 }
 
+function startDrawLine(startX, startY) {
+    currentElement = document.createElementNS(svgns, "line");
+    currentElement.setAttribute("x1", startX);
+    currentElement.setAttribute("y1", startY);
+    currentElement.setAttribute("x2", startX);
+    currentElement.setAttribute("y2", startY);
+    finalizeSvgElement();
+}
+
 function translateAttribute(element, attributeName, difference) {
     const currentValue = parseInt(element.getAttribute(attributeName));
     element.setAttribute(attributeName, currentValue + difference);
@@ -141,10 +157,15 @@ function resizeCircle(circle, offsetX, offsetY) {
 function drawing(e) {
     switch (currentElement.tagName) {
         case "rect":
-            resizeRect(currentElement, e.movementX, e.movementY);
+            translateAttribute(currentElement, "width", e.movementX);
+            translateAttribute(currentElement, "height", e.movementY);
             break;
         case "circle":
             resizeCircle(currentElement, e.offsetX, e.offsetY);
+            break;
+        case "line":
+            translateAttribute(currentElement, "x2", e.movementX);
+            translateAttribute(currentElement, "y2", e.movementY);
             break;
     }
 }
@@ -158,6 +179,12 @@ function moving(dX, dY) {
         case "circle":
             translateAttribute(currentElement, "cx", dX);
             translateAttribute(currentElement, "cy", dY);
+            break;
+        case "line":
+            translateAttribute(currentElement, "x1", dX);
+            translateAttribute(currentElement, "y1", dY);
+            translateAttribute(currentElement, "x2", dX);
+            translateAttribute(currentElement, "y2", dY);
             break;
     }
 }
@@ -212,6 +239,14 @@ function scaling(e) {
         case scalingTypes.circle:
             resizeCircle(currentElement, eventX, eventY);
             break;
+        case scalingTypes.line1:
+            translateAttribute(currentElement, "x1", dX);
+            translateAttribute(currentElement, "y1", dY);
+            break;
+        case scalingTypes.line2:
+            translateAttribute(currentElement, "x2", dX);
+            translateAttribute(currentElement, "y2", dY);
+            break;
     }
 }
 
@@ -227,7 +262,6 @@ function prepareRectToScaling(e) {
     const y = getIntAttribute(e.target, "y");
     const width = getIntAttribute(e.target, "width");
     const height = getIntAttribute(e.target, "height");
-    const tolerance = 10;
 
     // top
     if (checkIfIsNear(y, offsetY, tolerance)) {
@@ -298,9 +332,20 @@ function onObjectMouseDown(e) {
                 currentCircleY = getIntAttribute(currentElement, "cy");
                 currentScalingType = scalingTypes.circle;
                 break;
+            case "line":
+                const x1 = getIntAttribute(currentElement, "x1");
+                const y1 = getIntAttribute(currentElement, "y1");
+                const x2 = getIntAttribute(currentElement, "x2");
+                const y2 = getIntAttribute(currentElement, "y2");
+
+                if (checkIfIsNear(x1, e.offsetX, tolerance) && checkIfIsNear(y1, e.offsetY, tolerance)) {
+                    currentScalingType = scalingTypes.line1;
+                }
+                else if (checkIfIsNear(x2, e.offsetX, tolerance) && checkIfIsNear(y2, e.offsetY, tolerance)) {
+                    currentScalingType = scalingTypes.line2;
+                }
+                break;
         }
-
-
 }
 
 function onMouseDown(e) {
