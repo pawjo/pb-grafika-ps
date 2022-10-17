@@ -113,3 +113,28 @@ section {
 .scale-point {
   fill: blue;
 }
+
+#sketch {
+    height: 100%;
+    position: relative;
+    color: black;
+}
+
+#tmp_canvas {
+    position: absolute;
+    left: 0px; right: 0;
+    bottom: 0; top: 0;
+    cursor: crosshair;
+    color: black;
+}
+
+#text_tool {
+    position: absolute;
+    border: 1px dashed black;
+    outline: 0;
+    display: none;
+    
+    font: 13px Poppins;
+    overflow: hidden;
+    white-space: nowrap;
+}
