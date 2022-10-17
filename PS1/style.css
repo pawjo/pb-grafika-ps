@@ -29,7 +29,7 @@ section {
 }
 
 .tools-board {
-  width: 210px;
+  width: 180px;
   padding: 15px 22px 0;
 }
 
@@ -77,20 +77,23 @@ section {
 
 .buttons button {
   width: 100%;
-  color: #fff;
+  color: black;
   border: none;
   outline: none;
-  padding: 10px 0;
   font-size: 0.9rem;
-  margin-bottom: 10px;
   background: none;
-  border-radius: 4px;
+  padding: 5px;
+  border-radius: 5px;
   cursor: pointer;
 }
 
 .buttons .save-img {
-  background: black;
-  border: 1px solid black;
+  background: white;
+  border: 2px solid black;
+}
+
+.save-img:hover {
+    color: #4A98F7;
 }
 
 .drawing-board {
