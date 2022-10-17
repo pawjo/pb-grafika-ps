@@ -23,6 +23,18 @@ const tools = {
     scale: "scale"
 };
 
+const scalingTypes = {
+    rectTop: "rectTop",
+    rectTopLeft: "rectTopLeft",
+    rectTopRight: "rectTopRight",
+    rectBottom: "rectBottom",
+    rectBottomLeft: "rectBottomLeft",
+    rectBottomRight: "rectBottomRight",
+    rectLeft: "rectLeft",
+    rectRight: "rectRight",
+    circle: "circle"
+};
+
 
 let mouseX = 0;
 let mouseY = 0;
@@ -32,7 +44,10 @@ let currentAction = "none";
 let selectedShape = null;
 let selectedTool = null;
 
-let scaleCurrentActions = null;
+let currentCircleX = null;
+let currentCircleY = null;
+
+let currentScalingType = null;
 
 function setSelectedShape(shape) {
     selectedShape = shape;
@@ -64,15 +79,15 @@ addEventListenersForButtons(toolBtns, "options", "activeTool", setSelectedTool);
 function startDraw(e) {
     currentAction = "draw";
     currentElementShape = selectedShape;
-    mouseX = e.offsetX;
-    mouseY = e.offsetY;
+    const startX = e.offsetX;
+    const startY = e.offsetY;
 
     switch (selectedShape) {
         case shapes.rectangle:
-            startDrawRect(mouseX, mouseY);
+            startDrawRect(startX, startY);
             break;
         case shapes.circle:
-            startDrawCircle(mouseX, mouseY);
+            startDrawCircle(startX, startY);
             break;
     }
 }
@@ -92,28 +107,14 @@ function startDrawRect(startX, startY) {
 }
 
 function startDrawCircle(startX, startY) {
+    currentCircleX = startX;
+    currentCircleY = startY;
+
     currentElement = document.createElementNS(svgns, "circle");
     currentElement.setAttribute("cx", startX);
     currentElement.setAttribute("cy", startY);
     currentElement.setAttribute("r", 0);
     finalizeSvgElement();
-}
-
-function createScalePoint(x, y, action) {
-    let scalePoint = document.createElementNS(svgns, "circle");
-    scalePoint.setAttribute("cx", x);
-    scalePoint.setAttribute("cy", y);
-    scalePoint.setAttribute("r", 5);
-    scalePoint.classList.add("scale-point");
-    svg.appendChild(scalePoint);
-
-    scalePoint.addEventListener("mousedown", e => {
-        e.stopPropagation();
-        activeScalePointAction = action;
-        currentAction = tools.scale;
-    });
-
-    return scalePoint;
 }
 
 function translateAttribute(element, attributeName, difference) {
@@ -131,30 +132,30 @@ function pow2(val) {
 }
 
 function resizeCircle(circle, offsetX, offsetY) {
-    const dX = offsetX - mouseX;
-    const dY = offsetY - mouseY;
+    const dX = offsetX - currentCircleX;
+    const dY = offsetY - currentCircleY;
     const dR = Math.sqrt(pow2(dX) + pow2(dY));
     circle.setAttribute("r", dR);
 }
 
 function drawing(e) {
-    switch (currentElementShape) {
-        case shapes.rectangle:
+    switch (currentElement.tagName) {
+        case "rect":
             resizeRect(currentElement, e.movementX, e.movementY);
             break;
-        case shapes.circle:
+        case "circle":
             resizeCircle(currentElement, e.offsetX, e.offsetY);
             break;
     }
 }
 
 function moving(dX, dY) {
-    switch (currentElementShape) {
-        case shapes.rectangle:
+    switch (currentElement.tagName) {
+        case "rect":
             translateAttribute(currentElement, "x", dX);
             translateAttribute(currentElement, "y", dY);
             break;
-        case shapes.circle:
+        case "circle":
             translateAttribute(currentElement, "cx", dX);
             translateAttribute(currentElement, "cy", dY);
             break;
@@ -162,56 +163,105 @@ function moving(dX, dY) {
 }
 
 function checkIfIsNear(a, b, tolerance) {
-    return Math.abs(a - b) > tolerance;
+    const result = Math.abs(a - b) < tolerance;
+    console.log(`compare result: ${result}`);
+    return result;
 }
 
 function scaling(e) {
-    // const eventX = e.offsetX;
-    // const eventY = e.offsetY;
-    // const dX = e.movementX;
-    // const dY = e.movementY;
-    // switch (currentElementShape) {
-    //     case shapes.rectangle:
-    //         const x = currentElement.getAttribute("x");
-    //         const y = currentElement.getAttribute("y");
-    //         const width = currentElement.getAttribute("width");
-    //         const height = currentElement.getAttribute("height");
+    const eventX = e.offsetX;
+    const eventY = e.offsetY;
+    const dX = e.movementX;
+    const dY = e.movementY;
 
-    //         if (checkIfIsNear(x, eventX, 5) && checkIfIsNear(y, eventY, 5)) { //top left
-    //             translateAttribute(currentElement, "x", dX);
-    //             translateAttribute(currentElement, "y", dY);
-    //             translateAttribute(currentElement, "width", -dX);
-    //             translateAttribute(currentElement, "height", -dY);
-    //         }
-    //         // else if (checkIfIsNear(x + width, eventX, 5) &&)
-    //         //     break;
-    // }
+    switch (currentScalingType) {
+        case scalingTypes.rectTop:
+            translateAttribute(currentElement, "y", dY);
+            translateAttribute(currentElement, "height", -dY);
+            break;
+        case scalingTypes.rectTopLeft:
+            translateAttribute(currentElement, "x", dX);
+            translateAttribute(currentElement, "y", dY);
+            translateAttribute(currentElement, "width", -dX);
+            translateAttribute(currentElement, "height", -dY);
+            break;
+        case scalingTypes.rectTopRight:
+            translateAttribute(currentElement, "y", dY);
+            translateAttribute(currentElement, "width", dX);
+            translateAttribute(currentElement, "height", -dY);
+            break;
+        case scalingTypes.rectBottom:
+            translateAttribute(currentElement, "height", dY);
+            break;
+        case scalingTypes.rectBottomLeft:
+            translateAttribute(currentElement, "x", dX);
+            translateAttribute(currentElement, "width", -dX);
+            translateAttribute(currentElement, "height", dY);
+            break;
+        case scalingTypes.rectBottomRight:
+            translateAttribute(currentElement, "width", dX);
+            translateAttribute(currentElement, "height", dY);
+            break;
+        case scalingTypes.rectLeft:
+            translateAttribute(currentElement, "x", dX);
+            translateAttribute(currentElement, "width", -dX);
+            break;
+        case scalingTypes.rectRight:
+            translateAttribute(currentElement, "width", dX);
+            break;
+        case scalingTypes.circle:
+            resizeCircle(currentElement, eventX, eventY);
+            break;
+    }
 }
 
-function startManipulateRect(e) {
-    currentElementShape = shapes.rectangle;
-    if (selectedTool === tools.move) {
-        startMove(e, shapes.rectangle);
-    }
-    else if (selectedTool === tools.scale) {
-        console.log(e);
-        currentAction === tools.scale;
-        const offsetX = e.offsetX;
-        const offsetY = e.offsetY;
-        const x = e.target.getAttribute("x");
-        const y = e.target.getAttribute("y");
-        const width = e.target.getAttribute("width");
-        const height = e.target.getAttribute("height");
-
-        // scalePoints.push(createScalePoint(x, y, moveTopLeftCorner));
-    }
+function getIntAttribute(element, attributeName) {
+    return parseInt(element.getAttribute(attributeName));
 }
 
-function moveTopLeftCorner(dX, dY) {
-    translateAttribute(currentElement, "x", dX);
-    translateAttribute(currentElement, "y", dY);
-    translateAttribute(currentElement, "width", -dX);
-    translateAttribute(currentElement, "height", -dY);
+function prepareRectToScaling(e) {
+    currentAction = tools.scale;
+    const offsetX = e.offsetX;
+    const offsetY = e.offsetY;
+    const x = getIntAttribute(e.target, "x");
+    const y = getIntAttribute(e.target, "y");
+    const width = getIntAttribute(e.target, "width");
+    const height = getIntAttribute(e.target, "height");
+    const tolerance = 10;
+
+    // top
+    if (checkIfIsNear(y, offsetY, tolerance)) {
+        if (checkIfIsNear(x, offsetX, tolerance)) {
+            currentScalingType = scalingTypes.rectTopLeft;
+        }
+        else if (checkIfIsNear(x + width, offsetX, tolerance)) {
+            currentScalingType = scalingTypes.rectTopRight;
+        }
+        else {
+            currentScalingType = scalingTypes.rectTop;
+        }
+    }
+    // bottom
+    else if (checkIfIsNear(y + height, offsetY, tolerance)) {
+        if (checkIfIsNear(x, offsetX, tolerance)) {
+            currentScalingType = scalingTypes.rectBottomLeft;
+        }
+        else if (checkIfIsNear(x + width, offsetX, tolerance)) {
+            currentScalingType = scalingTypes.rectBottomRight;
+        }
+        else {
+            currentScalingType = scalingTypes.rectBottom;
+        }
+    }
+    // sides
+    else {
+        if (checkIfIsNear(x, offsetX, tolerance)) {
+            currentScalingType = scalingTypes.rectBottomLeft;
+        }
+        else if (checkIfIsNear(x + width, offsetX, tolerance)) {
+            currentScalingType = scalingTypes.rectBottomRight;
+        }
+    }
 }
 
 function startMoveCircle(e) {
@@ -219,36 +269,41 @@ function startMoveCircle(e) {
 }
 
 function startMove(e, shape) {
-    e.preventDefault();
-    currentElement = e.target;
+    // e.preventDefault();
+    // currentElement = e.target;
     currentAction = tools.move;
-    currentElementShape = shape;
+    // currentElementShape = shape;
 }
 
 function stopDraw() {
-    let actionForSpecifiedType = null;
-    switch (currentElementShape) {
-        case shapes.rectangle:
-            actionForSpecifiedType = startManipulateRect;
-            break;
-        case shapes.circle:
-            actionForSpecifiedType = startMoveCircle;
-            break;
+    currentElement.addEventListener("mousedown", onObjectMouseDown);
+}
+
+function onObjectMouseDown(e) {
+    if (selectedTool === tools.draw) {
+        return;
     }
 
-    currentElement.addEventListener("mousedown", e => {
-        e.stopPropagation();
-        currentElement = e.target;
-        actionForSpecifiedType(e);
-    });
+    e.stopPropagation();
+    currentElement = e.target;
+    currentAction = selectedTool;
+
+    if (currentAction === tools.scale)
+        switch (e.target.tagName) {
+            case "rect":
+                prepareRectToScaling(e);
+                break;
+            case "circle":
+                currentCircleX = getIntAttribute(currentElement, "cx");
+                currentCircleY = getIntAttribute(currentElement, "cy");
+                currentScalingType = scalingTypes.circle;
+                break;
+        }
+
+
 }
 
 function onMouseDown(e) {
-    // if (scalePoints.length > 0) {
-    //     scalePoints.forEach(x => x.remove());
-    //     scalePoints = [];
-    // }
-
     if (selectedTool === tools.draw && selectedShape) {
         startDraw(e);
     }
@@ -267,7 +322,9 @@ function onMouseMove(e) {
             moving(e.movementX, e.movementY);
             break;
         case tools.scale:
+            console.log("switch");
             scaling(e);
+            break;
     }
 }
 
