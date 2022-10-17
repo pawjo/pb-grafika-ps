@@ -109,3 +109,7 @@ section {
   fill: none;
   cursor: pointer;
 }
+
+.scale-point {
+  fill: blue;
+}

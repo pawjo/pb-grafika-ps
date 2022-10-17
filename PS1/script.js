@@ -6,8 +6,6 @@ const shapeBtns = document.querySelectorAll(".shape"),
 
 const svgns = "http://www.w3.org/2000/svg";
 
-const x = "x";
-const y = "y";
 const width = "width";
 const height = "height";
 const svgElementClassName = "svg-element";
@@ -22,7 +20,7 @@ const shapes = {
 const tools = {
     draw: "draw",
     move: "move",
-    resize: "resize"
+    scale: "scale"
 };
 
 
@@ -33,6 +31,8 @@ let currentElementShape = null;
 let currentAction = "none";
 let selectedShape = null;
 let selectedTool = null;
+
+let scaleCurrentActions = null;
 
 function setSelectedShape(shape) {
     selectedShape = shape;
@@ -84,10 +84,10 @@ function finalizeSvgElement() {
 
 function startDrawRect(startX, startY) {
     currentElement = document.createElementNS(svgns, "rect");
-    currentElement.setAttribute(x, startX);
-    currentElement.setAttribute(y, startY);
-    currentElement.setAttribute(width, 0);
-    currentElement.setAttribute(height, 0);
+    currentElement.setAttribute("x", startX);
+    currentElement.setAttribute("y", startY);
+    currentElement.setAttribute("width", 0);
+    currentElement.setAttribute("height", 0);
     finalizeSvgElement();
 }
 
@@ -99,14 +99,31 @@ function startDrawCircle(startX, startY) {
     finalizeSvgElement();
 }
 
+function createScalePoint(x, y, action) {
+    let scalePoint = document.createElementNS(svgns, "circle");
+    scalePoint.setAttribute("cx", x);
+    scalePoint.setAttribute("cy", y);
+    scalePoint.setAttribute("r", 5);
+    scalePoint.classList.add("scale-point");
+    svg.appendChild(scalePoint);
+
+    scalePoint.addEventListener("mousedown", e => {
+        e.stopPropagation();
+        activeScalePointAction = action;
+        currentAction = tools.scale;
+    });
+
+    return scalePoint;
+}
+
 function translateAttribute(element, attributeName, difference) {
     const currentValue = parseInt(element.getAttribute(attributeName));
     element.setAttribute(attributeName, currentValue + difference);
 }
 
 function resizeRect(rect, dX, dY) {
-    translateAttribute(rect, width, dX);
-    translateAttribute(rect, height, dY);
+    translateAttribute(rect, "width", dX);
+    translateAttribute(rect, "height", dY);
 }
 
 function pow2(val) {
@@ -134,8 +151,8 @@ function drawing(e) {
 function moving(dX, dY) {
     switch (currentElementShape) {
         case shapes.rectangle:
-            translateAttribute(currentElement, x, dX);
-            translateAttribute(currentElement, y, dY);
+            translateAttribute(currentElement, "x", dX);
+            translateAttribute(currentElement, "y", dY);
             break;
         case shapes.circle:
             translateAttribute(currentElement, "cx", dX);
@@ -144,8 +161,57 @@ function moving(dX, dY) {
     }
 }
 
-function startMoveRect(e) {
-    startMove(e, shapes.rectangle);
+function checkIfIsNear(a, b, tolerance) {
+    return Math.abs(a - b) > tolerance;
+}
+
+function scaling(e) {
+    // const eventX = e.offsetX;
+    // const eventY = e.offsetY;
+    // const dX = e.movementX;
+    // const dY = e.movementY;
+    // switch (currentElementShape) {
+    //     case shapes.rectangle:
+    //         const x = currentElement.getAttribute("x");
+    //         const y = currentElement.getAttribute("y");
+    //         const width = currentElement.getAttribute("width");
+    //         const height = currentElement.getAttribute("height");
+
+    //         if (checkIfIsNear(x, eventX, 5) && checkIfIsNear(y, eventY, 5)) { //top left
+    //             translateAttribute(currentElement, "x", dX);
+    //             translateAttribute(currentElement, "y", dY);
+    //             translateAttribute(currentElement, "width", -dX);
+    //             translateAttribute(currentElement, "height", -dY);
+    //         }
+    //         // else if (checkIfIsNear(x + width, eventX, 5) &&)
+    //         //     break;
+    // }
+}
+
+function startManipulateRect(e) {
+    currentElementShape = shapes.rectangle;
+    if (selectedTool === tools.move) {
+        startMove(e, shapes.rectangle);
+    }
+    else if (selectedTool === tools.scale) {
+        console.log(e);
+        currentAction === tools.scale;
+        const offsetX = e.offsetX;
+        const offsetY = e.offsetY;
+        const x = e.target.getAttribute("x");
+        const y = e.target.getAttribute("y");
+        const width = e.target.getAttribute("width");
+        const height = e.target.getAttribute("height");
+
+        // scalePoints.push(createScalePoint(x, y, moveTopLeftCorner));
+    }
+}
+
+function moveTopLeftCorner(dX, dY) {
+    translateAttribute(currentElement, "x", dX);
+    translateAttribute(currentElement, "y", dY);
+    translateAttribute(currentElement, "width", -dX);
+    translateAttribute(currentElement, "height", -dY);
 }
 
 function startMoveCircle(e) {
@@ -163,17 +229,26 @@ function stopDraw() {
     let actionForSpecifiedType = null;
     switch (currentElementShape) {
         case shapes.rectangle:
-            actionForSpecifiedType = startMoveRect;
+            actionForSpecifiedType = startManipulateRect;
             break;
         case shapes.circle:
             actionForSpecifiedType = startMoveCircle;
             break;
     }
 
-    currentElement.addEventListener("mousedown", actionForSpecifiedType);
+    currentElement.addEventListener("mousedown", e => {
+        e.stopPropagation();
+        currentElement = e.target;
+        actionForSpecifiedType(e);
+    });
 }
 
 function onMouseDown(e) {
+    // if (scalePoints.length > 0) {
+    //     scalePoints.forEach(x => x.remove());
+    //     scalePoints = [];
+    // }
+
     if (selectedTool === tools.draw && selectedShape) {
         startDraw(e);
     }
@@ -191,6 +266,8 @@ function onMouseMove(e) {
         case tools.move:
             moving(e.movementX, e.movementY);
             break;
+        case tools.scale:
+            scaling(e);
     }
 }
 
@@ -201,7 +278,7 @@ function onMouseUp() {
             break;
     }
 
-    currentElement = null;
+    // currentElement = null;
     currentAction = null;
 }
 
