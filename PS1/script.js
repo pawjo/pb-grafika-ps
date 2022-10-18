@@ -12,6 +12,8 @@ const svgElementClassName = "svg-element";
 
 const tolerance = 10;
 
+const textField = document.getElementById("text-field");
+
 const shapes = {
     line: "line",
     rectangle: "rectangle",
@@ -23,7 +25,8 @@ const tools = {
     draw: "draw",
     move: "move",
     scale: "scale",
-    pencil: "pencil"
+    pencil: "pencil",
+    text: "text"
 };
 
 const scalingTypes = {
@@ -115,7 +118,10 @@ function startDraw(e) {
 }
 
 function finalizeSvgElement() {
-    currentElement.classList.add(svgElementClassName);
+    // currentElement.classList.add(svgElementClassName);
+    currentElement.setAttribute("fill", "none");
+    currentElement.setAttribute("stroke", "black");
+    currentElement.setAttribute("stroke-width", "3px");
     svg.appendChild(currentElement);
 }
 
@@ -125,6 +131,7 @@ function startDrawRect(startX, startY) {
     currentElement.setAttribute("y", startY);
     currentElement.setAttribute("width", 0);
     currentElement.setAttribute("height", 0);
+    
     finalizeSvgElement();
 }
 
@@ -469,6 +476,23 @@ function onMouseDown(e) {
         path.setAttribute("d", strPath);
         svg.appendChild(path);
     }
+    else if (selectedTool === tools.text && textField.value.length > 0) {
+        console.log(textField.value);
+        textField.style.display = "none";
+        currentElement = document.createElementNS(svgns, "text");
+        currentElement.setAttribute("x", e.offsetX);
+        currentElement.setAttribute("y", e.offsetY);
+        currentElement.innerHTML = textField.value;
+        finalizeSvgElement();
+    }
+    else if (selectedTool === tools.text) {
+        textField.style.background = "white";
+        textField.style.display = "block";
+        textField.style.zIndex = 1000;
+        textField.value = "";
+        textField.style.position = "absolute";
+    }
+
 }
 
 function onMouseMove(e) {
@@ -492,6 +516,7 @@ function onMouseMove(e) {
                 updateSvgPath();
             }
             break;
+
     }
 }
 
@@ -732,3 +757,18 @@ var updateSvgPath = function () {
         path.setAttribute("d", strPath + tmpPath);
     }
 };
+
+
+function saveSvg() {
+    svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    var svgData = svg.outerHTML;
+    var preface = '<?xml version="1.0" standalone="no"?>\r\n';
+    var svgBlob = new Blob([preface, svgData], {type:"image/svg+xml;charset=utf-8"});
+    var svgUrl = URL.createObjectURL(svgBlob);
+    var downloadLink = document.createElement("a");
+    downloadLink.href = svgUrl;
+    downloadLink.download = "example";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
