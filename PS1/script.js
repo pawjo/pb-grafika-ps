@@ -22,7 +22,8 @@ const shapes = {
 const tools = {
     draw: "draw",
     move: "move",
-    scale: "scale"
+    scale: "scale",
+    pencil: "pencil"
 };
 
 const scalingTypes = {
@@ -57,6 +58,12 @@ let currentCircleY = null;
 let currentScalingType = null;
 
 let currentTriangleAttributes = null;
+
+const bufferSize = 8;
+let boundingRect = svg.getBoundingClientRect();
+let path = null;
+let strPath;
+let buffer = [];
 
 function setSelectedShape(shape) {
     selectedShape = shape;
@@ -449,6 +456,19 @@ function onMouseDown(e) {
     if (selectedTool === tools.draw && selectedShape) {
         startDraw(e);
     }
+    else if (selectedTool === tools.pencil) {
+        currentAction = tools.pencil;
+        path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke", "#000");
+        path.setAttribute("stroke-width", 2);
+        buffer = [];
+        let pt = getMousePosition(e);
+        appendToBuffer(pt);
+        strPath = "M" + pt.x + " " + pt.y;
+        path.setAttribute("d", strPath);
+        svg.appendChild(path);
+    }
 }
 
 function onMouseMove(e) {
@@ -466,6 +486,12 @@ function onMouseMove(e) {
         case tools.scale:
             scaling(e);
             break;
+        case tools.pencil:
+            if (path) {
+                appendToBuffer(getMousePosition(e));
+                updateSvgPath();
+            }
+            break;
     }
 }
 
@@ -473,6 +499,11 @@ function onMouseUp() {
     switch (selectedTool) {
         case tools.draw:
             stopDraw();
+            break;
+        case tools.pencil:
+            if (path) {
+                path = null;
+            }
             break;
     }
 
@@ -503,139 +534,201 @@ svg.addEventListener("mouseup", onMouseUp);
 // });
 
 //write
-    
-    var canvas = document.querySelector('#paint');
-    var ctx = canvas.getContext('2d');
-    
-    var sketch = document.querySelector('#sketch');
-    var sketch_style = getComputedStyle(sketch);
-    canvas.width = parseInt(sketch_style.getPropertyValue('width'));
-    canvas.height = parseInt(sketch_style.getPropertyValue('height'));
-    
-        var tmp_canvas = document.createElement('canvas');
-    var tmp_ctx = tmp_canvas.getContext('2d');
-    tmp_canvas.id = 'tmp_canvas';
-    tmp_canvas.width = canvas.width;
-    tmp_canvas.height = canvas.height;
-    
-    sketch.appendChild(tmp_canvas);
 
-    var mouse = {x: 0, y: 0};
-    var start_mouse = {x: 0, y: 0};
-    var last_mouse = {x: 0, y: 0};
-    
-    var sprayIntervalID;
-    
-    var textarea = document.createElement('textarea');
-    textarea.id = 'text_tool';
-    sketch.appendChild(textarea);
-    
-    var tmp_txt_ctn = document.createElement('div');
-    tmp_txt_ctn.style.display = 'none';
-    sketch.appendChild(tmp_txt_ctn);
-    
-    
-    textarea.addEventListener('mouseup', function(e) {
-        tmp_canvas.removeEventListener('mousemove', onPaint, false);
-    }, false);
-    
-    
-    /* Mouse Capturing Work */
-    tmp_canvas.addEventListener('mousemove', function(e) {
-        mouse.x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
-        mouse.y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
-    }, false);
-    
-    
-    tmp_ctx.lineWidth = 5;
-    tmp_ctx.lineJoin = 'round';
-    tmp_ctx.lineCap = 'round';
-    tmp_ctx.strokeStyle = 'black';
-    tmp_ctx.fillStyle = 'black';
-    
-    tmp_canvas.addEventListener('mousedown', function(e) {
-        tmp_canvas.addEventListener('mousemove', onPaint, false);
-        
-        mouse.x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
-        mouse.y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
-        
-        start_mouse.x = mouse.x;
-        start_mouse.y = mouse.y;
-            }, false);
-    
-    tmp_canvas.addEventListener('mouseup', function() {
-        tmp_canvas.removeEventListener('mousemove', onPaint, false);
-        
-        var lines = textarea.value.split('\n');
-        var processed_lines = [];
-        
-        for (var i = 0; i < lines.length; i++) {
-            var chars = lines[i].length;
-            
-            for (var j = 0; j < chars; j++) {
-                var text_node = document.createTextNode(lines[i][j]);
-                tmp_txt_ctn.appendChild(text_node);
-               
-                tmp_txt_ctn.style.position   = 'absolute';
-                tmp_txt_ctn.style.visibility = 'hidden';
-                tmp_txt_ctn.style.display    = 'block';
-                
-                var width = tmp_txt_ctn.offsetWidth;
-                var height = tmp_txt_ctn.offsetHeight;
-                
-                tmp_txt_ctn.style.position   = '';
-                tmp_txt_ctn.style.visibility = '';
-                tmp_txt_ctn.style.color = 'black';
-                tmp_txt_ctn.style.display    = 'none';
-                
-                if (width > parseInt(textarea.style.width)) {
-                    break;
-                }
-            }
-            
-            processed_lines.push(tmp_txt_ctn.textContent);
-            tmp_txt_ctn.innerHTML = '';
-        }
-        
-        var ta_comp_style = getComputedStyle(textarea);
-        var fs = ta_comp_style.getPropertyValue('font-size');
-        var ff = ta_comp_style.getPropertyValue('font-family');
-        
-        tmp_ctx.font = fs + ' ' + ff;
-        tmp_ctx.textBaseline = 'top';
-        
-        for (var n = 0; n < processed_lines.length; n++) {
-            var processed_line = processed_lines[n];
-            
-            tmp_ctx.fillText(
-                processed_line,
-                parseInt(textarea.style.left),
-                parseInt(textarea.style.top) + n*parseInt(fs)
-            );
-        }
-        
-        ctx.drawImage(tmp_canvas, 0, 0);
-        tmp_ctx.clearRect(0, 0, tmp_canvas.width, tmp_canvas.height);
-        
-        textarea.style.display = 'none';
-        textarea.value = '';
-    }, false);
-    
-    var onPaint = function() {
-        
-        tmp_ctx.clearRect(0, 0, tmp_canvas.width, tmp_canvas.height);
-        
-        var x = Math.min(mouse.x, start_mouse.x);
-        var y = Math.min(mouse.y, start_mouse.y);
-        var width = Math.abs(mouse.x - start_mouse.x);
-        var height = Math.abs(mouse.y - start_mouse.y);
-        
-        textarea.style.left = x + 'px';
-        textarea.style.top = y + 'px';
-        textarea.style.width = width + 'px';
-        textarea.style.height = height + 'px';
-        
-        textarea.style.display = 'block';
-    };
-    
+// var canvas = document.querySelector('#paint');
+// var ctx = canvas.getContext('2d');
 
+// var sketch = document.querySelector('#sketch');
+// var sketch_style = getComputedStyle(sketch);
+// canvas.width = parseInt(sketch_style.getPropertyValue('width'));
+// canvas.height = parseInt(sketch_style.getPropertyValue('height'));
+
+//     var tmp_canvas = document.createElement('canvas');
+// var tmp_ctx = tmp_canvas.getContext('2d');
+// tmp_canvas.id = 'tmp_canvas';
+// tmp_canvas.width = canvas.width;
+// tmp_canvas.height = canvas.height;
+
+// sketch.appendChild(tmp_canvas);
+
+// var mouse = {x: 0, y: 0};
+// var start_mouse = {x: 0, y: 0};
+// var last_mouse = {x: 0, y: 0};
+
+// var sprayIntervalID;
+
+// var textarea = document.createElement('textarea');
+// textarea.id = 'text_tool';
+// sketch.appendChild(textarea);
+
+// var tmp_txt_ctn = document.createElement('div');
+// tmp_txt_ctn.style.display = 'none';
+// sketch.appendChild(tmp_txt_ctn);
+
+
+// textarea.addEventListener('mouseup', function(e) {
+//     tmp_canvas.removeEventListener('mousemove', onPaint, false);
+// }, false);
+
+
+// /* Mouse Capturing Work */
+// tmp_canvas.addEventListener('mousemove', function(e) {
+//     mouse.x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
+//     mouse.y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
+// }, false);
+
+
+// tmp_ctx.lineWidth = 5;
+// tmp_ctx.lineJoin = 'round';
+// tmp_ctx.lineCap = 'round';
+// tmp_ctx.strokeStyle = 'black';
+// tmp_ctx.fillStyle = 'black';
+
+// tmp_canvas.addEventListener('mousedown', function(e) {
+//     tmp_canvas.addEventListener('mousemove', onPaint, false);
+
+//     mouse.x = typeof e.offsetX !== 'undefined' ? e.offsetX : e.layerX;
+//     mouse.y = typeof e.offsetY !== 'undefined' ? e.offsetY : e.layerY;
+
+//     start_mouse.x = mouse.x;
+//     start_mouse.y = mouse.y;
+//         }, false);
+
+// tmp_canvas.addEventListener('mouseup', function() {
+//     tmp_canvas.removeEventListener('mousemove', onPaint, false);
+
+//     var lines = textarea.value.split('\n');
+//     var processed_lines = [];
+
+//     for (var i = 0; i < lines.length; i++) {
+//         var chars = lines[i].length;
+
+//         for (var j = 0; j < chars; j++) {
+//             var text_node = document.createTextNode(lines[i][j]);
+//             tmp_txt_ctn.appendChild(text_node);
+
+//             tmp_txt_ctn.style.position   = 'absolute';
+//             tmp_txt_ctn.style.visibility = 'hidden';
+//             tmp_txt_ctn.style.display    = 'block';
+
+//             var width = tmp_txt_ctn.offsetWidth;
+//             var height = tmp_txt_ctn.offsetHeight;
+
+//             tmp_txt_ctn.style.position   = '';
+//             tmp_txt_ctn.style.visibility = '';
+//             tmp_txt_ctn.style.color = 'black';
+//             tmp_txt_ctn.style.display    = 'none';
+
+//             if (width > parseInt(textarea.style.width)) {
+//                 break;
+//             }
+//         }
+
+//         processed_lines.push(tmp_txt_ctn.textContent);
+//         tmp_txt_ctn.innerHTML = '';
+//     }
+
+//     var ta_comp_style = getComputedStyle(textarea);
+//     var fs = ta_comp_style.getPropertyValue('font-size');
+//     var ff = ta_comp_style.getPropertyValue('font-family');
+
+//     tmp_ctx.font = fs + ' ' + ff;
+//     tmp_ctx.textBaseline = 'top';
+
+//     for (var n = 0; n < processed_lines.length; n++) {
+//         var processed_line = processed_lines[n];
+
+//         tmp_ctx.fillText(
+//             processed_line,
+//             parseInt(textarea.style.left),
+//             parseInt(textarea.style.top) + n*parseInt(fs)
+//         );
+//     }
+
+//     ctx.drawImage(tmp_canvas, 0, 0);
+//     tmp_ctx.clearRect(0, 0, tmp_canvas.width, tmp_canvas.height);
+
+//     textarea.style.display = 'none';
+//     textarea.value = '';
+// }, false);
+
+// var onPaint = function() {
+
+//     tmp_ctx.clearRect(0, 0, tmp_canvas.width, tmp_canvas.height);
+
+//     var x = Math.min(mouse.x, start_mouse.x);
+//     var y = Math.min(mouse.y, start_mouse.y);
+//     var width = Math.abs(mouse.x - start_mouse.x);
+//     var height = Math.abs(mouse.y - start_mouse.y);
+
+//     textarea.style.left = x + 'px';
+//     textarea.style.top = y + 'px';
+//     textarea.style.width = width + 'px';
+//     textarea.style.height = height + 'px';
+
+//     textarea.style.display = 'block';
+// };
+
+
+
+
+
+
+
+// pencil
+
+var getMousePosition = function (e) {
+    return {
+        x: e.pageX - boundingRect.left,
+        y: e.pageY - boundingRect.top
+    }
+};
+
+var appendToBuffer = function (pt) {
+    buffer.push(pt);
+    while (buffer.length > bufferSize) {
+        buffer.shift();
+    }
+};
+
+// Calculate the average point, starting at offset in the buffer
+var getAveragePoint = function (offset) {
+    var len = buffer.length;
+    if (len % 2 === 1 || len >= bufferSize) {
+        var totalX = 0;
+        var totalY = 0;
+        var pt, i;
+        var count = 0;
+        for (i = offset; i < len; i++) {
+            count++;
+            pt = buffer[i];
+            totalX += pt.x;
+            totalY += pt.y;
+        }
+        return {
+            x: totalX / count,
+            y: totalY / count
+        }
+    }
+    return null;
+};
+
+var updateSvgPath = function () {
+    var pt = getAveragePoint(0);
+
+    if (pt) {
+        // Get the smoothed part of the path that will not change
+        strPath += " L" + pt.x + " " + pt.y;
+
+        // Get the last part of the path (close to the current mouse position)
+        // This part will change if the mouse moves again
+        var tmpPath = "";
+        for (var offset = 2; offset < buffer.length; offset += 2) {
+            pt = getAveragePoint(offset);
+            tmpPath += " L" + pt.x + " " + pt.y;
+        }
+
+        // Set the complete current path coordinates
+        path.setAttribute("d", strPath + tmpPath);
+    }
+};
