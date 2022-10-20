@@ -26,14 +26,24 @@ namespace GrafikaPS2
 
             if (openJPEGDialong.ShowDialog() == true)
             {
-
-                MainImage.Source = ToBitmapImage(ReadBitmapFromPPM(openJPEGDialong));
+                var read = ReadBitmapFromPPM(openJPEGDialong);
+                if (read != null)
+                {
+                    MainImage.Source = ToBitmapImage(read);
+                }
             }
         }
 
         private Bitmap ReadBitmapFromPPM(OpenFileDialog openJPEGDialong)
         {
-            var ppm = new PPM(openJPEGDialong);
+            //var ppm = new PPM(openJPEGDialong);
+            var ppm = new PPMReader(openJPEGDialong);
+
+            if (!ppm.ReadFile())
+            {
+                MessageBox.Show("Open file error");
+                return null;
+            }
 
             MainImage.Width = ppm.Width;
             MainImage.Height = ppm.Height;
