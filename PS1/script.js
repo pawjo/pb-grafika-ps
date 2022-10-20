@@ -131,7 +131,7 @@ function startDrawRect(startX, startY) {
     currentElement.setAttribute("y", startY);
     currentElement.setAttribute("width", 0);
     currentElement.setAttribute("height", 0);
-    
+
     finalizeSvgElement();
 }
 
@@ -484,6 +484,8 @@ function onMouseDown(e) {
         currentElement.setAttribute("y", e.offsetY);
         currentElement.innerHTML = textField.value;
         finalizeSvgElement();
+        currentElement.setAttribute("stroke", "none");
+        currentElement.setAttribute("fill", "black");
     }
     else if (selectedTool === tools.text) {
         textField.style.background = "white";
@@ -492,7 +494,6 @@ function onMouseDown(e) {
         textField.value = "";
         textField.style.position = "absolute";
     }
-
 }
 
 function onMouseMove(e) {
@@ -610,7 +611,7 @@ function saveSvg() {
     svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
     var svgData = svg.outerHTML;
     var preface = '<?xml version="1.0" standalone="no"?>\r\n';
-    var svgBlob = new Blob([preface, svgData], {type:"image/svg+xml;charset=utf-8"});
+    var svgBlob = new Blob([preface, svgData], { type: "image/svg+xml;charset=utf-8" });
     var svgUrl = URL.createObjectURL(svgBlob);
     var downloadLink = document.createElement("a");
     downloadLink.href = svgUrl;
