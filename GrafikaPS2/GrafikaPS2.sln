@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrafikaPS2", "GrafikaPS2.csproj", "{80038E4E-96EB-499C-881D-B0A246766C70}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{80038E4E-96EB-499C-881D-B0A246766C70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80038E4E-96EB-499C-881D-B0A246766C70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80038E4E-96EB-499C-881D-B0A246766C70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80038E4E-96EB-499C-881D-B0A246766C70}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {886D88A8-2C5E-4A6A-82AF-0801396AFAF2}
+	EndGlobalSection
+EndGlobal
