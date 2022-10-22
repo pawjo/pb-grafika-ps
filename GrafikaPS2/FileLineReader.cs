@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -6,6 +7,8 @@ namespace GrafikaPS2
 {
     public class FileLineReader : IDisposable
     {
+        public List<string> Comments { get; set; }
+
         private readonly StreamReader _streamReader;
         private string[] _lineValues;
         private int _lineValueIndex;
@@ -14,6 +17,7 @@ namespace GrafikaPS2
         public FileLineReader(string fileName)
         {
             _streamReader = new StreamReader(fileName);
+            Comments = new List<string>();
             GetNextLine();
         }
 
@@ -48,12 +52,15 @@ namespace GrafikaPS2
         {
             _lineValueIndex = 0;
             var line = _streamReader.ReadLine();
-            if (line == null)
+            if (string.IsNullOrWhiteSpace(line))
             {
-
+                GetNextLine();
+                return;
             }
-            if (string.IsNullOrWhiteSpace(line) || line.StartsWith('#'))
+            
+            if(line.StartsWith('#'))
             {
+                Comments.Add(line.Substring(1));
                 GetNextLine();
                 return;
             }
@@ -61,6 +68,7 @@ namespace GrafikaPS2
             var commentSignIndex = line.IndexOf('#');
             if (commentSignIndex != -1)
             {
+                Comments.Add(line.Substring(commentSignIndex + 1));
                 line = line.Substring(0, commentSignIndex);
             }
 

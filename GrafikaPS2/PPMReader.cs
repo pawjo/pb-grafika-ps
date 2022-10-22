@@ -71,23 +71,12 @@ namespace GrafikaPS2
 
             for (int i = 0; i < Height; i++)
             {
-                var pixelsValues = new string[3 * Width];
-                var counter = 0;
-                var position = 0;
-
-                while (counter != 3 * Width)
+                for (int j = 0; j < Width; j++)
                 {
-                    pixelsValues[counter++] = lineReader.GetNextStringValue();
-
-                    if (counter % 3 == 0)
-                    {
-                        if (is16Bit)
-                            Bitmap.SetPixel(position, i, Color.FromArgb(Int32.Parse(pixelsValues[counter - 3]) >> 8, Int32.Parse(pixelsValues[counter - 2]) >> 8, Int32.Parse(pixelsValues[counter - 1]) >> 8));
-                        else
-                            Bitmap.SetPixel(position, i, Color.FromArgb(Int32.Parse(pixelsValues[counter - 3]), Int32.Parse(pixelsValues[counter - 2]), Int32.Parse(pixelsValues[counter - 1])));
-
-                        position++;
-                    }
+                    if (is16Bit)
+                        Bitmap.SetPixel(j, i, Color.FromArgb(lineReader.GetNextIntValue() >> 8, lineReader.GetNextIntValue() >> 8, lineReader.GetNextIntValue() >> 8));
+                    else
+                        Bitmap.SetPixel(j, i, Color.FromArgb(lineReader.GetNextIntValue(), lineReader.GetNextIntValue(), lineReader.GetNextIntValue()));
                 }
             }
         }
