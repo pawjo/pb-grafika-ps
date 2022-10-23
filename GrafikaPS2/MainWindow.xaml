@@ -55,16 +55,7 @@
             </Border>
         </StackPanel>
         <DockPanel Margin="15,357,5,1" Grid.RowSpan="2">
-            <ListBox Margin="5,0" BorderBrush="White" Foreground="white" Background="Black">
-                <ListBoxItem>
-                    <Label Foreground="white" Content="test"/>
-                </ListBoxItem>
-                <ListBoxItem>
-                    <Label Foreground="white" Content="test2"/>
-                </ListBoxItem>
-                <ListBoxItem>
-                    <Label Foreground="white" Content="test3"/>
-                </ListBoxItem>
+            <ListBox Name="CommentsListBox" Margin="5,0" BorderBrush="White" Foreground="white" Background="Black">
             </ListBox>
         </DockPanel>
         <StackPanel Margin="10,50,20,1" Background="White" Grid.Column="1">

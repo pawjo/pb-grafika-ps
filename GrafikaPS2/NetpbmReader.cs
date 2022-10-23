@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 
@@ -15,6 +16,8 @@ namespace GrafikaPS2
         public int MaxColor { get; set; }
 
         public Bitmap Bitmap { get; set; }
+
+        public List<string> Comments { get => lineReader.Comments; }
 
         private readonly OpenFileDialog _dialog;
 

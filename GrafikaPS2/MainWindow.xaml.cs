@@ -61,6 +61,8 @@ namespace GrafikaPS2
                 MainImage.Height = ImageStackPanel.ActualHeight;
             }
 
+            CommentsListBox.ItemsSource = ppm.Comments;
+
             return ppm.Bitmap;
         }
 
