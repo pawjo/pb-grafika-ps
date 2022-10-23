@@ -49,11 +49,11 @@
             <RowDefinition Height="369*"/>
             <RowDefinition Height="65*"/>
         </Grid.RowDefinitions>
-        <StackPanel Name="ImageStackPanel" Margin="20,50,10,1" Background="White" Grid.Column="0">
-            <Border Name="border" ClipToBounds="True">
+        <Border Name="border" Margin="5,5,5,5">
+            <StackPanel ClipToBounds="True" Name="ImageStackPanel" Margin="20,50,10,1" Background="White" Grid.Column="0">
                 <Image Name="MainImage" MouseLeftButtonDown="MainImage_MouseLeftButtonDown" MouseLeftButtonUp="MainImage_MouseLeftButtonUp" MouseMove="MainImage_MouseMove"/>
-            </Border>
-        </StackPanel>
+            </StackPanel>
+        </Border>
         <DockPanel Margin="15,357,5,1" Grid.RowSpan="2">
             <ListBox Margin="5,0" BorderBrush="White" Foreground="white" Background="Black">
                 <ListBoxItem>

@@ -87,7 +87,7 @@ namespace GrafikaPS2
             if (MainImage.IsMouseCaptured) return;
             MainImage.CaptureMouse();
 
-            start = e.GetPosition(border);
+            start = e.GetPosition(ImageStackPanel);
             origin.X = MainImage.RenderTransform.Value.OffsetX;
             origin.Y = MainImage.RenderTransform.Value.OffsetY;
         }
@@ -97,7 +97,7 @@ namespace GrafikaPS2
         private void MainImage_MouseMove(object sender, MouseEventArgs e)
         {
             if (!MainImage.IsMouseCaptured) return;
-            System.Windows.Point p = e.MouseDevice.GetPosition(border);
+            System.Windows.Point p = e.MouseDevice.GetPosition(ImageStackPanel);
 
             Matrix m = MainImage.RenderTransform.Value;
             m.OffsetX = origin.X + (p.X - start.X);
