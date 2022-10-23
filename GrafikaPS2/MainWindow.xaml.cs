@@ -3,6 +3,8 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace GrafikaPS2
@@ -12,24 +14,32 @@ namespace GrafikaPS2
     /// </summary>
     public partial class MainWindow : Window
     {
+        private System.Windows.Point origin;  // Original Offset of MainImage
+        private System.Windows.Point start;   // Original Position of the mouse
+
         public MainWindow()
         {
             InitializeComponent();
+
+            MainWindowName.MouseWheel += MainWindow_MouseWheel;
+            MainImage.MouseLeftButtonDown += MainImage_MouseLeftButtonDown;
+            //MainImage.MouseLeftButtonUp += MainImage_MouseLeftButtonUp;
+            MainImage.MouseMove += MainImage_MouseMove;
         }
 
         private void OpenFileButton_Click(object sender, RoutedEventArgs e)
         {
             var openJPEGDialong = new OpenFileDialog();
 
-            openJPEGDialong.Filter = "Image files(*.ppm)|*.ppm";
-            openJPEGDialong.Title = "Open an Image File";
+            openJPEGDialong.Filter = "MainImage files(*.pbm;*.ppm)|*.pbm;*.ppm";
+            openJPEGDialong.Title = "Open an MainImage File";
 
             if (openJPEGDialong.ShowDialog() == true)
             {
                 var read = ReadBitmapFromPPM(openJPEGDialong);
                 if (read != null)
                 {
-                    MainImage.Source = ToBitmapImage(read);
+                    MainImage.Source = ToBitmapMainImage(read);
                 }
             }
         }
@@ -50,35 +60,70 @@ namespace GrafikaPS2
 
             //if (ppm.Width < 100)
             //{
-            //    MainImage.Width = 20 * ppm.Width;
-            //    MainImage.Height = 20 * ppm.Width;
+            //    MainMainImage.Width = 20 * ppm.Width;
+            //    MainMainImage.Height = 20 * ppm.Width;
             //}
 
             //if (ppm.Width > 1000)
             //{
-            //    MainImage.Width = ppm.Width / 10;
-            //    MainImage.Height = ppm.Width / 10;
+            //    MainMainImage.Width = ppm.Width / 10;
+            //    MainMainImage.Height = ppm.Width / 10;
             //}
 
             return ppm.Bitmap;
         }
 
-        public BitmapImage ToBitmapImage(Bitmap bitmap)
+        public BitmapImage ToBitmapMainImage(Bitmap bitmap)
         {
             using (var memory = new MemoryStream())
             {
                 bitmap.Save(memory, ImageFormat.Bmp);
                 memory.Position = 0;
 
-                var bitmapImage = new BitmapImage();
+                var bitmapMainImage = new BitmapImage();
 
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memory;
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.EndInit();
+                bitmapMainImage.BeginInit();
+                bitmapMainImage.StreamSource = memory;
+                bitmapMainImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapMainImage.EndInit();
 
-                return bitmapImage;
+                return bitmapMainImage;
             }
+        }
+
+        private void MainImage_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (MainImage.IsMouseCaptured) return;
+            MainImage.CaptureMouse();
+
+            start = e.GetPosition(border);
+            origin.X = MainImage.RenderTransform.Value.OffsetX;
+            origin.Y = MainImage.RenderTransform.Value.OffsetY;
+        }
+
+        private void MainImage_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!MainImage.IsMouseCaptured) return;
+            System.Windows.Point p = e.MouseDevice.GetPosition(border);
+
+            Matrix m = MainImage.RenderTransform.Value;
+            m.OffsetX = origin.X + (p.X - start.X);
+            m.OffsetY = origin.Y + (p.Y - start.Y);
+
+            MainImage.RenderTransform = new MatrixTransform(m);
+        }
+
+        private void MainWindow_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            System.Windows.Point p = e.MouseDevice.GetPosition(MainImage);
+
+            Matrix m = MainImage.RenderTransform.Value;
+            if (e.Delta > 0)
+                m.ScaleAtPrepend(1.1, 1.1, p.X, p.Y);
+            else
+                m.ScaleAtPrepend(1 / 1.1, 1 / 1.1, p.X, p.Y);
+
+            MainImage.RenderTransform = new MatrixTransform(m);
         }
     }
 }

@@ -12,6 +12,7 @@ namespace GrafikaPS2
         private readonly StreamReader _streamReader;
         private string[] _lineValues;
         private int _lineValueIndex;
+        private int _singleBitIndex;
         private bool _isEndOfFile = false;
 
         public FileLineReader(string fileName)
@@ -43,6 +44,29 @@ namespace GrafikaPS2
             return int.Parse(str);
         }
 
+        public bool GetNextSingleBitValue()
+        {
+            if (_lineValueIndex >= _lineValues.Count() || _singleBitIndex >= _lineValues[_lineValueIndex].Length)
+            {
+                GetNextLine();
+            }
+
+            var val = _lineValues[_lineValueIndex][_singleBitIndex++];
+
+            if (val == '1')
+            {
+                return true;
+            }
+            else if (val == '0')
+            {
+                return false;
+            }
+            else
+            {
+                throw new Exception("It is not bit value");
+            }
+        }
+
         public void Dispose()
         {
             _streamReader.Dispose();
@@ -51,14 +75,15 @@ namespace GrafikaPS2
         private void GetNextLine()
         {
             _lineValueIndex = 0;
+            _singleBitIndex = 0;
             var line = _streamReader.ReadLine();
             if (string.IsNullOrWhiteSpace(line))
             {
                 GetNextLine();
                 return;
             }
-            
-            if(line.StartsWith('#'))
+
+            if (line.StartsWith('#'))
             {
                 Comments.Add(line.Substring(1));
                 GetNextLine();

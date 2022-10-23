@@ -74,7 +74,7 @@ namespace GrafikaPS2
                 switch (_formatIndex, _isAscii, _is16bit)
                 {
                     case (0, true, false): // PBM ASCII
-                        getter = () => lineReader.GetNextIntValue() == 1 ? Color.Black : Color.White;
+                        getter = () => lineReader.GetNextSingleBitValue() ? Color.Black : Color.White;
                         break;
                     case (1, true, false): // PGM ASCII
                         getter = () =>
@@ -116,7 +116,8 @@ namespace GrafikaPS2
             }
             catch
             {
-                _stream.Dispose();
+                if (_stream != null)
+                    _stream.Dispose();
                 lineReader.Dispose();
                 return false;
             }
