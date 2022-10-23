@@ -50,7 +50,7 @@
             <RowDefinition Height="65*"/>
         </Grid.RowDefinitions>
         <StackPanel Name="ImageStackPanel" Margin="20,50,10,1" Background="White" Grid.Column="0">
-            <Border Name="border" ClipToBounds="True">
+            <Border Name="border">
                 <Image Name="MainImage" MouseLeftButtonDown="MainImage_MouseLeftButtonDown" MouseLeftButtonUp="MainImage_MouseLeftButtonUp" MouseMove="MainImage_MouseMove"/>
             </Border>
         </StackPanel>
@@ -61,7 +61,7 @@
         <StackPanel Margin="10,50,20,1" Background="White" Grid.Column="1">
             <Label Background="White"/>
             <Button Margin="20,20,20,10.8" Height="30" Width="120" Content="Open" Click="OpenFileButton_Click"/>
-            <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Save as PBM"/>
+            <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Save as PBM" Click="SavePBMButton_Click"/>
             <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Save as PGM"/>
             <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Save as PPM"/>
             <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Show Comments" Click="Button_Click"/>

@@ -1,11 +1,12 @@
 ﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 
 namespace GrafikaPS2
 {
-    public class NetpbmReader
+    public class NetpbmReader : IDisposable
     {
         public string Format { get; set; }
 
@@ -17,7 +18,7 @@ namespace GrafikaPS2
 
         public Bitmap Bitmap { get; set; }
 
-        public List<string> Comments { get => lineReader.Comments; }
+        public List<string> Comments { get => _lineReader.Comments; }
 
         private readonly OpenFileDialog _dialog;
 
@@ -33,7 +34,7 @@ namespace GrafikaPS2
 
         private bool _is16bit;
 
-        private FileLineReader lineReader;
+        private FileLineReader _lineReader;
 
         private Stream _stream;
 
@@ -48,20 +49,19 @@ namespace GrafikaPS2
         {
             try
             {
-                lineReader = new FileLineReader(_dialog.FileName);
+                _lineReader = new FileLineReader(_dialog.FileName);
 
-                if (!SetFormat(lineReader))
+                if (!SetFormat(_lineReader))
                 {
-                    lineReader.Dispose();
                     return false;
                 }
 
-                Width = lineReader.GetNextIntValue();
-                Height = lineReader.GetNextIntValue();
+                Width = _lineReader.GetNextIntValue();
+                Height = _lineReader.GetNextIntValue();
 
                 if (_formatIndex > 1)
                 {
-                    MaxColor = lineReader.GetNextIntValue();
+                    MaxColor = _lineReader.GetNextIntValue();
                     _is16bit = MaxColor > 255;
                 }
 
@@ -77,7 +77,7 @@ namespace GrafikaPS2
                 switch (_formatIndex, _isAscii, _is16bit)
                 {
                     case (0, true, false): // PBM ASCII
-                        getter = () => lineReader.GetNextSingleBitValue() ? Color.Black : Color.White;
+                        getter = () => _lineReader.GetNextSingleBitValue() ? Color.Black : Color.White;
                         break;
                     case (0, false, false): // PBM binary
                         int bitsCount = Width * Height;
@@ -87,19 +87,19 @@ namespace GrafikaPS2
                             bytesCount++;
                         }
                         SetStreamPositon(bytesCount);
-                        getter = () => lineReader.GetNextSingleBitValue() ? Color.Black : Color.White;
+                        getter = () => _lineReader.GetNextSingleBitValue() ? Color.White : Color.Black;
                         break;
                     case (1, true, false): // PGM ASCII
                         getter = () =>
                         {
-                            var value = lineReader.GetNextIntValue();
+                            var value = _lineReader.GetNextIntValue();
                             return Color.FromArgb(value, value, value);
                         };
                         break;
                     case (1, true, true): // PGM ASCII 16 bit
                         getter = () =>
                         {
-                            var value = lineReader.GetNextIntValue() >> 8;
+                            var value = _lineReader.GetNextIntValue() >> 8;
                             return Color.FromArgb(value, value, value);
                         };
                         break;
@@ -120,10 +120,10 @@ namespace GrafikaPS2
                         };
                         break;
                     case (2, true, false): // PPM ASCII
-                        getter = () => Color.FromArgb(lineReader.GetNextIntValue(), lineReader.GetNextIntValue(), lineReader.GetNextIntValue());
+                        getter = () => Color.FromArgb(_lineReader.GetNextIntValue(), _lineReader.GetNextIntValue(), _lineReader.GetNextIntValue());
                         break;
                     case (2, true, true): // PPM ASCII 16 bit
-                        getter = () => Color.FromArgb(lineReader.GetNextIntValue() >> 8, lineReader.GetNextIntValue() >> 8, lineReader.GetNextIntValue() >> 8);
+                        getter = () => Color.FromArgb(_lineReader.GetNextIntValue() >> 8, _lineReader.GetNextIntValue() >> 8, _lineReader.GetNextIntValue() >> 8);
                         break;
                     case (2, false, false): // PPM binary
                         SetStreamPositon(Width * Height * 3);
@@ -139,23 +139,15 @@ namespace GrafikaPS2
                 {
                     for (int j = 0; j < Width; j++)
                     {
-                        Bitmap.SetPixel(j, i, getter());
+                        var color = getter();
+                        Bitmap.SetPixel(j, i, color);
                     }
                 }
 
-                if (!_isAscii)
-                {
-                    _stream.Dispose();
-                }
-
-                lineReader.Dispose();
                 return true;
             }
             catch
             {
-                if (_stream != null)
-                    _stream.Dispose();
-                lineReader.Dispose();
                 return false;
             }
         }
@@ -190,6 +182,19 @@ namespace GrafikaPS2
         private void SetStreamPositon(int offset)
         {
             _stream.Position = _stream.Length - offset;
+        }
+
+        public void Dispose()
+        {
+            if (_lineReader != null)
+            {
+                _lineReader.Dispose();
+            }
+
+            if (_stream != null)
+            {
+                _stream.Dispose();
+            }
         }
 
 

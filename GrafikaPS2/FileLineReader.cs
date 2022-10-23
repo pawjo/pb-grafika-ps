@@ -24,11 +24,6 @@ namespace GrafikaPS2
 
         public string GetNextStringValue()
         {
-            if (_isEndOfFile)
-            {
-                return null;
-            }
-
             if (_lineValueIndex >= _lineValues.Count())
             {
                 GetNextLine();
@@ -46,9 +41,15 @@ namespace GrafikaPS2
 
         public bool GetNextSingleBitValue()
         {
-            if (_lineValueIndex >= _lineValues.Count() || _singleBitIndex >= _lineValues[_lineValueIndex].Length)
+            if (_lineValueIndex >= _lineValues.Count())
             {
                 GetNextLine();
+            }
+
+            if (_singleBitIndex >= _lineValues[_lineValueIndex].Length)
+            {
+                _lineValueIndex++;
+                _singleBitIndex = 0;
             }
 
             var val = _lineValues[_lineValueIndex][_singleBitIndex++];
@@ -74,6 +75,11 @@ namespace GrafikaPS2
 
         private void GetNextLine()
         {
+            if (_streamReader.EndOfStream)
+            {
+                throw new Exception("End of file");
+            }
+
             _lineValueIndex = 0;
             _singleBitIndex = 0;
             var line = _streamReader.ReadLine();

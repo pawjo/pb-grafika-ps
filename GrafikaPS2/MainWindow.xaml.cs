@@ -17,6 +17,8 @@ namespace GrafikaPS2
         private System.Windows.Point origin;  // Original Offset of MainImage
         private System.Windows.Point start;   // Original Position of the mouse
 
+        private Bitmap _bitmap;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -24,46 +26,46 @@ namespace GrafikaPS2
 
         private void OpenFileButton_Click(object sender, RoutedEventArgs e)
         {
-            var openJPEGDialong = new OpenFileDialog();
+            var openFileDialog = new OpenFileDialog();
 
-            openJPEGDialong.Filter = "MainImage files(*.pbm;*.ppm)|*.pbm;*.ppm";
-            openJPEGDialong.Title = "Open an MainImage File";
+            openFileDialog.Filter = "MainImage files(*.pbm;*.ppm)|*.pbm;*.ppm";
+            openFileDialog.Title = "Open an NetPbm image file";
 
-            if (openJPEGDialong.ShowDialog() == true)
+            if (openFileDialog.ShowDialog() == true)
             {
-                var read = ReadBitmapFromPPM(openJPEGDialong);
-                if (read != null)
+                ReadBitmapFromPPM(openFileDialog);
+                if (_bitmap != null)
                 {
-                    MainImage.Source = ToBitmapMainImage(read);
+                    MainImage.Source = ToBitmapMainImage(_bitmap);
                 }
             }
         }
 
-        private Bitmap ReadBitmapFromPPM(OpenFileDialog openJPEGDialong)
+        private void ReadBitmapFromPPM(OpenFileDialog openFileDialog)
         {
-            //var ppm = new PPM(openJPEGDialong);
-            var ppm = new NetpbmReader(openJPEGDialong);
-
-            if (!ppm.ReadFile())
+            using (var ppm = new NetpbmReader(openFileDialog))
             {
-                MessageBox.Show("Open file error");
-                return null;
+                if (!ppm.ReadFile())
+                {
+                    MessageBox.Show("Open file error");
+                    _bitmap = null;
+                }
+
+                MainImage.RenderTransform = new MatrixTransform();
+
+                if (ppm.Width / ppm.Height > ImageStackPanel.ActualWidth / ImageStackPanel.ActualHeight)
+                {
+                    MainImage.Width = ImageStackPanel.ActualWidth;
+                }
+                else
+                {
+                    MainImage.Height = ImageStackPanel.ActualHeight;
+                }
+
+                CommentsListBox.ItemsSource = ppm.Comments;
+
+                _bitmap = ppm.Bitmap;
             }
-
-            MainImage.RenderTransform = new MatrixTransform();
-
-            if (ppm.Width / ppm.Height > ImageStackPanel.ActualWidth / ImageStackPanel.ActualHeight)
-            {
-                MainImage.Width = ImageStackPanel.ActualWidth;
-            }
-            else
-            {
-                MainImage.Height = ImageStackPanel.ActualHeight;
-            }
-
-            CommentsListBox.ItemsSource = ppm.Comments;
-
-            return ppm.Bitmap;
         }
 
         public BitmapImage ToBitmapMainImage(Bitmap bitmap)
@@ -129,6 +131,25 @@ namespace GrafikaPS2
         private void MainImage_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             MainImage.ReleaseMouseCapture();
+        }
+
+        private void SavePBMButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new SaveFileDialog();
+            dialog.Title = "Save as PBM file";
+            if (_bitmap != null && dialog.ShowDialog() == true)
+            {
+                var writer = new NetpbmWriter(_bitmap);
+
+                if (writer.Write(dialog.FileName))
+                {
+                    MessageBox.Show("Successful save");
+                }
+                else
+                {
+                    MessageBox.Show("Save error");
+                }
+            }
         }
     }
 }
