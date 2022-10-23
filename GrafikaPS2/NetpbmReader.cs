@@ -40,6 +40,9 @@ namespace GrafikaPS2
 
         private delegate Color ColorGetter();
 
+        private int _currentPBMBinaryByte;
+        private int _currentPBMBinaryByteIndex;
+
         public NetpbmReader(OpenFileDialog dialog)
         {
             _dialog = dialog;
@@ -87,7 +90,19 @@ namespace GrafikaPS2
                             bytesCount++;
                         }
                         SetStreamPositon(bytesCount);
-                        getter = () => _lineReader.GetNextSingleBitValue() ? Color.White : Color.Black;
+                        _currentPBMBinaryByte = _stream.ReadByte();
+                        getter = () =>
+                        {
+                            if (_currentPBMBinaryByteIndex == -1)
+                            {
+                                _currentPBMBinaryByte = _stream.ReadByte();
+                            }
+                            var val = _currentPBMBinaryByte >> _currentPBMBinaryByteIndex;
+                            val %= 2;
+                            _currentPBMBinaryByteIndex--;
+
+                            return val == 1 ? Color.Black : Color.White;
+                        };
                         break;
                     case (1, true, false): // PGM ASCII
                         getter = () =>
@@ -186,88 +201,8 @@ namespace GrafikaPS2
 
         public void Dispose()
         {
-            if (_lineReader != null)
-            {
-                _lineReader.Dispose();
-            }
-
-            if (_stream != null)
-            {
-                _stream.Dispose();
-            }
+            _lineReader?.Dispose();
+            _stream?.Dispose();
         }
-
-
-        //private void ReadPPMASCIIFormat(FileLineReader lineReader)
-        //{
-        //    for (int i = 0; i < Height; i++)
-        //    {
-        //        for (int j = 0; j < Width; j++)
-        //        {
-        //            Bitmap.SetPixel(j, i, Color.FromArgb(lineReader.GetNextIntValue(), lineReader.GetNextIntValue(), lineReader.GetNextIntValue()));
-        //        }
-        //    }
-        //}
-
-        //private void ReadPPMASCII16BitFormat(FileLineReader lineReader)
-        //{
-        //    for (int i = 0; i < Height; i++)
-        //    {
-        //        for (int j = 0; j < Width; j++)
-        //        {
-        //            Bitmap.SetPixel(j, i, Color.FromArgb(lineReader.GetNextIntValue() >> 8, lineReader.GetNextIntValue() >> 8, lineReader.GetNextIntValue() >> 8));
-        //        }
-        //    }
-        //}
-
-        //private void ReadPGMASCIIFormat(FileLineReader lineReader)
-        //{
-        //    for (int i = 0; i < Height; i++)
-        //    {
-        //        for (int j = 0; j < Width; j++)
-        //        {
-        //            var value = lineReader.GetNextIntValue() >> 8;
-        //            Bitmap.SetPixel(j, i, Color.FromArgb(value, value, value));
-        //        }
-        //    }
-        //}
-
-        //private void ReadPGMASCII16BitFormat(FileLineReader lineReader)
-        //{
-        //    for (int i = 0; i < Height; i++)
-        //    {
-        //        for (int j = 0; j < Width; j++)
-        //        {
-        //            var value = lineReader.GetNextIntValue() >> 8;
-        //            Bitmap.SetPixel(j, i, Color.FromArgb(value, value, value));
-        //        }
-        //    }
-        //}
-
-        //private void ReadPBMASCIIFormat(FileLineReader lineReader)
-        //{
-        //    for (int i = 0; i < Height; i++)
-        //    {
-        //        for (int j = 0; j < Width; j++)
-        //        {
-        //            var color = lineReader.GetNextIntValue() == 1 ? Color.Black : Color.White;
-        //            Bitmap.SetPixel(j, i, color);
-        //        }
-        //    }
-        //}
-
-        //private void ReadBinaryFormat()
-        //{
-        //    var stream = _dialog.OpenFile();
-        //    stream.Position = stream.Length - (Width * Height * 3);
-
-        //    for (int i = 0; i < Height; i++)
-        //    {
-        //        for (int j = 0; j < Width; j++)
-        //        {
-        //            Bitmap.SetPixel(j, i, Color.FromArgb(stream.ReadByte(), stream.ReadByte(), stream.ReadByte()));
-        //        }
-        //    }
-        //}
     }
 }
