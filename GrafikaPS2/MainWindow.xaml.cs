@@ -1,11 +1,10 @@
 ﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -66,15 +65,15 @@ namespace GrafikaPS2
                     MainImage.Height = ImageStackPanel.ActualHeight;
                 }
 
-            if (ppm.Comments.Count == 0)
-            {
-                CommentsListBox.ItemsSource = new List<string>() { "No comments" };
+                if (ppm.Comments.Count == 0)
+                {
+                    CommentsListBox.ItemsSource = new List<string>() { "No comments" };
 
-            }
-            else
-            {
-                CommentsListBox.ItemsSource = ppm.Comments;
-            }
+                }
+                else
+                {
+                    CommentsListBox.ItemsSource = ppm.Comments;
+                }
 
                 _bitmap = ppm.Bitmap;
             }
@@ -141,9 +140,9 @@ namespace GrafikaPS2
         }
 
         private void Show_Comments(object sender, RoutedEventArgs e)
-        { 
+        {
             if (CommentsListBox.Visibility == Visibility.Hidden)
-            { 
+            {
                 CommentsListBox.Visibility = Visibility.Visible;
 
             }
@@ -151,38 +150,52 @@ namespace GrafikaPS2
             {
                 CommentsListBox.Visibility = Visibility.Hidden;
             }
-            
+
         }
 
-        private void SaveAsBinary(object sender, RoutedEventArgs e)
+        private Tuple<string, bool> HandleSaveFileInit(string format)
         {
-            MessageBoxResult result = MessageBox.Show("Would you like to save this image in binary?", "Save", MessageBoxButton.YesNoCancel);
-            switch (result)
+            var formatResult = MessageBox.Show("Would you like to save this image in binary?", "Save", MessageBoxButton.YesNoCancel);
+
+            if (formatResult == MessageBoxResult.Cancel)
             {
-                case MessageBoxResult.Yes:
-                    break;
-                case MessageBoxResult.No:
-                    break;
-                case MessageBoxResult.Cancel:
-                    break;
+                return null;
+            }
+
+            var dialog = new SaveFileDialog();
+            dialog.Title = $"Save as {format} file";
+
+            if (dialog.ShowDialog() == true)
+            {
+                return Tuple.Create(dialog.FileName, formatResult == MessageBoxResult.Yes);
+            }
+            else
+            {
+                return null;
             }
         }
 
         private void SavePBMButton_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new SaveFileDialog();
-            dialog.Title = "Save as PBM file";
-            if (_bitmap != null && dialog.ShowDialog() == true)
+            if (_bitmap == null)
             {
-                var writer = new NetpbmWriter(_bitmap);
+                return;
+            }
 
-                if (writer.Write(dialog.FileName))
+            var newFileData = HandleSaveFileInit("PBM");
+
+            if (newFileData != null)
+            {
+                using (var writer = new NetpbmWriter(_bitmap, "pbm", newFileData.Item1, "P1"))
                 {
-                    MessageBox.Show("Successful save");
-                }
-                else
-                {
-                    MessageBox.Show("Save error");
+                    if (writer.Write())
+                    {
+                        MessageBox.Show("Successful save");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Save error");
+                    }
                 }
             }
         }
