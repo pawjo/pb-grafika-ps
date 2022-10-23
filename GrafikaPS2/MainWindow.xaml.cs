@@ -24,7 +24,6 @@ namespace GrafikaPS2
         {
             InitializeComponent();
             CommentsListBox.ItemsSource = new List<string>() { "No comments" };
-
         }
 
         private void OpenFileButton_Click(object sender, RoutedEventArgs e)
@@ -152,6 +151,21 @@ namespace GrafikaPS2
             }
             
         }
+
+        private void SaveAsBinary(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show("Would you like to save this image in binary?", "Save", MessageBoxButton.YesNoCancel);
+            switch (result)
+            {
+                case MessageBoxResult.Yes:
+                    break;
+                case MessageBoxResult.No:
+                    break;
+                case MessageBoxResult.Cancel:
+                    break;
+            }
+        }
+
 
     }
 }
