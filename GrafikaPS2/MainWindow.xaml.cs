@@ -1,8 +1,11 @@
 ﻿using Microsoft.Win32;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -22,6 +25,7 @@ namespace GrafikaPS2
         public MainWindow()
         {
             InitializeComponent();
+            CommentsListBox.ItemsSource = new List<string>() { "No comments" };
         }
 
         private void OpenFileButton_Click(object sender, RoutedEventArgs e)
@@ -62,7 +66,15 @@ namespace GrafikaPS2
                     MainImage.Height = ImageStackPanel.ActualHeight;
                 }
 
+            if (ppm.Comments.Count == 0)
+            {
+                CommentsListBox.ItemsSource = new List<string>() { "No comments" };
+
+            }
+            else
+            {
                 CommentsListBox.ItemsSource = ppm.Comments;
+            }
 
                 _bitmap = ppm.Bitmap;
             }
@@ -91,7 +103,7 @@ namespace GrafikaPS2
             if (MainImage.IsMouseCaptured) return;
             MainImage.CaptureMouse();
 
-            start = e.GetPosition(border);
+            start = e.GetPosition(ImageStackPanel);
             origin.X = MainImage.RenderTransform.Value.OffsetX;
             origin.Y = MainImage.RenderTransform.Value.OffsetY;
         }
@@ -101,7 +113,7 @@ namespace GrafikaPS2
         private void MainImage_MouseMove(object sender, MouseEventArgs e)
         {
             if (!MainImage.IsMouseCaptured) return;
-            System.Windows.Point p = e.MouseDevice.GetPosition(border);
+            System.Windows.Point p = e.MouseDevice.GetPosition(ImageStackPanel);
 
             Matrix m = MainImage.RenderTransform.Value;
             m.OffsetX = origin.X + (p.X - start.X);
@@ -123,14 +135,37 @@ namespace GrafikaPS2
             MainImage.RenderTransform = new MatrixTransform(m);
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         private void MainImage_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             MainImage.ReleaseMouseCapture();
+        }
+
+        private void Show_Comments(object sender, RoutedEventArgs e)
+        { 
+            if (CommentsListBox.Visibility == Visibility.Hidden)
+            { 
+                CommentsListBox.Visibility = Visibility.Visible;
+
+            }
+            else
+            {
+                CommentsListBox.Visibility = Visibility.Hidden;
+            }
+            
+        }
+
+        private void SaveAsBinary(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show("Would you like to save this image in binary?", "Save", MessageBoxButton.YesNoCancel);
+            switch (result)
+            {
+                case MessageBoxResult.Yes:
+                    break;
+                case MessageBoxResult.No:
+                    break;
+                case MessageBoxResult.Cancel:
+                    break;
+            }
         }
 
         private void SavePBMButton_Click(object sender, RoutedEventArgs e)
