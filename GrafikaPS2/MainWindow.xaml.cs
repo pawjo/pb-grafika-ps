@@ -37,7 +37,7 @@ namespace GrafikaPS2
         private Bitmap ReadBitmapFromPPM(OpenFileDialog openJPEGDialong)
         {
             //var ppm = new PPM(openJPEGDialong);
-            var ppm = new PPMReader(openJPEGDialong);
+            var ppm = new NetpbmReader(openJPEGDialong);
 
             if (!ppm.ReadFile())
             {
