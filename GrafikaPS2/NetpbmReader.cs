@@ -76,6 +76,16 @@ namespace GrafikaPS2
                     case (0, true, false): // PBM ASCII
                         getter = () => lineReader.GetNextSingleBitValue() ? Color.Black : Color.White;
                         break;
+                    case (0, false, false): // PBM binary
+                        int bitsCount = Width * Height;
+                        int bytesCount = bitsCount / 8;
+                        if (bitsCount % 8 > 0)
+                        {
+                            bytesCount++;
+                        }
+                        SetStreamPositon(bytesCount);
+                        getter = () => lineReader.GetNextSingleBitValue() ? Color.Black : Color.White;
+                        break;
                     case (1, true, false): // PGM ASCII
                         getter = () =>
                         {
@@ -90,11 +100,35 @@ namespace GrafikaPS2
                             return Color.FromArgb(value, value, value);
                         };
                         break;
+                    case (1, false, false): // PGM binary
+                        SetStreamPositon(Width * Height);
+                        getter = () =>
+                        {
+                            var value = _stream.ReadByte();
+                            return Color.FromArgb(value, value, value);
+                        };
+                        break;
+                    case (1, false, true): // PGM binary 16 bit
+                        SetStreamPositon(Width * Height * 2);
+                        getter = () =>
+                        {
+                            var value = Read16BitFromStream();
+                            return Color.FromArgb(value, value, value);
+                        };
+                        break;
                     case (2, true, false): // PPM ASCII
                         getter = () => Color.FromArgb(lineReader.GetNextIntValue(), lineReader.GetNextIntValue(), lineReader.GetNextIntValue());
                         break;
                     case (2, true, true): // PPM ASCII 16 bit
                         getter = () => Color.FromArgb(lineReader.GetNextIntValue() >> 8, lineReader.GetNextIntValue() >> 8, lineReader.GetNextIntValue() >> 8);
+                        break;
+                    case (2, false, false): // PPM binary
+                        SetStreamPositon(Width * Height * 3);
+                        getter = () => Color.FromArgb(_stream.ReadByte(), _stream.ReadByte(), _stream.ReadByte());
+                        break;
+                    case (2, false, true): // PPM binary 16 bit
+                        SetStreamPositon(Width * Height * 6);
+                        getter = () => Color.FromArgb(Read16BitFromStream(), Read16BitFromStream(), Read16BitFromStream());
                         break;
                 }
 
@@ -142,6 +176,17 @@ namespace GrafikaPS2
                 }
             }
             return false;
+        }
+
+        private int Read16BitFromStream()
+        {
+            _stream.ReadByte();
+            return _stream.ReadByte();
+        }
+
+        private void SetStreamPositon(int offset)
+        {
+            _stream.Position = _stream.Length - offset;
         }
 
 

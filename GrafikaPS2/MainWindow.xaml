@@ -6,7 +6,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GrafikaPS2"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800"
+        MouseWheel="MainWindow_MouseWheel">
 
     <Window.Resources>
         <Style TargetType="Button">
@@ -48,9 +49,9 @@
             <RowDefinition Height="369*"/>
             <RowDefinition Height="65*"/>
         </Grid.RowDefinitions>
-        <StackPanel Margin="20,50,10,1" Background="White" Grid.Column="0">
+        <StackPanel Name="ImageStackPanel" Margin="20,50,10,1" Background="White" Grid.Column="0">
             <Border Name="border" ClipToBounds="True">
-                <Image Name="MainImage" Grid.Column="0"/>
+                <Image Name="MainImage" MouseLeftButtonDown="MainImage_MouseLeftButtonDown" MouseLeftButtonUp="MainImage_MouseLeftButtonUp" MouseMove="MainImage_MouseMove"/>
             </Border>
         </StackPanel>
         <DockPanel Margin="15,357,5,1" Grid.RowSpan="2">

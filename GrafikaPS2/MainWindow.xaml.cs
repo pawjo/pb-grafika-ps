@@ -20,11 +20,6 @@ namespace GrafikaPS2
         public MainWindow()
         {
             InitializeComponent();
-
-            MainWindowName.MouseWheel += MainWindow_MouseWheel;
-            MainImage.MouseLeftButtonDown += MainImage_MouseLeftButtonDown;
-            //MainImage.MouseLeftButtonUp += MainImage_MouseLeftButtonUp;
-            MainImage.MouseMove += MainImage_MouseMove;
         }
 
         private void OpenFileButton_Click(object sender, RoutedEventArgs e)
@@ -55,20 +50,16 @@ namespace GrafikaPS2
                 return null;
             }
 
-            MainImage.Width = ppm.Width;
-            MainImage.Height = ppm.Height;
+            MainImage.RenderTransform = new MatrixTransform();
 
-            //if (ppm.Width < 100)
-            //{
-            //    MainMainImage.Width = 20 * ppm.Width;
-            //    MainMainImage.Height = 20 * ppm.Width;
-            //}
-
-            //if (ppm.Width > 1000)
-            //{
-            //    MainMainImage.Width = ppm.Width / 10;
-            //    MainMainImage.Height = ppm.Width / 10;
-            //}
+            if (ppm.Width / ppm.Height > ImageStackPanel.ActualWidth / ImageStackPanel.ActualHeight)
+            {
+                MainImage.Width = ImageStackPanel.ActualWidth;
+            }
+            else
+            {
+                MainImage.Height = ImageStackPanel.ActualHeight;
+            }
 
             return ppm.Bitmap;
         }
@@ -101,6 +92,8 @@ namespace GrafikaPS2
             origin.Y = MainImage.RenderTransform.Value.OffsetY;
         }
 
+
+
         private void MainImage_MouseMove(object sender, MouseEventArgs e)
         {
             if (!MainImage.IsMouseCaptured) return;
@@ -129,6 +122,11 @@ namespace GrafikaPS2
         private void Button_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void MainImage_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            MainImage.ReleaseMouseCapture();
         }
     }
 }
