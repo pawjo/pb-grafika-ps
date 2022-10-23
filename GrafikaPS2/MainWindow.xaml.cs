@@ -1,8 +1,11 @@
 ﻿using Microsoft.Win32;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -20,6 +23,8 @@ namespace GrafikaPS2
         public MainWindow()
         {
             InitializeComponent();
+            CommentsListBox.ItemsSource = new List<string>() { "No comments" };
+
         }
 
         private void OpenFileButton_Click(object sender, RoutedEventArgs e)
@@ -61,7 +66,15 @@ namespace GrafikaPS2
                 MainImage.Height = ImageStackPanel.ActualHeight;
             }
 
-            CommentsListBox.ItemsSource = ppm.Comments;
+            if (ppm.Comments.Count == 0)
+            {
+                CommentsListBox.ItemsSource = new List<string>() { "No comments" };
+
+            }
+            else
+            {
+                CommentsListBox.ItemsSource = ppm.Comments;
+            }
 
             return ppm.Bitmap;
         }
@@ -121,14 +134,24 @@ namespace GrafikaPS2
             MainImage.RenderTransform = new MatrixTransform(m);
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         private void MainImage_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             MainImage.ReleaseMouseCapture();
         }
+
+        private void Show_Comments(object sender, RoutedEventArgs e)
+        { 
+            if (CommentsListBox.Visibility == Visibility.Hidden)
+            { 
+                CommentsListBox.Visibility = Visibility.Visible;
+
+            }
+            else
+            {
+                CommentsListBox.Visibility = Visibility.Hidden;
+            }
+            
+        }
+
     }
 }

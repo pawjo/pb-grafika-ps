@@ -54,8 +54,8 @@
                 <Image Name="MainImage" MouseLeftButtonDown="MainImage_MouseLeftButtonDown" MouseLeftButtonUp="MainImage_MouseLeftButtonUp" MouseMove="MainImage_MouseMove"/>
             </StackPanel>
         </Border>
-        <DockPanel Margin="15,357,5,1" Grid.RowSpan="2">
-            <ListBox Name="CommentsListBox" Margin="5,0" BorderBrush="White" Foreground="white" Background="Black">
+        <DockPanel Margin="25,35,15,10" Grid.RowSpan="2" VerticalAlignment="Bottom">
+            <ListBox Name="CommentsListBox" Margin="5,5,5,1" BorderBrush="White" Foreground="white" Background="Black" Visibility="Hidden" Padding="5,5,5,5">
             </ListBox>
         </DockPanel>
         <StackPanel Margin="10,50,20,1" Background="White" Grid.Column="1">
@@ -64,7 +64,7 @@
             <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Save as PBM"/>
             <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Save as PGM"/>
             <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Save as PPM"/>
-            <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Show Comments" Click="Button_Click"/>
+            <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Show Comments" Click="Show_Comments"/>
         </StackPanel>
     </Grid>
 </Window>
