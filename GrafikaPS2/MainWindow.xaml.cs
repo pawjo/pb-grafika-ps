@@ -125,5 +125,10 @@ namespace GrafikaPS2
 
             MainImage.RenderTransform = new MatrixTransform(m);
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

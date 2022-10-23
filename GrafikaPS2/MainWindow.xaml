@@ -53,8 +53,7 @@
                 <Image Name="MainImage" Grid.Column="0"/>
             </Border>
         </StackPanel>
-        <StackPanel Margin="0,357,0,0" Grid.RowSpan="2">
-            <Label Foreground="White" Content="Comments"/>
+        <DockPanel Margin="15,357,5,1" Grid.RowSpan="2">
             <ListBox Margin="5,0" BorderBrush="White" Foreground="white" Background="Black">
                 <ListBoxItem>
                     <Label Foreground="white" Content="test"/>
@@ -66,14 +65,14 @@
                     <Label Foreground="white" Content="test3"/>
                 </ListBoxItem>
             </ListBox>
-        </StackPanel>
+        </DockPanel>
         <StackPanel Margin="10,50,20,1" Background="White" Grid.Column="1">
             <Label Background="White"/>
             <Button Margin="20,20,20,10.8" Height="30" Width="120" Content="Open" Click="OpenFileButton_Click"/>
             <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Save as PBM"/>
             <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Save as PGM"/>
             <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Save as PPM"/>
-            <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Show Comments"/>
+            <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Show Comments" Click="Button_Click"/>
         </StackPanel>
     </Grid>
 </Window>
