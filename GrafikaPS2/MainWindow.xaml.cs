@@ -80,5 +80,10 @@ namespace GrafikaPS2
                 return bitmapImage;
             }
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
