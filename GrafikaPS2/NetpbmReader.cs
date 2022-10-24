@@ -51,130 +51,128 @@ namespace GrafikaPS2
 
         public bool ReadFile()
         {
-            try
-            {
-                _lineReader = new FileLineReader(_dialog.FileName);
+            _lineReader = new FileLineReader(_dialog.FileName);
 
-                if (!SetFormat(_lineReader))
-                {
-                    return false;
-                }
-
-                Width = _lineReader.GetNextIntValue();
-                Height = _lineReader.GetNextIntValue();
-
-                if (_formatIndex > 1)
-                {
-                    MaxColor = _lineReader.GetNextIntValue();
-                    _is16bit = MaxColor > 255;
-                }
-
-                Bitmap = new Bitmap(Width, Height);
-                ColorGetter getter = null;
-
-                if (!_isAscii)
-                {
-                    _stream = _dialog.OpenFile();
-                }
-
-                switch (_formatIndex, _isAscii, _is16bit)
-                {
-                    case (0, true, false): // PBM ASCII
-                        getter = () => _lineReader.GetNextSingleBitValue() ? Color.Black : Color.White;
-                        break;
-                    case (0, false, false): // PBM binary
-                        int bytesRowCount = Width / 8;
-                        if (Width % 8 > 0)
-                        {
-                            bytesRowCount++;
-                        }
-                        SetStreamPositon(bytesRowCount * Height);
-                        getter = () =>
-                        {
-                            if (_currentPBMBinaryWidthIndex == Width && _currentPBMBinaryByteIndex == 7)
-                            {
-                                _currentPBMBinaryWidthIndex = 0;
-                            }
-                            else if (_currentPBMBinaryWidthIndex == Width)
-                            {
-                                _currentPBMBinaryWidthIndex = 0;
-                                _currentPBMBinaryByte = _stream.ReadByte();
-                                _currentPBMBinaryByteIndex = 7;
-                            }
-                            else if (_currentPBMBinaryByteIndex == -1)
-                            {
-                                _currentPBMBinaryByte = _stream.ReadByte();
-                                _currentPBMBinaryByteIndex = 7;
-                            }
-                            var val = _currentPBMBinaryByte >> _currentPBMBinaryByteIndex;
-                            val %= 2;
-                            _currentPBMBinaryByteIndex--;
-                            _currentPBMBinaryWidthIndex++;
-
-                            return val == 1 ? Color.Black : Color.White;
-                        };
-                        break;
-                    case (1, true, false): // PGM ASCII
-                        getter = () =>
-                        {
-                            var value = _lineReader.GetNextIntValue();
-                            return Color.FromArgb(value, value, value);
-                        };
-                        break;
-                    case (1, true, true): // PGM ASCII 16 bit
-                        getter = () =>
-                        {
-                            var value = _lineReader.GetNextIntValue() >> 8;
-                            return Color.FromArgb(value, value, value);
-                        };
-                        break;
-                    case (1, false, false): // PGM binary
-                        SetStreamPositon(Width * Height);
-                        getter = () =>
-                        {
-                            var value = _stream.ReadByte();
-                            return Color.FromArgb(value, value, value);
-                        };
-                        break;
-                    case (1, false, true): // PGM binary 16 bit
-                        SetStreamPositon(Width * Height * 2);
-                        getter = () =>
-                        {
-                            var value = Read16BitFromStream();
-                            return Color.FromArgb(value, value, value);
-                        };
-                        break;
-                    case (2, true, false): // PPM ASCII
-                        getter = () => Color.FromArgb(_lineReader.GetNextIntValue(), _lineReader.GetNextIntValue(), _lineReader.GetNextIntValue());
-                        break;
-                    case (2, true, true): // PPM ASCII 16 bit
-                        getter = () => Color.FromArgb(_lineReader.GetNextIntValue() >> 8, _lineReader.GetNextIntValue() >> 8, _lineReader.GetNextIntValue() >> 8);
-                        break;
-                    case (2, false, false): // PPM binary
-                        SetStreamPositon(Width * Height * 3);
-                        getter = () => Color.FromArgb(_stream.ReadByte(), _stream.ReadByte(), _stream.ReadByte());
-                        break;
-                    case (2, false, true): // PPM binary 16 bit
-                        SetStreamPositon(Width * Height * 6);
-                        getter = () => Color.FromArgb(Read16BitFromStream(), Read16BitFromStream(), Read16BitFromStream());
-                        break;
-                }
-
-                for (int i = 0; i < Height; i++)
-                {
-                    for (int j = 0; j < Width; j++)
-                    {
-                        var color = getter();
-                        Bitmap.SetPixel(j, i, color);
-                    }
-                }
-
-                return true;
-            }
-            catch
+            if (!SetFormat(_lineReader))
             {
                 return false;
             }
+
+            if (_lineReader.Stream.Length == 0)
+            {
+                return false;
+            }
+
+            Width = _lineReader.GetNextIntValue();
+            Height = _lineReader.GetNextIntValue();
+
+            if (_formatIndex > 1)
+            {
+                MaxColor = _lineReader.GetNextIntValue();
+                _is16bit = MaxColor > 255;
+            }
+
+            Bitmap = new Bitmap(Width, Height);
+            ColorGetter getter = null;
+
+            if (!_isAscii)
+            {
+                _stream = _dialog.OpenFile();
+            }
+
+            switch (_formatIndex, _isAscii, _is16bit)
+            {
+                case (0, true, false): // PBM ASCII
+                    getter = () => _lineReader.GetNextSingleBitValue() ? Color.Black : Color.White;
+                    break;
+                case (0, false, false): // PBM binary
+                    int bytesRowCount = Width / 8;
+                    if (Width % 8 > 0)
+                    {
+                        bytesRowCount++;
+                    }
+                    SetStreamPositon(bytesRowCount * Height);
+                    getter = () =>
+                    {
+                        if (_currentPBMBinaryWidthIndex == Width && _currentPBMBinaryByteIndex == 7)
+                        {
+                            _currentPBMBinaryWidthIndex = 0;
+                        }
+                        else if (_currentPBMBinaryWidthIndex == Width)
+                        {
+                            _currentPBMBinaryWidthIndex = 0;
+                            _currentPBMBinaryByte = _stream.ReadByte();
+                            _currentPBMBinaryByteIndex = 7;
+                        }
+                        else if (_currentPBMBinaryByteIndex == -1)
+                        {
+                            _currentPBMBinaryByte = _stream.ReadByte();
+                            _currentPBMBinaryByteIndex = 7;
+                        }
+                        var val = _currentPBMBinaryByte >> _currentPBMBinaryByteIndex;
+                        val %= 2;
+                        _currentPBMBinaryByteIndex--;
+                        _currentPBMBinaryWidthIndex++;
+
+                        return val == 1 ? Color.Black : Color.White;
+                    };
+                    break;
+                case (1, true, false): // PGM ASCII
+                    getter = () =>
+                    {
+                        var value = _lineReader.GetNextIntValue();
+                        return Color.FromArgb(value, value, value);
+                    };
+                    break;
+                case (1, true, true): // PGM ASCII 16 bit
+                    getter = () =>
+                    {
+                        var value = _lineReader.GetNextIntValue() >> 8;
+                        return Color.FromArgb(value, value, value);
+                    };
+                    break;
+                case (1, false, false): // PGM binary
+                    SetStreamPositon(Width * Height);
+                    getter = () =>
+                    {
+                        var value = _stream.ReadByte();
+                        return Color.FromArgb(value, value, value);
+                    };
+                    break;
+                case (1, false, true): // PGM binary 16 bit
+                    SetStreamPositon(Width * Height * 2);
+                    getter = () =>
+                    {
+                        var value = Read16BitFromStream();
+                        return Color.FromArgb(value, value, value);
+                    };
+                    break;
+                case (2, true, false): // PPM ASCII
+                    getter = () => Color.FromArgb(_lineReader.GetNextIntValue(), _lineReader.GetNextIntValue(), _lineReader.GetNextIntValue());
+                    break;
+                case (2, true, true): // PPM ASCII 16 bit
+                    getter = () => Color.FromArgb(_lineReader.GetNextIntValue() >> 8, _lineReader.GetNextIntValue() >> 8, _lineReader.GetNextIntValue() >> 8);
+                    break;
+                case (2, false, false): // PPM binary
+                    SetStreamPositon(Width * Height * 3);
+                    getter = () => Color.FromArgb(_stream.ReadByte(), _stream.ReadByte(), _stream.ReadByte());
+                    break;
+                case (2, false, true): // PPM binary 16 bit
+                    SetStreamPositon(Width * Height * 6);
+                    getter = () => Color.FromArgb(Read16BitFromStream(), Read16BitFromStream(), Read16BitFromStream());
+                    break;
+            }
+
+            for (int i = 0; i < Height; i++)
+            {
+                for (int j = 0; j < Width; j++)
+                {
+                    var color = getter();
+                    Bitmap.SetPixel(j, i, color);
+                }
+            }
+
+            return true;
         }
 
         private bool SetFormat(FileLineReader lineReader)

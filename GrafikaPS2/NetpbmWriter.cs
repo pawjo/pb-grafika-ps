@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 
 namespace GrafikaPS2
@@ -8,7 +9,8 @@ namespace GrafikaPS2
     {
         private readonly Bitmap _bitmap;
         private readonly string _fileName;
-        private readonly string _format;
+        private readonly string _destinationFormat;
+        private readonly int _sourceFormat;
         private readonly bool _isAscii;
 
         private const int _maxColor = 255;
@@ -29,11 +31,12 @@ namespace GrafikaPS2
 
         private string _colorValueSeparator;
 
-        public NetpbmWriter(Bitmap bitmap, string extension, string fileName, string format, bool isAscii = false)
+        public NetpbmWriter(Bitmap bitmap, string extension, string fileName, int sourceFormat, string destinationFormat, bool isAscii = false)
         {
             _bitmap = bitmap;
             _fileName = fileName;
-            _format = format;
+            _destinationFormat = destinationFormat;
+            _sourceFormat = sourceFormat;
             _isAscii = isAscii;
 
             _fileName = fileName;
@@ -50,24 +53,44 @@ namespace GrafikaPS2
             {
                 _streamWriter = new StreamWriter(_fileName);
                 _streamWriter.NewLine = "\n";
-                _streamWriter.WriteLine(_format);
+                _streamWriter.WriteLine(_destinationFormat);
                 _streamWriter.WriteLine($"{_bitmap.Width} {_bitmap.Height}");
 
-                _colorValueSeparator = " ";
-                switch (_format)
+                switch (_destinationFormat)
                 {
                     case "P1":
                         _colorStringGetter = color =>
                         {
-                            var avg = (color.R + color.G + color.B) / 3;
+                            var avg = GetAverageColorValue(color);
                             return avg >= 128 ? "0" : "1";
                         };
                         _colorStringLength = 1;
+                        _colorValueSeparator = " ";
                         WriteAsciiPixelsValues();
                         break;
                     case "P4":
                         _streamWriter.Close();
                         WriteP4();
+                        break;
+                    case "P2":
+                        _streamWriter.WriteLine(_maxColor);
+                        _colorStringGetter = color =>
+                        {
+                            int avg = GetAverageColorValue(color);
+                            return GetNormalizedString(avg, 3);
+                        };
+                        _colorStringLength = 3;
+                        _colorValueSeparator = " ";
+                        WriteAsciiPixelsValues();
+                        break;
+                    case "P5":
+                        _streamWriter.WriteLine(_maxColor);
+                        _writePixelValueToStream = color =>
+                        {
+                            int avg = GetAverageColorValue(color);
+                            _fileStream.WriteByte((byte)avg);
+                        };
+                        WriteBinaryPixelValues();
                         break;
                 }
 
@@ -79,16 +102,28 @@ namespace GrafikaPS2
             }
         }
 
+        private int GetAverageColorValue(Color color)
+        {
+            return _sourceFormat == 3 ? ((color.R + color.G + color.B) / 3) : color.R;
+        }
+
         private void WriteAsciiPixelsValues()
         {
-            var maxLineLength = 70 - _colorStringLength;
+            var maxLineLength = 70 - 2 * _colorStringLength - _colorValueSeparator.Length;
             var lineLength = 0;
+            var counter = 0;
             for (int i = 0; i < _bitmap.Height; i++)
             {
                 for (int j = 0; j < _bitmap.Width; j++)
                 {
                     var color = _bitmap.GetPixel(j, i);
                     var colorString = _colorStringGetter(color);
+                    counter++;
+                    //if(counter == 8)
+                    //{
+                    //    colorString = colorString + " |";
+                    //    counter = 0;
+                    //}
 
                     if (lineLength == 0)
                     {
@@ -113,36 +148,37 @@ namespace GrafikaPS2
         {
             _fileStream = new FileStream(_fileName, FileMode.Append);
             var currentByte = 0;
-            var currentByteLength = 1;
+            var currentByteLength = 0;
             for (int i = 0; i < _bitmap.Height; i++)
             {
                 for (int j = 0; j < _bitmap.Width; j++)
                 {
                     var color = _bitmap.GetPixel(j, i);
-                    var avg = (color.R + color.G + color.B) / 3;
+                    var avg = GetAverageColorValue(color);
                     var val = avg >= 128 ? 0 : 1;
-                    currentByte |= val;
                     currentByte <<= 1;
+                    currentByte |= val;
                     currentByteLength++;
 
                     if (currentByteLength == 8)
                     {
-                        WriteAndResetCurrentByte();
+                        WriteAndResetCurrentByte(j, i);
                     }
                 }
                 if (currentByteLength > 1)
                 {
                     currentByte <<= (8 - currentByteLength);
-                    WriteAndResetCurrentByte();
+                    WriteAndResetCurrentByte(_bitmap.Width, i);
                 }
             }
 
 
-            void WriteAndResetCurrentByte()
+            void WriteAndResetCurrentByte(int x, int y)
             {
+                var m = (x + 1) * (y + 1);
                 _fileStream.WriteByte((byte)currentByte);
                 currentByte = 0;
-                currentByteLength = 1;
+                currentByteLength = 0;
             }
             _fileStream.Close();
         }
@@ -150,7 +186,8 @@ namespace GrafikaPS2
 
         private void WriteBinaryPixelValues()
         {
-            _fileStream = new FileStream(_fileName, FileMode.Create);
+            _streamWriter.Close();
+            _fileStream = new FileStream(_fileName, FileMode.Append);
             for (int i = 0; i < _bitmap.Height; i++)
             {
                 for (int j = 0; j < _bitmap.Width; j++)
@@ -191,6 +228,20 @@ namespace GrafikaPS2
         {
             _streamWriter?.Dispose();
             _fileStream?.Dispose();
+        }
+
+        private string GetNormalizedString(int val, int length)
+        {
+            var str = val.ToString();
+            if (val > 99)
+            {
+                return str;
+            }
+            else if (val > 9)
+            {
+                return " " + str;
+            }
+            return "  " + str;
         }
     }
 }

@@ -9,10 +9,12 @@ namespace GrafikaPS2
     {
         public List<string> Comments { get; set; }
 
+        public Stream Stream { get => _streamReader.BaseStream; }
+
         private readonly StreamReader _streamReader;
         private string[] _lineValues;
-        private int _lineValueIndex;
-        private int _singleBitIndex;
+        private int _lineValueIndex = 35;
+        private int _singleBitIndex = 70;
         private bool _isEndOfFile = false;
 
         public FileLineReader(string fileName)
@@ -44,13 +46,16 @@ namespace GrafikaPS2
             if (_lineValueIndex >= _lineValues.Count())
             {
                 GetNextLine();
+                _singleBitIndex = 0;
             }
 
-            if (_singleBitIndex >= _lineValues[_lineValueIndex].Length)
+            if (_singleBitIndex == _lineValues[_lineValueIndex].Length)
             {
                 _lineValueIndex++;
                 _singleBitIndex = 0;
+                return GetNextSingleBitValue();
             }
+            
 
             var val = _lineValues[_lineValueIndex][_singleBitIndex++];
 

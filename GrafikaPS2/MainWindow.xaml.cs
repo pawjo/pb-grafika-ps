@@ -1,5 +1,4 @@
 ﻿using Microsoft.Win32;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -21,6 +20,8 @@ namespace GrafikaPS2
 
         private Bitmap _bitmap;
 
+        private int currentImageFormat = 0;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -31,7 +32,7 @@ namespace GrafikaPS2
         {
             var openFileDialog = new OpenFileDialog();
 
-            openFileDialog.Filter = "MainImage files(*.pbm;*.ppm)|*.pbm;*.ppm";
+            openFileDialog.Filter = "Netpbm files(*.pbm;*.pgm;*.ppm)|*.pbm;*.pgm;*.ppm";
             openFileDialog.Title = "Open an NetPbm image file";
 
             if (openFileDialog.ShowDialog() == true)
@@ -74,6 +75,9 @@ namespace GrafikaPS2
                 {
                     CommentsListBox.ItemsSource = ppm.Comments;
                 }
+
+                int format = (ppm.Format[1] - 48) % 3;
+                currentImageFormat = format == 0 ? 3 : format;
 
                 _bitmap = ppm.Bitmap;
             }
@@ -153,52 +157,50 @@ namespace GrafikaPS2
 
         }
 
-        private Tuple<string, bool> HandleSaveFileInit(string format)
+        private void HandleSaveFile(string format, string asciiFormat, string binaryFormat)
         {
+            if (_bitmap == null)
+            {
+                MessageBox.Show("No open file");
+                return;
+            }
+
             var formatResult = MessageBox.Show("Would you like to save this image in binary?", "Save", MessageBoxButton.YesNoCancel);
 
             if (formatResult == MessageBoxResult.Cancel)
             {
-                return null;
+                return;
             }
+
+            var isAscii = formatResult == MessageBoxResult.No;
 
             var dialog = new SaveFileDialog();
-            dialog.Title = $"Save as {format} file";
+            dialog.Title = $"Save as {format.ToUpper()} file";
 
-            if (dialog.ShowDialog() == true)
+            if (dialog.ShowDialog() == false)
+                return;
+
+            using (var writer = new NetpbmWriter(_bitmap, format, dialog.FileName, currentImageFormat, isAscii ? asciiFormat : binaryFormat))
             {
-                var stream = dialog.OpenFile();
-                return Tuple.Create(dialog.FileName, formatResult == MessageBoxResult.Yes);
-            }
-            else
-            {
-                return null;
+                if (writer.Write())
+                {
+                    MessageBox.Show("Successful save");
+                }
+                else
+                {
+                    MessageBox.Show("Save error");
+                }
             }
         }
 
         private void SavePBMButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_bitmap == null)
-            {
-                return;
-            }
+            HandleSaveFile("pbm", "P1", "P4");
+        }
 
-            var newFileData = HandleSaveFileInit("PBM");
-
-            if (newFileData != null)
-            {
-                using (var writer = new NetpbmWriter(_bitmap, "pbm", newFileData.Item1, newFileData.Item2 ? "P4" : "P1"))
-                {
-                    if (writer.Write())
-                    {
-                        MessageBox.Show("Successful save");
-                    }
-                    else
-                    {
-                        MessageBox.Show("Save error");
-                    }
-                }
-            }
+        private void SavePGMButton_Click(object sender, RoutedEventArgs e)
+        {
+            HandleSaveFile("pgm", "P2", "P5");
         }
     }
 }
