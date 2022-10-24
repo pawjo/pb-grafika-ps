@@ -41,7 +41,8 @@ namespace GrafikaPS2
         private delegate Color ColorGetter();
 
         private int _currentPBMBinaryByte;
-        private int _currentPBMBinaryByteIndex;
+        private int _currentPBMBinaryByteIndex = -1;
+        private int _currentPBMBinaryWidthIndex = 0;
 
         public NetpbmReader(OpenFileDialog dialog)
         {
@@ -83,23 +84,33 @@ namespace GrafikaPS2
                         getter = () => _lineReader.GetNextSingleBitValue() ? Color.Black : Color.White;
                         break;
                     case (0, false, false): // PBM binary
-                        int bitsCount = Width * Height;
-                        int bytesCount = bitsCount / 8;
-                        if (bitsCount % 8 > 0)
+                        int bytesRowCount = Width / 8;
+                        if (Width % 8 > 0)
                         {
-                            bytesCount++;
+                            bytesRowCount++;
                         }
-                        SetStreamPositon(bytesCount);
-                        _currentPBMBinaryByte = _stream.ReadByte();
+                        SetStreamPositon(bytesRowCount * Height);
                         getter = () =>
                         {
-                            if (_currentPBMBinaryByteIndex == -1)
+                            if (_currentPBMBinaryWidthIndex == Width && _currentPBMBinaryByteIndex == 7)
+                            {
+                                _currentPBMBinaryWidthIndex = 0;
+                            }
+                            else if (_currentPBMBinaryWidthIndex == Width)
+                            {
+                                _currentPBMBinaryWidthIndex = 0;
+                                _currentPBMBinaryByte = _stream.ReadByte();
+                                _currentPBMBinaryByteIndex = 7;
+                            }
+                            else if (_currentPBMBinaryByteIndex == -1)
                             {
                                 _currentPBMBinaryByte = _stream.ReadByte();
+                                _currentPBMBinaryByteIndex = 7;
                             }
                             var val = _currentPBMBinaryByte >> _currentPBMBinaryByteIndex;
                             val %= 2;
                             _currentPBMBinaryByteIndex--;
+                            _currentPBMBinaryWidthIndex++;
 
                             return val == 1 ? Color.Black : Color.White;
                         };

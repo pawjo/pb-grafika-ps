@@ -167,6 +167,7 @@ namespace GrafikaPS2
 
             if (dialog.ShowDialog() == true)
             {
+                var stream = dialog.OpenFile();
                 return Tuple.Create(dialog.FileName, formatResult == MessageBoxResult.Yes);
             }
             else
@@ -186,7 +187,7 @@ namespace GrafikaPS2
 
             if (newFileData != null)
             {
-                using (var writer = new NetpbmWriter(_bitmap, "pbm", newFileData.Item1, "P1"))
+                using (var writer = new NetpbmWriter(_bitmap, "pbm", newFileData.Item1, newFileData.Item2 ? "P4" : "P1"))
                 {
                     if (writer.Write())
                     {
