@@ -75,7 +75,6 @@ namespace GrafikaPS2
                 if (!_isAscii)
                 {
                     _stream = _dialog.OpenFile();
-                    _stream.Position = _stream.Length - (Width * Height);
                 }
 
                 switch (_formatIndex, _isAscii, _is16bit)
