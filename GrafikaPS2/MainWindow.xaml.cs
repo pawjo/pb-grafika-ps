@@ -191,7 +191,9 @@ namespace GrafikaPS2
             Loading.IsBusy = true;
 
             var dialog = new SaveFileDialog();
-            dialog.Title = $"Save as {format.ToUpper()} file";
+            var upperFormat = format.ToUpper();
+            dialog.Title = $"Save as {upperFormat} file";
+            dialog.Filter = $"{upperFormat} file (*.{format})|*.{format}";
 
             if (dialog.ShowDialog() == false)
             {
