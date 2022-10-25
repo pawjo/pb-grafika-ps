@@ -46,22 +46,15 @@
             <RowDefinition Height="369*"/>
             <RowDefinition Height="65*"/>
         </Grid.RowDefinitions>
-        <Border Name="border" Margin="5,5,5,5">
-            <StackPanel ClipToBounds="True" Name="ImageStackPanel" Margin="20,50,10,1" Background="White" Grid.Column="0">
-                <Image Name="MainImage" />
-            </StackPanel>
-        </Border>
-        <DockPanel Margin="25,35,15,10" Grid.RowSpan="2" VerticalAlignment="Bottom">
-            <ListBox Name="CommentsListBox" Margin="5,5,5,1" BorderBrush="White" Foreground="white" Background="Black" Visibility="Hidden" Padding="5,5,5,5">
-            </ListBox>
-        </DockPanel>
+        <StackPanel ClipToBounds="True" Name="StackPanel" Margin="20,50,10,1" Background="White" Grid.Column="0">
+            <Image Name="MainImage" />
+        </StackPanel>
         <StackPanel Margin="10,50,20,1" Background="White" Grid.Column="1">
             <Label Background="White"/>
-            <Button Margin="20,20,20,10.8" Height="30" Width="120" Content="Open"/>
-            <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Save as PBM"/>
-            <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Save as PGM"/>
-            <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Save as PPM"/>
-            <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Show Comments"/>
+            <Button Margin="20,20,20,10.8" Height="30" Width="120" Click="ConvertRGB" Content="Converter RGB"/>
+            <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Converter CMYK"/>
+            <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Converter HSV"/>
+            <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Create Cube"/>
         </StackPanel>
     </Grid>
 </Window>

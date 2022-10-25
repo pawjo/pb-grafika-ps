@@ -16,22 +16,13 @@ using System.Windows.Shapes;
 namespace GrafikaPS3
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for ConverterCMYK.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class ConverterCMYK : UserControl
     {
-        public static StackPanel mainPanel = new StackPanel();
-
-        public MainWindow()
+        public ConverterCMYK()
         {
             InitializeComponent();
-            StackPanel.Children.Add(mainPanel);
         }
-        private void ConvertRGB(object sender, RoutedEventArgs e)
-        {
-            mainPanel.Children.Clear();
-            mainPanel.Children.Add(new ConverterRGB());
-        }
-
     }
 }
