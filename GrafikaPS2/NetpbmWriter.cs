@@ -77,7 +77,7 @@ namespace GrafikaPS2
                         _colorStringGetter = color =>
                         {
                             int avg = GetAverageColorValue(color);
-                            return GetNormalizedString(avg, 3);
+                            return GetNormalizedString(avg);
                         };
                         _colorStringLength = 3;
                         _colorValueSeparator = " ";
@@ -89,6 +89,27 @@ namespace GrafikaPS2
                         {
                             int avg = GetAverageColorValue(color);
                             _fileStream.WriteByte((byte)avg);
+                        };
+                        WriteBinaryPixelValues();
+                        break;
+                    case "P3":
+                        _streamWriter.WriteLine(_maxColor);
+                        _colorStringGetter = color =>
+                        {
+                            var val = $"{GetNormalizedString(color.R)} {GetNormalizedString(color.G)} {GetNormalizedString(color.B)}";
+                            return val;
+                        };
+                        _colorStringLength = 11;
+                        _colorValueSeparator = "   ";
+                        WriteAsciiPixelsValues();
+                        break;
+                    case "P6":
+                        _streamWriter.WriteLine(_maxColor);
+                        _writePixelValueToStream = color =>
+                        {
+                            _fileStream.WriteByte((byte)color.R);
+                            _fileStream.WriteByte((byte)color.G);
+                            _fileStream.WriteByte((byte)color.B);
                         };
                         WriteBinaryPixelValues();
                         break;
@@ -198,27 +219,6 @@ namespace GrafikaPS2
             }
         }
 
-        //private void SetFormatProperties()
-        //{
-        //    switch (_format)
-        //    {
-        //        case "P1":
-        //            _colorStringGetter = color =>
-        //            {
-        //                var avg = (color.R + color.G + color.B) / 3;
-        //                return avg >= 128 ? "0" : "1";
-        //            };
-        //            _colorStringLength = 1;
-        //            break;
-        //        case "P4":
-        //            _writePixelValueToStream = color =>
-        //            {
-        //                var avg = (color.R + color.G + color.B) / 3;
-
-        //            }
-        //    }
-        //}
-
         private bool IsEndOfBitmap(int x, int y)
         {
             return x == _bitmap.Width - 1 && y == _bitmap.Height - 1;
@@ -230,7 +230,7 @@ namespace GrafikaPS2
             _fileStream?.Dispose();
         }
 
-        private string GetNormalizedString(int val, int length)
+        private string GetNormalizedString(int val)
         {
             var str = val.ToString();
             if (val > 99)

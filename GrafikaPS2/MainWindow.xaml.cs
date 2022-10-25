@@ -15,40 +15,52 @@ namespace GrafikaPS2
     /// </summary>
     public partial class MainWindow : Window
     {
-        private System.Windows.Point origin;  // Original Offset of MainImage
-        private System.Windows.Point start;   // Original Position of the mouse
+        private System.Windows.Point _origin;  // Original Offset of MainImage
+        private System.Windows.Point _start;   // Original Position of the mouse
 
         private Bitmap _bitmap;
 
-        private int currentImageFormat = 0;
+        private int _currentImageFormat = 0;
+
+        private string _windowTitle = "Netpbm Viewer PTPW";
+
+        public bool IsLoading { get; set; }
 
         public MainWindow()
         {
             InitializeComponent();
+
+            MainViewerWindow.DataContext = this;
+
+            MainViewerWindow.Title = _windowTitle;
             CommentsListBox.ItemsSource = new List<string>() { "No comments" };
         }
 
         private void OpenFileButton_Click(object sender, RoutedEventArgs e)
         {
+
             var openFileDialog = new OpenFileDialog();
 
             openFileDialog.Filter = "Netpbm files(*.pbm;*.pgm;*.ppm)|*.pbm;*.pgm;*.ppm";
             openFileDialog.Title = "Open an NetPbm image file";
+            Loading.IsBusy = true;
 
             if (openFileDialog.ShowDialog() == true)
             {
-                ReadBitmapFromPPM(openFileDialog);
+                ReadFile(openFileDialog);
                 if (_bitmap != null)
                 {
-                    MainImage.Source = ToBitmapMainImage(_bitmap);
+                    MainImage.Source = GetBitmapImage(_bitmap);
                 }
             }
+            Loading.IsBusy = false;
         }
 
-        private void ReadBitmapFromPPM(OpenFileDialog openFileDialog)
+        private void ReadFile(OpenFileDialog openFileDialog)
         {
             using (var ppm = new NetpbmReader(openFileDialog))
             {
+
                 if (!ppm.ReadFile())
                 {
                     MessageBox.Show("Open file error");
@@ -77,13 +89,15 @@ namespace GrafikaPS2
                 }
 
                 int format = (ppm.Format[1] - 48) % 3;
-                currentImageFormat = format == 0 ? 3 : format;
+                _currentImageFormat = format == 0 ? 3 : format;
+
+                MainViewerWindow.Title = $"{_windowTitle} - {openFileDialog.FileName}";
 
                 _bitmap = ppm.Bitmap;
             }
         }
 
-        public BitmapImage ToBitmapMainImage(Bitmap bitmap)
+        public BitmapImage GetBitmapImage(Bitmap bitmap)
         {
             using (var memory = new MemoryStream())
             {
@@ -106,9 +120,9 @@ namespace GrafikaPS2
             if (MainImage.IsMouseCaptured) return;
             MainImage.CaptureMouse();
 
-            start = e.GetPosition(ImageStackPanel);
-            origin.X = MainImage.RenderTransform.Value.OffsetX;
-            origin.Y = MainImage.RenderTransform.Value.OffsetY;
+            _start = e.GetPosition(ImageStackPanel);
+            _origin.X = MainImage.RenderTransform.Value.OffsetX;
+            _origin.Y = MainImage.RenderTransform.Value.OffsetY;
         }
 
 
@@ -119,8 +133,8 @@ namespace GrafikaPS2
             System.Windows.Point p = e.MouseDevice.GetPosition(ImageStackPanel);
 
             Matrix m = MainImage.RenderTransform.Value;
-            m.OffsetX = origin.X + (p.X - start.X);
-            m.OffsetY = origin.Y + (p.Y - start.Y);
+            m.OffsetX = _origin.X + (p.X - _start.X);
+            m.OffsetY = _origin.Y + (p.Y - _start.Y);
 
             MainImage.RenderTransform = new MatrixTransform(m);
         }
@@ -174,13 +188,18 @@ namespace GrafikaPS2
 
             var isAscii = formatResult == MessageBoxResult.No;
 
+            Loading.IsBusy = true;
+
             var dialog = new SaveFileDialog();
             dialog.Title = $"Save as {format.ToUpper()} file";
 
             if (dialog.ShowDialog() == false)
+            {
+                Loading.IsBusy = false;
                 return;
+            }
 
-            using (var writer = new NetpbmWriter(_bitmap, format, dialog.FileName, currentImageFormat, isAscii ? asciiFormat : binaryFormat))
+            using (var writer = new NetpbmWriter(_bitmap, format, dialog.FileName, _currentImageFormat, isAscii ? asciiFormat : binaryFormat))
             {
                 if (writer.Write())
                 {
@@ -191,6 +210,8 @@ namespace GrafikaPS2
                     MessageBox.Show("Save error");
                 }
             }
+
+            Loading.IsBusy = false;
         }
 
         private void SavePBMButton_Click(object sender, RoutedEventArgs e)
@@ -201,6 +222,11 @@ namespace GrafikaPS2
         private void SavePGMButton_Click(object sender, RoutedEventArgs e)
         {
             HandleSaveFile("pgm", "P2", "P5");
+        }
+
+        private void SavePPMButton_Click(object sender, RoutedEventArgs e)
+        {
+            HandleSaveFile("ppm", "P3", "P6");
         }
     }
 }

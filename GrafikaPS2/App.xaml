@@ -4,6 +4,6 @@
              xmlns:local="clr-namespace:GrafikaPS2"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <ResourceDictionary Source="pack://application:,,,/BusyIndicator;component/Theme/Default.xaml"/>
     </Application.Resources>
 </Application>
