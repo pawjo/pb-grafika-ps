@@ -8,49 +8,65 @@
     <title>Grafika PS3</title>
     <!-- <script src="https://threejs.org/build/three.min.js"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r124/three.min.js"
-    integrity="sha512-jeYvJdyAYkpQCY/omvCYQo89qA5YxDW4JBT7COPsHT2sOAanwxkZRFeP9gc69b5reSDpZIoyCqZQZcWZkbB5Gw=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        integrity="sha512-jeYvJdyAYkpQCY/omvCYQo89qA5YxDW4JBT7COPsHT2sOAanwxkZRFeP9gc69b5reSDpZIoyCqZQZcWZkbB5Gw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
     <script src="script.js" defer></script>
-    <link rel="stylesheet"  href="style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+
     <body>
         <div class="container">
-          <section class="drawing-board">
-            <div id="main-container">
-                <div class="panel" id="rgb-panel">
-                    <div class="slidecontainer">
-                        <div><p id="column1">R</p><input id="column2" type="number"><input id="column3" class="slider" type="range" min="1" max="255" value="0"></div>
-                        <div><p id="column1">G</p><input id="column2" type="number"><input id="column3" class="slider" type="range" min="1" max="255" value="0"></div>
-                        <div><p id="column1">B</p><input id="column2" type="number"><input id="column3" class="slider" type="range" min="1" max="255" value="0"></div></div>
-                   <div class="color-panel"></div>
-                  <div class="chuj"> <p id="column4">C</p>
-                   <input id="column5" type="number">
-                       <p id="column4">M</p>
-                       <input id="column5" type="number">
-                           <p id="column4">Y</p>
-                           <input id="column5" type="number">
-                               <p id="column4">K</p>
-                               <input id="column5" type="number">
-                                   </br>
-                                   <p id="column4">H</p>
-                                   <input id="column5" type="number">
-                                       <p id="column4">S</p>
-                                       <input id="column5" type="number">
-                                           <p id="column4">V</p>
-                                           <input id="column5" type="number">
-                                   </div>
-            </div>
-          </section>
-          <section class="tools-board">
+            <section class="drawing-board">
+                <div id="main-container">
+                    <div class="panel" id="rgb-panel">
+                        <div class="slidecontainer">
+                            <div>
+                                <p class="form-column">R</p>
+                                <input id="rgb-input-r-field" class="form-column color-input" type="number">
+                                <input id="rgb-input-r-slider" class="slider form-column color-input" type="range">
+                            </div>
+                            <div>
+                                <p class="form-column">G</p>
+                                <input id="rgb-input-g-field" class="form-column color-input" type="number">
+                                <input id="rgb-input-g-slider" class="slider form-column color-input" type="range">
+                            </div>
+                            <div>
+                                <p class="form-column">B</p>
+                                <input id="rgb-input-b-field" class="form-column color-input" type="number">
+                                <input id="rgb-input-b-slider" class="slider form-column color-input" type="range">
+                            </div>
+                        </div>
+                        <div id="rgb-color-panel" class="color-panel"></div>
+                        <div class="chuj">
+                            <p class="column4">C</p>
+                            <input id="rgb-cmyk-c" class="column5" type="number" readonly>
+                            <p class="column4">M</p>
+                            <input id="rgb-cmyk-m" class="column5" type="number" readonly>
+                            <p class="column4">Y</p>
+                            <input id="rgb-cmyk-y" class="column5" type="number" readonly>
+                            <p class="column4">K</p>
+                            <input id="rgb-cmyk-k" class="column5" type="number" readonly>
+                            </br>
+                            <p class="column4">H</p>
+                            <input id="rgb-hsv-h" class="column5" type="number" readonly>
+                            <p class="column4">S</p>
+                            <input id="rgb-hsv-s" class="column5" type="number" readonly>
+                            <p class="column4">V</p>
+                            <input id="rgb-hsv-v" class="column5" type="number" readonly>
+                        </div>
+                    </div>
+            </section>
+            <section class="tools-board">
                 <button class="buttons" onclick="showElement('rgb-cube-panel')">RGB Cube</button>
                 <button class="buttons" onclick="showElement('rgb-panel')">RGB Converter</button>
                 <button class="buttons">CMYK Converter</button>
                 <button class="buttons">HSV Converter</button>
-          </section>
+            </section>
         </div>
-      </body>
+    </body>
 </body>
+
 </html>

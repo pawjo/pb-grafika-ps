@@ -158,13 +158,19 @@ section {
   cursor: pointer;
 }
 
-#column1, column2, column3 {
+/* #column1, column2, column3 {
+    display:inline;
+    font-size: 12px;
+    margin-left:10%;
+} */
+
+.form-column {
     display:inline;
     font-size: 12px;
     margin-left:10%;
 }
 
-#column4, column5 {
+.column4, .column5 {
     display:inline;
     font-size: 12px;
 }
@@ -208,7 +214,7 @@ input[type=number]:focus {
 }
 
 
-#column5 {
+.column5 {
     width: 8%;
     padding: 2px 2px;
     box-sizing: border-box;
