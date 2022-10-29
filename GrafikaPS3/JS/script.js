@@ -2,7 +2,8 @@ var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
 var renderer = new THREE.WebGLRenderer();
 
-renderer.setSize(600, 400);
+renderer.setSize(700, 400);
+renderer.setClearColor( 0xffffff );
 const mainContainer = document.getElementById("main-container");
 const canvas = renderer.domElement;
 canvas.id = "rgb-cube-panel";
@@ -52,7 +53,7 @@ function showElement(id) {
         element.style.display = "none";
     }
     const element = document.getElementById(id);
-    element.style.display = "block";
+    element.style.display = "grid";
 }
 
 

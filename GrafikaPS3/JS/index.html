@@ -21,17 +21,34 @@
           <section class="drawing-board">
             <div id="main-container">
                 <div class="panel" id="rgb-panel">
-                    RGB
-                </div>
+                    <div class="slidecontainer">
+                        <div><p id="column1">R</p><input id="column2" type="number"><input id="column3" class="slider" type="range" min="1" max="255" value="0"></div>
+                        <div><p id="column1">G</p><input id="column2" type="number"><input id="column3" class="slider" type="range" min="1" max="255" value="0"></div>
+                        <div><p id="column1">B</p><input id="column2" type="number"><input id="column3" class="slider" type="range" min="1" max="255" value="0"></div></div>
+                   <div class="color-panel"></div>
+                  <div class="chuj"> <p id="column4">C</p>
+                   <input id="column5" type="number">
+                       <p id="column4">M</p>
+                       <input id="column5" type="number">
+                           <p id="column4">Y</p>
+                           <input id="column5" type="number">
+                               <p id="column4">K</p>
+                               <input id="column5" type="number">
+                                   </br>
+                                   <p id="column4">H</p>
+                                   <input id="column5" type="number">
+                                       <p id="column4">S</p>
+                                       <input id="column5" type="number">
+                                           <p id="column4">V</p>
+                                           <input id="column5" type="number">
+                                   </div>
             </div>
           </section>
           <section class="tools-board">
-            <div class="row">
                 <button class="buttons" onclick="showElement('rgb-cube-panel')">RGB Cube</button>
                 <button class="buttons" onclick="showElement('rgb-panel')">RGB Converter</button>
                 <button class="buttons">CMYK Converter</button>
                 <button class="buttons">HSV Converter</button>
-            </div>
           </section>
         </div>
       </body>
