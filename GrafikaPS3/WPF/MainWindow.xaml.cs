@@ -1,18 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace GrafikaPS3
 {
@@ -27,6 +21,54 @@ namespace GrafikaPS3
         public MainWindow()
         {
             InitializeComponent();
+            var uri = new Uri("test.png", UriKind.Relative);
+
+            int max = 255;
+            var bitmap = new Bitmap(max+1, max+1);
+            for (int i = 0; i <= max; i++)
+            {
+                for (int j = 0; j <= max; j++)
+                {
+                    var r = j > i ? j - i : 0;
+                    var g = i > j ? i - j : 0;
+                    var b = max - i;
+                    bitmap.SetPixel(j, i, System.Drawing.Color.FromArgb(r, g, b));
+                }
+            }
+
+            bitmap.SetPixel(0, 0, System.Drawing.Color.Orange);
+            bitmap.SetPixel(0, 1, System.Drawing.Color.Orange);
+            bitmap.SetPixel(0, 2, System.Drawing.Color.Orange);
+            bitmap.SetPixel(0, 3, System.Drawing.Color.Orange);
+            bitmap.SetPixel(1, 0, System.Drawing.Color.Orange);
+            bitmap.SetPixel(1, 1, System.Drawing.Color.Orange);
+            bitmap.SetPixel(1, 2, System.Drawing.Color.Orange);
+            bitmap.SetPixel(1, 3, System.Drawing.Color.Orange);
+            bitmap.SetPixel(2, 0, System.Drawing.Color.Orange);
+            bitmap.SetPixel(2, 1, System.Drawing.Color.Orange);
+            bitmap.SetPixel(2, 2, System.Drawing.Color.Orange);
+            bitmap.SetPixel(2, 3, System.Drawing.Color.Orange);
+
+            var bitmapImage = GetBitmapImage(bitmap);
+            testMaterial.Brush = new ImageBrush(bitmapImage);
+        }
+
+        public BitmapImage GetBitmapImage(Bitmap bitmap)
+        {
+            using (var memory = new MemoryStream())
+            {
+                bitmap.Save(memory, ImageFormat.Bmp);
+                memory.Position = 0;
+
+                var bitmapMainImage = new BitmapImage();
+
+                bitmapMainImage.BeginInit();
+                bitmapMainImage.StreamSource = memory;
+                bitmapMainImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapMainImage.EndInit();
+
+                return bitmapMainImage;
+            }
         }
 
         private void MainImage_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
