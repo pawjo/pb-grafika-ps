@@ -4,7 +4,11 @@ var renderer = new THREE.WebGLRenderer();
 
 renderer.setSize(400, 400);
 const mainContainer = document.getElementById("main-container");
-mainContainer.appendChild(renderer.domElement);
+const canvas = renderer.domElement;
+canvas.id = "rgb-cube-panel";
+canvas.style.display = "none";
+canvas.classList.add("panel");
+mainContainer.appendChild(canvas);
 
 var contorls = new THREE.OrbitControls(camera, renderer.domElement);
 var geom = new THREE.BoxGeometry(1, 1, 1);
@@ -42,16 +46,15 @@ function render() {
     renderer.render(scene, camera);
 };
 
+function showElement(id) {
+    const panels = document.getElementsByClassName("panel");
+    for (let element of panels) {
+        element.style.display = "none";
+    }
+    const element = document.getElementById(id);
+    element.style.display = "block";
+}
+
+
 render();
-
-function hideCanvas(){
-    const canvas = document.getElementsByTagName("canvas")[0];
-    canvas.style.display = "none";
-}
-
-function showCanvas(){
-    const canvas = document.getElementsByTagName("canvas")[0];
-    canvas.style.display = "block";
-}
-
-hideCanvas();
+// hideElement();

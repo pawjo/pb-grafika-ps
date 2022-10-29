@@ -21,19 +21,22 @@
         <div class="container">
           <section class="drawing-board">
             <div id="main-container">
+                <div class="panel" id="rgb-panel">
+                    RGB
+                </div>
             </div>
           </section>
           <section class="tools-board">
             <div class="row">
               <label class="title">Shapes</label>
               <ul class="options">
-                <li class="option shape" id="rectangle" onclick="showCanvas()">
+                <li class="option shape" id="rectangle" onclick="showElement('rgb-cube-panel')">
                   <img src="icons/rectangle.svg" alt="">
                   <span>Show RGB Cube</span>
                 </li>
-                <li class="option shape" id="circle" onclick="hideCanvas()">
+                <li class="option shape" id="circle" onclick="showElement('rgb-panel')">
                   <img src="icons/circle.svg" alt="">
-                  <span>Hide RGB Cube</span>
+                  <span>Show RGB panel</span>
                 </li>
                 <li class="option shape" id="triangle">
                   <img src="icons/triangle.svg" alt="">
