@@ -2,8 +2,9 @@ var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
 var renderer = new THREE.WebGLRenderer();
 
-renderer.setSize(window.innerWidth - 5, window.innerHeight - 55);
-document.body.appendChild(renderer.domElement);
+renderer.setSize(400, 400);
+const mainContainer = document.getElementById("main-container");
+mainContainer.appendChild(renderer.domElement);
 
 var contorls = new THREE.OrbitControls(camera, renderer.domElement);
 var geom = new THREE.BoxGeometry(1, 1, 1);
@@ -42,3 +43,15 @@ function render() {
 };
 
 render();
+
+function hideCanvas(){
+    const canvas = document.getElementsByTagName("canvas")[0];
+    canvas.style.display = "none";
+}
+
+function showCanvas(){
+    const canvas = document.getElementsByTagName("canvas")[0];
+    canvas.style.display = "block";
+}
+
+hideCanvas();
