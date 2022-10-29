@@ -6,7 +6,7 @@
 .topnav a {
     float: left;
     display: block;
-    color: #f2f2f2;
+    color: white;
     text-align: center;
     padding: 14px 16px;
     text-decoration: none;
@@ -14,12 +14,12 @@
 }
 
 .topnav a:hover {
-    background-color: #ddd;
+    background-color: white;
     color: black;
 }
 
 .active {
-    background-color: #4CAF50;
+    background-color: white;
     color: white;
 }
 
@@ -134,14 +134,22 @@ section {
     margin-top: 10px;
 }
 
-.buttons button {
+.buttons {
     width: 100%;
-    color: black;
+    color: white;
     border: none;
     outline: none;
     font-size: 0.9rem;
     background: none;
-    padding: 5px;
+    padding: 12px;
     border-radius: 5px;
     cursor: pointer;
+    background-color: black;
+    margin: 5%;
+    margin-bottom: 10%;
+}
+
+.buttons:hover {
+    transform: scale(1.05);
+    background-color: #282828;
 }

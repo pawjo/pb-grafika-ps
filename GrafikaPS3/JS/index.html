@@ -16,7 +16,6 @@
 </head>
 
 <body>
-
     <body>
         <div class="container">
           <section class="drawing-board">
@@ -28,65 +27,13 @@
           </section>
           <section class="tools-board">
             <div class="row">
-              <label class="title">Shapes</label>
-              <ul class="options">
-                <li class="option shape" id="rectangle" onclick="showElement('rgb-cube-panel')">
-                  <img src="icons/rectangle.svg" alt="">
-                  <span>Show RGB Cube</span>
-                </li>
-                <li class="option shape" id="circle" onclick="showElement('rgb-panel')">
-                  <img src="icons/circle.svg" alt="">
-                  <span>Show RGB panel</span>
-                </li>
-                <li class="option shape" id="triangle">
-                  <img src="icons/triangle.svg" alt="">
-                  <span>Triangle</span>
-                </li>
-                <li class="option shape" id="line">
-                  <img src="icons/line.svg" alt="">
-                  <span>Line</span>
-                </li>
-                <li class="option" for="fill-color" id="fill-color">
-                </li>
-              </ul>
-            </div>
-            <div class="row">
-              <label class="title">Options</label>
-              <ul class="options">
-                <li class="option tool" id="draw">
-                  <img src="icons/add.svg" alt="">
-                  <span>Create</span>
-                </li>
-                <li class="option tool" id="move">
-                  <img src="icons/move.svg" alt="">
-                  <span>Move</span>
-                </li>
-                <li class="option tool" id="scale">
-                  <img src="icons/scale.svg" alt="">
-                  <span>Scale</span>
-                </li>
-              </ul>
-            </div>
-            <div class="row">
-              <label class="title">Others</label>
-              <ul class="options">
-                <li class="option tool" id="pencil">
-                  <img src="icons/pencil.svg" alt="">
-                  <span>Draw</span>
-                </li>
-                <li class="option tool" id="text">
-                  <img src="icons/text.svg" alt="">
-                  <span>Write</span>
-                </li>
-              </ul>
-            </div>
-            <div class="row buttons">
-              <button class="save-img" onClick="saveSvg()">Save</button>
+                <button class="buttons" onclick="showElement('rgb-cube-panel')">RGB Cube</button>
+                <button class="buttons" onclick="showElement('rgb-panel')">RGB Converter</button>
+                <button class="buttons">CMYK Converter</button>
+                <button class="buttons">HSV Converter</button>
             </div>
           </section>
         </div>
       </body>
-
 </body>
-
 </html>

@@ -2,7 +2,7 @@ var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
 var renderer = new THREE.WebGLRenderer();
 
-renderer.setSize(400, 400);
+renderer.setSize(600, 400);
 const mainContainer = document.getElementById("main-container");
 const canvas = renderer.domElement;
 canvas.id = "rgb-cube-panel";
