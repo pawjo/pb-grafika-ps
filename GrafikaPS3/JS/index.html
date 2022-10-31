@@ -21,22 +21,22 @@
         <div class="container">
             <section class="drawing-board">
                 <div id="main-container">
-                    <div class="panel" id="rgb-panel">
+                    <div class="panel active-panel" id="rgb-panel">
                         <div class="slidecontainer">
                             <div>
                                 <p class="form-column">R</p>
-                                <input id="rgb-input-r-field" class="form-column color-input" type="number">
-                                <input id="rgb-input-r-slider" class="slider form-column color-input" type="range">
+                                <input id="rgb-input-r-field" class="form-column rgb-color-input" type="number">
+                                <input id="rgb-input-r-slider" class="slider form-column rgb-color-input" type="range">
                             </div>
                             <div>
                                 <p class="form-column">G</p>
-                                <input id="rgb-input-g-field" class="form-column color-input" type="number">
-                                <input id="rgb-input-g-slider" class="slider form-column color-input" type="range">
+                                <input id="rgb-input-g-field" class="form-column rgb-color-input" type="number">
+                                <input id="rgb-input-g-slider" class="slider form-column rgb-color-input" type="range">
                             </div>
                             <div>
                                 <p class="form-column">B</p>
-                                <input id="rgb-input-b-field" class="form-column color-input" type="number">
-                                <input id="rgb-input-b-slider" class="slider form-column color-input" type="range">
+                                <input id="rgb-input-b-field" class="form-column rgb-color-input" type="number">
+                                <input id="rgb-input-b-slider" class="slider form-column rgb-color-input" type="range">
                             </div>
                         </div>
                         <div id="rgb-color-panel" class="color-panel"></div>
@@ -57,93 +57,99 @@
                             <p class="column4">V</p>
                             <input id="rgb-hsv-v" class="column5" type="number" readonly>
                         </div>
-                        </div>
+                    </div>
                     <div class="panel" id="cmyk-panel">
                         <div class="slidecontainer">
                             <div>
                                 <p class="form-column">C</p>
-                                <input id="cmyk-input-r-field" class="form-column color-input" type="number">
-                                    <input id="cmyk-input-r-slider" class="slider form-column color-input" type="range">
-                                    </div>
+                                <input id="cmyk-input-c-field" class="form-column percent-color-input" type="number">
+                                <input id="cmyk-input-c-slider" class="slider form-column percent-color-input"
+                                    type="range">
+                            </div>
                             <div>
                                 <p class="form-column">M</p>
-                                <input id="cmyk-input-g-field" class="form-column color-input" type="number">
-                                    <input id="cmyk-input-g-slider" class="slider form-column color-input" type="range">
-                                    </div>
+                                <input id="cmyk-input-m-field" class="form-column percent-color-input" type="number">
+                                <input id="cmyk-input-m-slider" class="slider form-column percent-color-input"
+                                    type="range">
+                            </div>
                             <div>
                                 <p class="form-column">Y</p>
-                                <input id="cmyk-input-b-field" class="form-column color-input" type="number">
-                                    <input id="cmyk-input-b-slider" class="slider form-column color-input" type="range">
-                                    </div>
+                                <input id="cmyk-input-y-field" class="form-column percent-color-input" type="number">
+                                <input id="cmyk-input-y-slider" class="slider form-column percent-color-input"
+                                    type="range">
+                            </div>
                             <div>
                                 <p class="form-column">K</p>
-                                <input id="cmyk-input-b-field" class="form-column color-input" type="number">
-                                    <input id="cmyk-input-b-slider" class="slider form-column color-input" type="range">
-                                    </div>
+                                <input id="cmyk-input-k-field" class="form-column percent-color-input" type="number">
+                                <input id="cmyk-input-k-slider" class="slider form-column percent-color-input"
+                                    type="range">
+                            </div>
                         </div>
                         <div id="cmyk-color-panel" class="color-panel"></div>
                         <div class="chuj">
                             <p class="column4">R</p>
                             <input id="cmyk-rgb-r" class="column5" type="number" readonly>
-                                <p class="column4">G</p>
-                                <input id="cmyk-rgb-g" class="column5" type="number" readonly>
-                                    <p class="column4">B</p>
-                                    <input id="cmyk-rgb-y" class="column5" type="number" readonly>
-                                        </br>
-                                        <p class="column4">H</p>
-                                        <input id="cmyk-hsv-h" class="column5" type="number" readonly>
-                                            <p class="column4">S</p>
-                                            <input id="cmyk-hsv-s" class="column5" type="number" readonly>
-                                                <p class="column4">V</p>
-                                                <input id="cmyk-hsv-v" class="column5" type="number" readonly>
-                                                </div>
+                            <p class="column4">G</p>
+                            <input id="cmyk-rgb-g" class="column5" type="number" readonly>
+                            <p class="column4">B</p>
+                            <input id="cmyk-rgb-b" class="column5" type="number" readonly>
+                            </br>
+                            <p class="column4">H</p>
+                            <input id="cmyk-hsv-h" class="column5" type="number" readonly>
+                            <p class="column4">S</p>
+                            <input id="cmyk-hsv-s" class="column5" type="number" readonly>
+                            <p class="column4">V</p>
+                            <input id="cmyk-hsv-v" class="column5" type="number" readonly>
+                        </div>
                     </div>
                     <div class="panel" id="hsv-panel">
                         <div class="slidecontainer">
                             <div>
                                 <p class="form-column">H</p>
-                                <input id="hsv-input-h-field" class="form-column color-input" type="number">
-                                    <input id="hsv-input-h-slider" class="slider form-column color-input" type="range">
-                                    </div>
+                                <input id="hsv-input-h-field" class="form-column degres-color-input" type="number">
+                                <input id="hsv-input-h-slider" class="slider form-column degres-color-input"
+                                    type="range">
+                            </div>
                             <div>
                                 <p class="form-column">S</p>
-                                <input id="hsv-input-s-field" class="form-column color-input" type="number">
-                                    <input id="hsv-input-s-slider" class="slider form-column color-input" type="range">
-                                    </div>
+                                <input id="hsv-input-s-field" class="form-column percent-color-input" type="number">
+                                <input id="hsv-input-s-slider" class="slider form-column percent-color-input"
+                                    type="range">
+                            </div>
                             <div>
                                 <p class="form-column">V</p>
-                                <input id="hsv-input-v-field" class="form-column color-input" type="number">
-                                    <input id="hsv-input-v-slider" class="slider form-column color-input" type="range">
-                                    </div>
+                                <input id="hsv-input-v-field" class="form-column percent-color-input" type="number">
+                                <input id="hsv-input-v-slider" class="slider form-column percent-color-input"
+                                    type="range">
+                            </div>
                             <div>
+                            </div>
+                            <div id="hsv-color-panel" class="color-panel"></div>
+                            <div class="chuj">
+                                <p class="column4">C</p>
+                                <input id="hsv-cmyk-c" class="column5" type="number" readonly>
+                                <p class="column4">M</p>
+                                <input id="hsv-cmyk-m" class="column5" type="number" readonly>
+                                <p class="column4">Y</p>
+                                <input id="hsv-cmyk-y" class="column5" type="number" readonly>
+                                <p class="column4">K</p>
+                                <input id="hsv-cmyk-k" class="column5" type="number" readonly>
+                                </br>
+                                <p class="column4">R</p>
+                                <input id="hsv-rgb-r" class="column5" type="number" readonly>
+                                <p class="column4">G</p>
+                                <input id="hsv-rgb-g" class="column5" type="number" readonly>
+                                <p class="column4">B</p>
+                                <input id="hsv-rgb-b" class="column5" type="number" readonly>
+                            </div>
                         </div>
-                        <div id="hsv-color-panel" class="color-panel"></div>
-                        <div class="chuj">
-                            <p class="column4">C</p>
-                            <input id="hsv-cmyk-c" class="column5" type="number" readonly>
-                            <p class="column4">M</p>
-                            <input id="hsv-cmyk-m" class="column5" type="number" readonly>
-                            <p class="column4">Y</p>
-                            <input id="hsv-cmyk-y" class="column5" type="number" readonly>
-                            <p class="column4">K</p>
-                            <input id="hsv-cmyk-k" class="column5" type="number" readonly>
-                                        </br>
-                                        <p class="column4">R</p>
-                                        <input id="hsv-rgb-r" class="column5" type="number" readonly>
-                                            <p class="column4">G</p>
-                                            <input id="hsv-rgb-g" class="column5" type="number" readonly>
-                                                <p class="column4">B</p>
-                                                <input id="hsv-rgb-b" class="column5" type="number" readonly>
-                                                </div>
-                    </div>
                     </div>
             </section>
             <section class="tools-board">
                 <button class="buttons" onclick="showElement('rgb-cube-panel')">RGB Cube</button>
                 <button class="buttons" onclick="showElement('rgb-panel')">RGB Converter</button>
                 <button class="buttons" onclick="showElement('cmyk-panel')">CMYK Converter</button>
-                <button class="buttons"
-                    onclick="showElement('hsv-panel')">HSV Converter</button>
+                <button class="buttons" onclick="showElement('hsv-panel')">HSV Converter</button>
             </section>
         </div>
     </body>
