@@ -7,7 +7,7 @@
         xmlns:busyIndicator="https://github.com/Peoky/BusyIndicator"
         xmlns:local="clr-namespace:GrafikaPS4"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800"
+        Title="MainWindow" Width="800"
         MouseWheel="MainWindow_MouseWheel">
 
     <Window.Resources>
@@ -47,6 +47,7 @@
     <busyIndicator:BusyMask x:Name="Loading" IsBusy="False" IndicatorType="DotCircle" BusyContent="Loading..." >
         <Grid Background="black">
             <Grid.ColumnDefinitions>
+
                 <ColumnDefinition/>
                 <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
@@ -63,13 +64,52 @@
                 <ListBox Name="CommentsListBox" Margin="5,5,5,1" BorderBrush="White" Foreground="white" Background="Black" Visibility="Hidden" Padding="5,5,5,5">
                 </ListBox>
             </DockPanel>
-            <StackPanel Margin="10,50,20,1" Background="White" Grid.Column="1">
+            <StackPanel Margin="10,20,20,1" Width="160" Background="White" Grid.Column="1">
                 <Label Background="White"/>
                 <Button Margin="20,20,20,10.8" Height="30" Width="120" Content="Open" Click="OpenFileButton_Click"/>
-                <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Gray scale" Click="GrayScale"/>
-                <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Save as PGM" />
-                <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Save as PPM" />
-                <Button Margin="20,10,20,10.8" Height="30" Width="120" Content="Show Comments" />
+
+                <Label Content="Point transforms" FontSize="14"/>
+                <!--<StackPanel Margin="20,10,20,10.8" Orientation="Horizontal">
+                    <Label Content="Value"/>
+                    <TextBox Text="test"></TextBox>
+                </StackPanel>-->
+                <Grid Margin="20,10,20,10.8" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Margin="20,0" Content="Value"/>
+                    <TextBox Name="PointTransformsValue" Grid.Column="1" Text="1"></TextBox>
+                </Grid>
+                <Button Height="30" Content="Add" Click="Add"/>
+                <Button Height="30" Content="Subtract" Click="Subtract"/>
+                <Button Height="30" Content="Multiply" Click="Multiply"/>
+                <Button Height="30" Content="Divide" Click="Divide"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Height="30" Content="Brighter" Click="Brighter"/>
+                    <Button Grid.Column="1" Height="30" Content="Darker" Click="Darker"/>
+                </Grid>
+
+                <Button Height="30" Content="Gray scale 1" Click="GrayScale"/>
+                <Button Height="30" Content="Gray scale 2" Click="test1"/>
+
+                <Label Content="Filters" FontSize="14"/>
+                <Button Height="30" Content="Smooth" />
+                <Button Height="30" Content="Sharp" />
+                <Button Height="30" Content="Median" />
+                <Button Height="30" Content="Sobel"  ToolTip="Nie ten piosenkarz"/>
+                <Button Height="30" Content="Smoothing" />
+                <Button Height="30" Content="High-pass sharp" />
+                <Button Height="30" Content="Gauss" />
+
+                <Label Content="Custom convolution"/>
+                <TextBox Height="100" AcceptsReturn="True"/>
+                <Button Height="30" Content="Apply custom convolution" />
+
             </StackPanel>
         </Grid>
     </busyIndicator:BusyMask>
