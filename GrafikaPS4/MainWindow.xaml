@@ -93,17 +93,17 @@
             <StackPanel Margin="10,20,10,20" Width="160" Background="White" Grid.Column="2">
                 <Label Background="White"/>
                 <Label  Margin="10,0,10,10.8" Content="Filters:" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <Button  Margin="10,0,10,10.8" Height="30" Content="Smooth" />
-                <Button  Margin="10,0,10,10.8" Height="30" Content="Sharp" />
-                <Button  Margin="10,0,10,10.8" Height="30" Content="Median" />
-                <Button  Margin="10,0,10,10.8" Height="30" Content="Sobel"  ToolTip="Nie ten piosenkarz"/>
-                <Button  Margin="10,0,10,10.8" Height="30" Content="Smoothing" />
-                <Button  Margin="10,0,10,10.8" Height="30" Content="High-pass sharp" />
-                <Button  Margin="10,0,10,10.8" Height="30" Content="Gauss" />
+                <Button  Margin="10,0,10,10.8" Height="30" Content="Smooth" Click="SmoothAsync" />
+                <Button  Margin="10,0,10,10.8" Height="30" Content="Sharp" Click="SharpenAsync"/>
+                <Button  Margin="10,0,10,10.8" Height="30" Content="Median" Click="MedianAsync"/>
+                <Button  Margin="10,0,10,10.8" Height="30" Content="Sobel horizontal" Click="SobelHorizontalAsync" ToolTip="Nie ten piosenkarz"/>
+                <Button  Margin="10,0,10,10.8" Height="30" Content="Sobel vertical" Click="SobelVerticalAsync" />
+                <Button  Margin="10,0,10,10.8" Height="30" Content="High-pass sharp" Click="HighPassSharpenAsync"/>
+                <Button  Margin="10,0,10,10.8" Height="30" Content="Gauss" Click="GaussAsync"/>
 
                 <Label Content="Custom convolution:" HorizontalAlignment="Center" FontWeight="Bold"/>
-                <TextBox Margin="10,10,10,10" Height="50" AcceptsReturn="True" FontWeight="Bold"/>
-                <Button  Margin="10,0,10,10.8" Height="30" Content="Apply" />
+                <TextBox Name="CustomConvolutionInput" Margin="10,10,10,10" Height="50" AcceptsReturn="True" FontWeight="Bold"/>
+                <Button  Margin="10,0,10,10.8" Height="30" Content="Apply" Click="CustomConvolutionAsync" />
 
             </StackPanel>
         </Grid>
