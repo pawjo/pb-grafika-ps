@@ -189,22 +189,7 @@ namespace GrafikaPS4
                 return;
             }
 
-            bitmap = await Task.Run(() =>
-            {
-                for (int i = 0; i < bitmap.Width; i++)
-                {
-                    for (int j = 0; j < bitmap.Height; j++)
-                    {
-                        var color = bitmap.GetPixel(i, j);
-                        var r = (color.R + color.G + color.B) / 3;
-                        var g = (color.R + color.G + color.B) / 3;
-                        var b = (color.R + color.G + color.B) / 3;
-
-                        bitmap.SetPixel(i, j, System.Drawing.Color.FromArgb(color.A, r, g, b));
-                    }
-                }
-                return bitmap;
-            });
+            bitmap = await Task.Run(() => PointTransforms.GrayScaleAsync(bitmap));
 
             SetNewWriteableBitmap(bitmap);
             Loading.IsBusy = false;
@@ -218,22 +203,7 @@ namespace GrafikaPS4
                 return;
             }
 
-            bitmap = await Task.Run(() =>
-            {
-                for (int i = 0; i < bitmap.Width; i++)
-                {
-                    for (int j = 0; j < bitmap.Height; j++)
-                    {
-                        var color = bitmap.GetPixel(i, j);
-                        var r = 0.299 * color.R + 0.587 * color.G + 0.114 * color.B;
-                        var g = 0.299 * color.R + 0.587 * color.G + 0.114 * color.B;
-                        var b = 0.299 * color.R + 0.587 * color.G + 0.114 * color.B;
-
-                        bitmap.SetPixel(i, j, System.Drawing.Color.FromArgb(color.A, (int)r, (int)g, (int)b));
-                    }
-                }
-                return bitmap;
-            });
+            bitmap = await Task.Run(() => PointTransforms.GrayScaleYUVAsync(bitmap));
 
             SetNewWriteableBitmap(bitmap);
             Loading.IsBusy = false;
@@ -250,33 +220,7 @@ namespace GrafikaPS4
 
             Loading.IsBusy = true;
 
-            bitmap = await Task.Run(() =>
-            {
-                for (int i = 0; i < bitmap.Width; i++)
-                {
-                    for (int j = 0; j < bitmap.Height; j++)
-                    {
-                        var color = bitmap.GetPixel(i, j);
-
-                        var r = color.R + value;
-                        var g = color.G + value;
-                        var b = color.B + value;
-
-                        if (r > 255)
-                            r = 255;
-
-                        if (g > 255)
-                            g = 255;
-
-                        if (b > 255)
-                            b = 255;
-
-                        bitmap.SetPixel(i, j, System.Drawing.Color.FromArgb(color.A, r, g, b));
-                    }
-                }
-
-                return bitmap;
-            });
+            bitmap = await Task.Run(() => PointTransforms.AddAsync(bitmap, value));
 
             SetNewWriteableBitmap(bitmap);
             Loading.IsBusy = false;
@@ -293,34 +237,7 @@ namespace GrafikaPS4
 
             Loading.IsBusy = true;
 
-            bitmap = await Task.Run(() =>
-            {
-
-                for (int i = 0; i < bitmap.Width; i++)
-                {
-                    for (int j = 0; j < bitmap.Height; j++)
-                    {
-                        var color = bitmap.GetPixel(i, j);
-
-                        var r = color.R - value;
-                        var g = color.G - value;
-                        var b = color.B - value;
-
-                        if (r < 0)
-                            r = 0;
-
-                        if (g < 0)
-                            g = 0;
-
-                        if (b < 0)
-                            b = 0;
-
-                        bitmap.SetPixel(i, j, System.Drawing.Color.FromArgb(color.A, r, g, b));
-                    }
-                }
-
-                return bitmap;
-            });
+            bitmap = await Task.Run(() => PointTransforms.SubtractAsync(bitmap, value));
 
             SetNewWriteableBitmap(bitmap);
             Loading.IsBusy = false;
@@ -337,34 +254,7 @@ namespace GrafikaPS4
 
             Loading.IsBusy = true;
 
-            bitmap = await Task.Run(() =>
-            {
-
-                for (int i = 0; i < bitmap.Width; i++)
-                {
-                    for (int j = 0; j < bitmap.Height; j++)
-                    {
-                        var color = bitmap.GetPixel(i, j);
-
-                        var r = color.R * value;
-                        var g = color.G * value;
-                        var b = color.B * value;
-
-                        if (r > 255)
-                            r = 255;
-
-                        if (g > 255)
-                            g = 255;
-
-                        if (b > 255)
-                            b = 255;
-
-                        bitmap.SetPixel(i, j, System.Drawing.Color.FromArgb(color.A, r, g, b));
-                    }
-                }
-
-                return bitmap;
-            });
+            bitmap = await Task.Run(() => PointTransforms.MultiplyAsync(bitmap, value));
 
             SetNewWriteableBitmap(bitmap);
             Loading.IsBusy = false;
@@ -381,25 +271,7 @@ namespace GrafikaPS4
 
             Loading.IsBusy = true;
 
-            bitmap = await Task.Run(() =>
-            {
-
-                for (int i = 0; i < bitmap.Width; i++)
-                {
-                    for (int j = 0; j < bitmap.Height; j++)
-                    {
-                        var color = bitmap.GetPixel(i, j);
-
-                        var r = color.R / value;
-                        var g = color.G / value;
-                        var b = color.B / value;
-
-                        bitmap.SetPixel(i, j, System.Drawing.Color.FromArgb(color.A, r, g, b));
-                    }
-                }
-
-                return bitmap;
-            });
+            bitmap = await Task.Run(() => PointTransforms.DivideAsync(bitmap, value));
 
             SetNewWriteableBitmap(bitmap);
             Loading.IsBusy = false;
@@ -416,24 +288,7 @@ namespace GrafikaPS4
 
             Loading.IsBusy = true;
 
-            bitmap = await Task.Run(() =>
-            {
-                var lut = new int[256];
-
-                for (int i = 0; i < 256; i++)
-                {
-                    lut[i] = i + value;
-
-                    if (lut[i] > 255)
-                    {
-                        lut[i] = 255;
-                    }
-                }
-
-                bitmap = SetBitmapFromLut(bitmap, lut);
-
-                return bitmap;
-            });
+            bitmap = await Task.Run(() => PointTransforms.BrighterAsync(bitmap, value));
 
             SetNewWriteableBitmap(bitmap);
             Loading.IsBusy = false;
@@ -450,46 +305,13 @@ namespace GrafikaPS4
 
             Loading.IsBusy = true;
 
-            bitmap = await Task.Run(() =>
-            {
-                var lut = new int[256];
-
-                for (int i = 0; i < 256; i++)
-                {
-                    lut[i] = i - value;
-
-                    if (lut[i] < 0)
-                    {
-                        lut[i] = 0;
-                    }
-                }
-
-                bitmap = SetBitmapFromLut(bitmap, lut);
-
-                return bitmap;
-            });
+            bitmap = await Task.Run(() => PointTransforms.DarkerAsync(bitmap, value));
 
             SetNewWriteableBitmap(bitmap);
             Loading.IsBusy = false;
         }
 
-        private Bitmap SetBitmapFromLut(Bitmap bitmap, int[] lut)
-        {
-            for (int i = 0; i < bitmap.Width; i++)
-            {
-                for (int j = 0; j < bitmap.Height; j++)
-                {
-                    var color = bitmap.GetPixel(i, j);
-                    var r = lut[color.R];
-                    var g = lut[color.G];
-                    var b = lut[color.B];
 
-                    bitmap.SetPixel(i, j, System.Drawing.Color.FromArgb(color.A, r, g, b));
-                }
-            }
-
-            return bitmap;
-        }
 
         private int GetPointTransformValue()
         {
