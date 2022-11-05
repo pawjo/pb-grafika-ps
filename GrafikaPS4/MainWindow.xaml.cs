@@ -1,11 +1,9 @@
-﻿using Accessibility;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -130,6 +128,7 @@ namespace GrafikaPS4
         {
             if (_writeableBitmap == null)
             {
+                MessageBox.Show("Not loaded image");
                 return null;
             }
 
@@ -182,48 +181,77 @@ namespace GrafikaPS4
             return writeableBitmap;
         }
 
-        private void GrayScale(object sender, RoutedEventArgs e)
+        private async void GrayScaleAsync(object sender, RoutedEventArgs e)
         {
-            if (_writeableBitmap == null)
+            var bitmap = GetBitmapFromWritableBitmap();
+            if (bitmap == null)
             {
-                MessageBox.Show("Brak obrazu");
                 return;
             }
 
-            var bitmap = GetBitmapFromWritableBitmap();
-
-            for (int i = 0; i < bitmap.Width; i++)
+            bitmap = await Task.Run(() =>
             {
-                for (int j = 0; j < bitmap.Height; j++)
+                for (int i = 0; i < bitmap.Width; i++)
                 {
-                    var color = bitmap.GetPixel(i, j);
-                    var r = (color.R + color.G + color.B) / 3;
-                    var g = (color.R + color.G + color.B) / 3;
-                    var b = (color.R + color.G + color.B) / 3;
+                    for (int j = 0; j < bitmap.Height; j++)
+                    {
+                        var color = bitmap.GetPixel(i, j);
+                        var r = (color.R + color.G + color.B) / 3;
+                        var g = (color.R + color.G + color.B) / 3;
+                        var b = (color.R + color.G + color.B) / 3;
 
-                    bitmap.SetPixel(i, j, System.Drawing.Color.FromArgb(color.A, r, g, b));
+                        bitmap.SetPixel(i, j, System.Drawing.Color.FromArgb(color.A, r, g, b));
+                    }
                 }
-            }
+                return bitmap;
+            });
 
             SetNewWriteableBitmap(bitmap);
+            Loading.IsBusy = false;
         }
 
-        private void test1(object sender, RoutedEventArgs e)
+        private async void GrayScaleYUVAsync(object sender, RoutedEventArgs e)
         {
-            Loading.IsBusy = true;
-        }
-
-
-        private async void Add(object sender, RoutedEventArgs e)
-        {
-            int value = GetPointTransformValue();
-            Loading.IsBusy = true;
-
             var bitmap = GetBitmapFromWritableBitmap();
+            if (bitmap == null)
+            {
+                return;
+            }
 
             bitmap = await Task.Run(() =>
             {
+                for (int i = 0; i < bitmap.Width; i++)
+                {
+                    for (int j = 0; j < bitmap.Height; j++)
+                    {
+                        var color = bitmap.GetPixel(i, j);
+                        var r = 0.299 * color.R + 0.587 * color.G + 0.114 * color.B;
+                        var g = 0.299 * color.R + 0.587 * color.G + 0.114 * color.B;
+                        var b = 0.299 * color.R + 0.587 * color.G + 0.114 * color.B;
 
+                        bitmap.SetPixel(i, j, System.Drawing.Color.FromArgb(color.A, (int)r, (int)g, (int)b));
+                    }
+                }
+                return bitmap;
+            });
+
+            SetNewWriteableBitmap(bitmap);
+            Loading.IsBusy = false;
+        }
+
+        private async void AddAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            int value = GetPointTransformValue();
+            if (bitmap == null || value == 0)
+            {
+                return;
+            }
+
+            Loading.IsBusy = true;
+
+            bitmap = await Task.Run(() =>
+            {
                 for (int i = 0; i < bitmap.Width; i++)
                 {
                     for (int j = 0; j < bitmap.Height; j++)
@@ -254,12 +282,139 @@ namespace GrafikaPS4
             Loading.IsBusy = false;
         }
 
-        private async void Brighter(object sender, RoutedEventArgs e)
+        private async void SubtractAsync(object sender, RoutedEventArgs e)
         {
+            var bitmap = GetBitmapFromWritableBitmap();
             int value = GetPointTransformValue();
+            if (bitmap == null || value == 0)
+            {
+                return;
+            }
+
             Loading.IsBusy = true;
 
+            bitmap = await Task.Run(() =>
+            {
+
+                for (int i = 0; i < bitmap.Width; i++)
+                {
+                    for (int j = 0; j < bitmap.Height; j++)
+                    {
+                        var color = bitmap.GetPixel(i, j);
+
+                        var r = color.R - value;
+                        var g = color.G - value;
+                        var b = color.B - value;
+
+                        if (r < 0)
+                            r = 0;
+
+                        if (g < 0)
+                            g = 0;
+
+                        if (b < 0)
+                            b = 0;
+
+                        bitmap.SetPixel(i, j, System.Drawing.Color.FromArgb(color.A, r, g, b));
+                    }
+                }
+
+                return bitmap;
+            });
+
+            SetNewWriteableBitmap(bitmap);
+            Loading.IsBusy = false;
+        }
+
+        private async void MultiplyAsync(object sender, RoutedEventArgs e)
+        {
             var bitmap = GetBitmapFromWritableBitmap();
+            int value = GetPointTransformValue();
+            if (bitmap == null || value == 0)
+            {
+                return;
+            }
+
+            Loading.IsBusy = true;
+
+            bitmap = await Task.Run(() =>
+            {
+
+                for (int i = 0; i < bitmap.Width; i++)
+                {
+                    for (int j = 0; j < bitmap.Height; j++)
+                    {
+                        var color = bitmap.GetPixel(i, j);
+
+                        var r = color.R * value;
+                        var g = color.G * value;
+                        var b = color.B * value;
+
+                        if (r > 255)
+                            r = 255;
+
+                        if (g > 255)
+                            g = 255;
+
+                        if (b > 255)
+                            b = 255;
+
+                        bitmap.SetPixel(i, j, System.Drawing.Color.FromArgb(color.A, r, g, b));
+                    }
+                }
+
+                return bitmap;
+            });
+
+            SetNewWriteableBitmap(bitmap);
+            Loading.IsBusy = false;
+        }
+
+        private async void DivideAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            int value = GetPointTransformValue();
+            if (bitmap == null || value == 0)
+            {
+                return;
+            }
+
+            Loading.IsBusy = true;
+
+            bitmap = await Task.Run(() =>
+            {
+
+                for (int i = 0; i < bitmap.Width; i++)
+                {
+                    for (int j = 0; j < bitmap.Height; j++)
+                    {
+                        var color = bitmap.GetPixel(i, j);
+
+                        var r = color.R / value;
+                        var g = color.G / value;
+                        var b = color.B / value;
+
+                        bitmap.SetPixel(i, j, System.Drawing.Color.FromArgb(color.A, r, g, b));
+                    }
+                }
+
+                return bitmap;
+            });
+
+            SetNewWriteableBitmap(bitmap);
+            Loading.IsBusy = false;
+        }
+
+        private async void BrighterAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            int value = GetPointTransformValue();
+            if (bitmap == null || value == 0)
+            {
+                return;
+            }
+
+            Loading.IsBusy = true;
 
             bitmap = await Task.Run(() =>
             {
@@ -284,12 +439,16 @@ namespace GrafikaPS4
             Loading.IsBusy = false;
         }
 
-        private async void Darker(object sender, RoutedEventArgs e)
+        private async void DarkerAsync(object sender, RoutedEventArgs e)
         {
-            int value = GetPointTransformValue();
-            Loading.IsBusy = true;
-
             var bitmap = GetBitmapFromWritableBitmap();
+            int value = GetPointTransformValue();
+            if (bitmap == null || value == 0)
+            {
+                return;
+            }
+
+            Loading.IsBusy = true;
 
             bitmap = await Task.Run(() =>
             {
@@ -332,125 +491,8 @@ namespace GrafikaPS4
             return bitmap;
         }
 
-        private async void Subtract(object sender, RoutedEventArgs e)
-        {
-            int value = GetPointTransformValue();
-            Loading.IsBusy = true;
-
-            var bitmap = GetBitmapFromWritableBitmap();
-
-            bitmap = await Task.Run(() =>
-            {
-
-                for (int i = 0; i < bitmap.Width; i++)
-                {
-                    for (int j = 0; j < bitmap.Height; j++)
-                    {
-                        var color = bitmap.GetPixel(i, j);
-
-                        var r = color.R - value;
-                        var g = color.G - value;
-                        var b = color.B - value;
-
-                        if (r < 0)
-                            r = 0;
-
-                        if (g < 0)
-                            g = 0;
-
-                        if (b < 0)
-                            b = 0;
-
-                        bitmap.SetPixel(i, j, System.Drawing.Color.FromArgb(color.A, r, g, b));
-                    }
-                }
-
-                return bitmap;
-            });
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
-        }
-
-        private async void Multiply(object sender, RoutedEventArgs e)
-        {
-            int value = GetPointTransformValue();
-            Loading.IsBusy = true;
-
-            var bitmap = GetBitmapFromWritableBitmap();
-
-            bitmap = await Task.Run(() =>
-            {
-
-                for (int i = 0; i < bitmap.Width; i++)
-                {
-                    for (int j = 0; j < bitmap.Height; j++)
-                    {
-                        var color = bitmap.GetPixel(i, j);
-
-                        var r = color.R * value;
-                        var g = color.G * value;
-                        var b = color.B * value;
-
-                        if (r > 255)
-                            r = 255;
-
-                        if (g > 255)
-                            g = 255;
-
-                        if (b > 255)
-                            b = 255;
-
-                        bitmap.SetPixel(i, j, System.Drawing.Color.FromArgb(color.A, r, g, b));
-                    }
-                }
-
-                return bitmap;
-            });
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
-        }
-
-        private async void Divide(object sender, RoutedEventArgs e)
-        {
-            int value = GetPointTransformValue();
-            Loading.IsBusy = true;
-
-            var bitmap = GetBitmapFromWritableBitmap();
-
-            bitmap = await Task.Run(() =>
-            {
-
-                for (int i = 0; i < bitmap.Width; i++)
-                {
-                    for (int j = 0; j < bitmap.Height; j++)
-                    {
-                        var color = bitmap.GetPixel(i, j);
-
-                        var r = color.R / value;
-                        var g = color.G / value;
-                        var b = color.B / value;
-
-                        bitmap.SetPixel(i, j, System.Drawing.Color.FromArgb(color.A, r, g, b));
-                    }
-                }
-
-                return bitmap;
-            });
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
-        }
-
         private int GetPointTransformValue()
         {
-            if (_writeableBitmap == null)
-            {
-                MessageBox.Show("Not loaded image");
-                return 0;
-            }
-
             if (int.TryParse(PointTransformsValue.Text, out int value) && value > 0)
             {
                 return value;

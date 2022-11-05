@@ -81,21 +81,21 @@
                     <Label Grid.Column="0" Margin="20,0" Content="Value"/>
                     <TextBox Name="PointTransformsValue" Grid.Column="1" Text="1"></TextBox>
                 </Grid>
-                <Button Height="30" Content="Add" Click="Add"/>
-                <Button Height="30" Content="Subtract" Click="Subtract"/>
-                <Button Height="30" Content="Multiply" Click="Multiply"/>
-                <Button Height="30" Content="Divide" Click="Divide"/>
+                <Button Height="30" Content="Add" Click="AddAsync"/>
+                <Button Height="30" Content="Subtract" Click="SubtractAsync"/>
+                <Button Height="30" Content="Multiply" Click="MultiplyAsync"/>
+                <Button Height="30" Content="Divide" Click="DivideAsync"/>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0" Height="30" Content="Brighter" Click="Brighter"/>
-                    <Button Grid.Column="1" Height="30" Content="Darker" Click="Darker"/>
+                    <Button Grid.Column="0" Height="30" Content="Brighter" Click="BrighterAsync"/>
+                    <Button Grid.Column="1" Height="30" Content="Darker" Click="DarkerAsync"/>
                 </Grid>
 
-                <Button Height="30" Content="Gray scale 1" Click="GrayScale"/>
-                <Button Height="30" Content="Gray scale 2" Click="test1"/>
+                <Button Height="30" Content="Gray scale 1" Click="GrayScaleAsync"/>
+                <Button Height="30" Content="Gray scale 2" Click="GrayScaleYUVAsync"/>
 
                 <Label Content="Filters" FontSize="14"/>
                 <Button Height="30" Content="Smooth" />
