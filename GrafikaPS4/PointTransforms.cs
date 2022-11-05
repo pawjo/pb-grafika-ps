@@ -9,7 +9,7 @@ namespace GrafikaPS4
 {
     public class PointTransforms
     {
-        public static async Task<Bitmap> AddAsync(Bitmap bitmap, int value)
+        public static Bitmap AddAsync(Bitmap bitmap, int value)
         {
             for (int i = 0; i < bitmap.Width; i++)
             {
@@ -37,7 +37,7 @@ namespace GrafikaPS4
             return bitmap;
         }
 
-        public static async Task<Bitmap> SubtractAsync(Bitmap bitmap, int value)
+        public static Bitmap SubtractAsync(Bitmap bitmap, int value)
         {
             for (int i = 0; i < bitmap.Width; i++)
             {
@@ -65,7 +65,7 @@ namespace GrafikaPS4
             return bitmap;
         }
 
-        public static async Task<Bitmap> MultiplyAsync(Bitmap bitmap, int value)
+        public static Bitmap MultiplyAsync(Bitmap bitmap, int value)
         {
             for (int i = 0; i < bitmap.Width; i++)
             {
@@ -93,7 +93,7 @@ namespace GrafikaPS4
             return bitmap;
         }
 
-        public static async Task<Bitmap> DivideAsync(Bitmap bitmap, int value)
+        public static Bitmap DivideAsync(Bitmap bitmap, int value)
         {
 
             for (int i = 0; i < bitmap.Width; i++)
@@ -113,7 +113,7 @@ namespace GrafikaPS4
             return bitmap;
         }
 
-        public static async Task<Bitmap> BrighterAsync(Bitmap bitmap, int value)
+        public static Bitmap BrighterAsync(Bitmap bitmap, int value)
         {
             var lut = new int[256];
 
@@ -132,7 +132,7 @@ namespace GrafikaPS4
             return bitmap;
         }
 
-        public static async Task<Bitmap> DarkerAsync(Bitmap bitmap, int value)
+        public static Bitmap DarkerAsync(Bitmap bitmap, int value)
         {
             var lut = new int[256];
 
@@ -169,7 +169,7 @@ namespace GrafikaPS4
             return bitmap;
         }
 
-        public static async Task<Bitmap> GrayScaleAsync(Bitmap bitmap)
+        public static Bitmap GrayScaleAsync(Bitmap bitmap)
         {
             for (int i = 0; i < bitmap.Width; i++)
             {
@@ -186,7 +186,7 @@ namespace GrafikaPS4
             return bitmap;
         }
 
-        public static async Task<Bitmap> GrayScaleYUVAsync(Bitmap bitmap)
+        public static Bitmap GrayScaleYUVAsync(Bitmap bitmap)
         {
             for (int i = 0; i < bitmap.Width; i++)
             {
