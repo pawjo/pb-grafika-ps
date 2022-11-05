@@ -314,6 +314,21 @@ namespace GrafikaPS4
             Loading.IsBusy = false;
         }
 
+        private async void SharpenAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            Loading.IsBusy = true;
+
+            bitmap = await Task.Run(() => ConvolutionFilters.Sharpen(bitmap));
+
+            SetNewWriteableBitmap(bitmap);
+            Loading.IsBusy = false;
+        }
 
 
         private int GetPointTransformValue()

@@ -99,7 +99,7 @@
 
                 <Label Content="Filters" FontSize="14"/>
                 <Button Height="30" Content="Smooth" />
-                <Button Height="30" Content="Sharp" />
+                <Button Height="30" Content="Sharp" Click="SharpenAsync"/>
                 <Button Height="30" Content="Median" />
                 <Button Height="30" Content="Sobel"  ToolTip="Nie ten piosenkarz"/>
                 <Button Height="30" Content="Smoothing" />
