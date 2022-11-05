@@ -6,20 +6,86 @@ namespace GrafikaPS4
 {
     public class ConvolutionFilters
     {
-        public static Bitmap Sharpen(Bitmap bitmap)
+        public static Bitmap Smooth(Bitmap bitmap)
         {
-            var mask = new int[3, 3]
-               {
-                    {-1, -1, -1},
-                    {-1, 9, -1},
-                    {-1, -1, -1}
-               };
+            double value = 1 / 9;
+            var mask = new double[3, 3]
+            {
+                {value, value, value},
+                {value, value, value},
+                {value, value, value}
+            };
 
             var result = ApplyFilter(bitmap, mask, 3);
             return result;
         }
 
-        public static Bitmap ApplyFilter(Bitmap sourceBitmap, int[,] matrix, int size)
+        public static Bitmap Sharpen(Bitmap bitmap)
+        {
+            var mask = new double[3, 3]
+            {
+                {-1, -1, -1},
+                {-1, 9, -1},
+                {-1, -1, -1}
+            };
+
+            var result = ApplyFilter(bitmap, mask, 3);
+            return result;
+        }
+
+        public static Bitmap SobelHorizontal(Bitmap bitmap)
+        {
+            var mask = new double[3, 3]
+            {
+                {1, 2, 1},
+                {0, 0, 0},
+                {-1, -2, -1}
+            };
+
+            var result = ApplyFilter(bitmap, mask, 3);
+            return result;
+        }
+
+        public static Bitmap SobelVertical(Bitmap bitmap)
+        {
+            var mask = new double[3, 3]
+            {
+                {1, 0, -1},
+                {2, 0, -2},
+                {1, 0, -1}
+            };
+
+            var result = ApplyFilter(bitmap, mask, 3);
+            return result;
+        }
+
+        public static Bitmap HighPassSharpen(Bitmap bitmap)
+        {
+            var mask = new double[3, 3]
+            {
+                {1, -2, 1},
+                {-2, 5, -2},
+                {1, -2, 1}
+            };
+
+            var result = ApplyFilter(bitmap, mask, 3);
+            return result;
+        }
+
+        public static Bitmap Gauss(Bitmap bitmap)
+        {
+            var mask = new double[3, 3]
+            {
+                {1, 2, 1},
+                {2, 4, 2},
+                {1, 2, 1}
+            };
+
+            var result = ApplyFilter(bitmap, mask, 3);
+            return result;
+        }
+
+        public static Bitmap ApplyFilter(Bitmap sourceBitmap, double[,] matrix, int size)
         {
             var sourceData = sourceBitmap.LockBits(new Rectangle(0, 0,
                                         sourceBitmap.Width, sourceBitmap.Height),
@@ -40,6 +106,15 @@ namespace GrafikaPS4
             int calcOffset = 0;
             int byteOffset = 0;
 
+            double weightsSum = 0;
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    weightsSum += matrix[i, j];
+                }
+            }
+
             for (int offsetY = filterOffset; offsetY < sourceBitmap.Height - filterOffset; offsetY++)
             {
                 for (int offsetX = filterOffset; offsetX < sourceBitmap.Width - filterOffset; offsetX++)
@@ -50,11 +125,9 @@ namespace GrafikaPS4
 
                     byteOffset = offsetY * sourceData.Stride + offsetX * 4;
 
-                    for (int filterY = -filterOffset;
-                         filterY <= filterOffset; filterY++)
+                    for (int filterY = -filterOffset; filterY <= filterOffset; filterY++)
                     {
-                        for (int filterX = -filterOffset;
-                             filterX <= filterOffset; filterX++)
+                        for (int filterX = -filterOffset; filterX <= filterOffset; filterX++)
                         {
                             calcOffset = byteOffset + (filterX * 4) + (filterY * sourceData.Stride);
 
@@ -64,6 +137,13 @@ namespace GrafikaPS4
 
                             red += (double)(pixelBuffer[calcOffset + 2]) * matrix[filterY + filterOffset, filterX + filterOffset];
                         }
+                    }
+
+                    if (weightsSum != 0 && weightsSum != 1)
+                    {
+                        blue /= weightsSum;
+                        green /= weightsSum;
+                        red /= weightsSum;
                     }
 
                     if (blue > 255)

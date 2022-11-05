@@ -3,7 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -47,8 +49,7 @@ namespace GrafikaPS4
             var openFileDialog = new OpenFileDialog();
 
             openFileDialog.Title = "Open an image file";
-            openFileDialog.Filter = "JPG|*.jpg;*.jpeg|PNG|*.png|BMP|*.bmp|GIF|*.gif|TIFF|*.tif;*.tiff|" +
-                "All Graphics Types|*.bmp;*.jpg;*.jpeg;*.png;*.tif;*.tiff";
+            openFileDialog.Filter = "All Graphics Types|*.bmp;*.jpg;*.jpeg;*.png;*.tif;*.tiff|JPG|*.jpg;*.jpeg|PNG|*.png|BMP|*.bmp|GIF|*.gif|TIFF|*.tif;*.tiff";
 
 
             if (openFileDialog.ShowDialog() == true)
@@ -205,7 +206,7 @@ namespace GrafikaPS4
                 return;
             }
             Loading.IsBusy = true;
-            
+
             bitmap = await Task.Run(() => PointTransforms.GrayScaleYUVAsync(bitmap));
 
             SetNewWriteableBitmap(bitmap);
@@ -314,6 +315,22 @@ namespace GrafikaPS4
             Loading.IsBusy = false;
         }
 
+        private async void SmoothAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            Loading.IsBusy = true;
+
+            bitmap = await Task.Run(() => ConvolutionFilters.Smooth(bitmap));
+
+            SetNewWriteableBitmap(bitmap);
+            Loading.IsBusy = false;
+        }
+
         private async void SharpenAsync(object sender, RoutedEventArgs e)
         {
             var bitmap = GetBitmapFromWritableBitmap();
@@ -330,6 +347,127 @@ namespace GrafikaPS4
             Loading.IsBusy = false;
         }
 
+        private async void MedianAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            Loading.IsBusy = true;
+
+            bitmap = await Task.Run(() => Filters.Median(bitmap));
+
+            SetNewWriteableBitmap(bitmap);
+            Loading.IsBusy = false;
+        }
+
+        private async void SobelHorizontalAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            Loading.IsBusy = true;
+
+            bitmap = await Task.Run(() => ConvolutionFilters.SobelHorizontal(bitmap));
+
+            SetNewWriteableBitmap(bitmap);
+            Loading.IsBusy = false;
+        }
+
+        private async void SobelVerticalAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            Loading.IsBusy = true;
+
+            bitmap = await Task.Run(() => ConvolutionFilters.SobelVertical(bitmap));
+
+            SetNewWriteableBitmap(bitmap);
+            Loading.IsBusy = false;
+        }
+
+        private async void HighPassSharpenAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            Loading.IsBusy = true;
+
+            bitmap = await Task.Run(() => ConvolutionFilters.HighPassSharpen(bitmap));
+
+            SetNewWriteableBitmap(bitmap);
+            Loading.IsBusy = false;
+        }
+
+        private async void GaussAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            Loading.IsBusy = true;
+
+            bitmap = await Task.Run(() => ConvolutionFilters.Gauss(bitmap));
+
+            SetNewWriteableBitmap(bitmap);
+            Loading.IsBusy = false;
+        }
+
+        private async void CustomConvolutionAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            var lines = CustomConvolutionInput.Text.Split("\r\n");
+            var maskSize = lines.Length;
+            var mask = new double[maskSize, maskSize];
+
+            for (int i = 0; i < maskSize; i++)
+            {
+                var splittedLine = lines[i].Split(',', ' ');
+                var filteredSplittedLine = splittedLine.Where(x => x != "").ToList();
+                if (filteredSplittedLine.Count != maskSize)
+                {
+                    MessageBox.Show("Mask format error - wrong numbers of values in line");
+                    return;
+                }
+
+                for (int j = 0; j < maskSize; j++)
+                {
+                    if (!double.TryParse(filteredSplittedLine[j], NumberStyles.Any, CultureInfo.InvariantCulture, out double result))
+                    {
+                        MessageBox.Show("Mask format error - value cannot be parsed");
+                        return;
+                    }
+
+                    mask[i, j] = result;
+                }
+            }
+
+            Loading.IsBusy = true;
+
+            bitmap = await Task.Run(() => ConvolutionFilters.ApplyFilter(bitmap, mask, maskSize));
+
+            SetNewWriteableBitmap(bitmap);
+            Loading.IsBusy = false;
+        }
 
         private int GetPointTransformValue()
         {

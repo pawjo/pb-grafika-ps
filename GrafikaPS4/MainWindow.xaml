@@ -98,17 +98,17 @@
                 <Button Height="30" Content="Gray scale 2" Click="GrayScaleYUVAsync"/>
 
                 <Label Content="Filters" FontSize="14"/>
-                <Button Height="30" Content="Smooth" />
+                <Button Height="30" Content="Smooth" Click="SmoothAsync"/>
                 <Button Height="30" Content="Sharp" Click="SharpenAsync"/>
-                <Button Height="30" Content="Median" />
-                <Button Height="30" Content="Sobel"  ToolTip="Nie ten piosenkarz"/>
-                <Button Height="30" Content="Smoothing" />
-                <Button Height="30" Content="High-pass sharp" />
-                <Button Height="30" Content="Gauss" />
+                <Button Height="30" Content="Median" Click="MedianAsync" />
+                <Button Height="30" Content="Sobel Horizontal" Click="SobelHorizontalAsync" ToolTip="Nie ten piosenkarz"/>
+                <Button Height="30" Content="Sobel Vertical" Click="SobelVerticalAsync" ToolTip="Nie ten piosenkarz"/>
+                <Button Height="30" Content="High-pass sharp" Click="HighPassSharpenAsync"/>
+                <Button Height="30" Content="Gauss" Click="GaussAsync"/>
 
                 <Label Content="Custom convolution"/>
-                <TextBox Height="100" AcceptsReturn="True"/>
-                <Button Height="30" Content="Apply custom convolution" />
+                <TextBox Name="CustomConvolutionInput" Height="100" AcceptsReturn="True"/>
+                <Button Height="30" Content="Apply custom convolution" Click="CustomConvolutionAsync"/>
 
             </StackPanel>
         </Grid>
