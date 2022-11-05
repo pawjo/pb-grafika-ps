@@ -188,6 +188,8 @@ namespace GrafikaPS4
             {
                 return;
             }
+            Loading.IsBusy = true;
+
 
             bitmap = await Task.Run(() => PointTransforms.GrayScaleAsync(bitmap));
 
@@ -202,7 +204,8 @@ namespace GrafikaPS4
             {
                 return;
             }
-
+            Loading.IsBusy = true;
+            
             bitmap = await Task.Run(() => PointTransforms.GrayScaleYUVAsync(bitmap));
 
             SetNewWriteableBitmap(bitmap);
