@@ -7,8 +7,8 @@
         xmlns:busyIndicator="https://github.com/Peoky/BusyIndicator"
         xmlns:local="clr-namespace:GrafikaPS4"
         mc:Ignorable="d"
-        Title="MainWindow" Width="800"
-        MouseWheel="MainWindow_MouseWheel">
+        Title="MainWindow" Width="900" Height="550"
+        MouseWheel="MainWindow_MouseWheel" FontFamily="Consolas">
 
     <Window.Resources>
         <Style TargetType="Button">
@@ -47,68 +47,63 @@
     <busyIndicator:BusyMask x:Name="Loading" IsBusy="False" IndicatorType="DotCircle" BusyContent="Loading..." >
         <Grid Background="black">
             <Grid.ColumnDefinitions>
-
+                <ColumnDefinition Width="auto"/>
                 <ColumnDefinition/>
                 <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="369*"/>
-                <RowDefinition Height="65*"/>
-            </Grid.RowDefinitions>
-            <Border Name="border" Margin="5,5,5,5">
-                <StackPanel ClipToBounds="True" Name="ImageStackPanel" Margin="20,50,10,1" Background="White" Grid.Column="0">
-                    <Image Name="MainImage" MouseLeftButtonDown="MainImage_MouseLeftButtonDown" MouseLeftButtonUp="MainImage_MouseLeftButtonUp" MouseMove="MainImage_MouseMove"/>
-                </StackPanel>
-            </Border>
-            <DockPanel Margin="25,35,15,10" Grid.RowSpan="2" VerticalAlignment="Bottom">
-                <ListBox Name="CommentsListBox" Margin="5,5,5,1" BorderBrush="White" Foreground="white" Background="Black" Visibility="Hidden" Padding="5,5,5,5">
-                </ListBox>
-            </DockPanel>
-            <StackPanel Margin="10,20,20,1" Width="160" Background="White" Grid.Column="1">
-                <Label Background="White"/>
-                <Button Margin="20,20,20,10.8" Height="30" Width="120" Content="Open" Click="OpenFileButton_Click"/>
+            <!--<StackPanel Margin="10,21,830,0" Width="160" Background="White" Grid.Column="0">-->
+            <StackPanel Margin="10,20,10,20"  Width="160" Background="White" Grid.Column="0">
+                <Button Margin="0,10,0,10.8" Height="30" Width="120" Content="Open Image" Click="OpenFileButton_Click"/>
 
-                <Label Content="Point transforms" FontSize="14"/>
-                <!--<StackPanel Margin="20,10,20,10.8" Orientation="Horizontal">
-                    <Label Content="Value"/>
-                    <TextBox Text="test"></TextBox>
-                </StackPanel>-->
-                <Grid Margin="20,10,20,10.8" >
+                <Label Content="Point transforms:" HorizontalAlignment="Center" FontFamily="Consolas" FontWeight="Bold"/>
+                <Grid Margin="10,10,10,10.8" >
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Label Grid.Column="0" Margin="20,0" Content="Value"/>
-                    <TextBox Name="PointTransformsValue" Grid.Column="1" Text="1"></TextBox>
+                    <Label Grid.Column="0" Margin="10,0,10,0" Content="Value:" FontFamily="Consolas" FontWeight="Bold"/>
+                    <TextBox  Background="Black" Name="PointTransformsValue" Grid.Column="1" Text="1" FontFamily="Consolas" Width="57" FontWeight="Bold" Margin="11,0,13,0" HorizontalAlignment="Center" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                 </Grid>
-                <Button Height="30" Content="Add" Click="AddAsync"/>
-                <Button Height="30" Content="Subtract" Click="SubtractAsync"/>
-                <Button Height="30" Content="Multiply" Click="MultiplyAsync"/>
-                <Button Height="30" Content="Divide" Click="DivideAsync"/>
+                <Button Margin="10,0,10,10.8" Height="30" Content="Add" Click="AddAsync"/>
+                <Button Margin="10,0,10,10.8" Height="30" Content="Subtract" Click="SubtractAsync"/>
+                <Button Margin="10,0,10,10.8" Height="30" Content="Multiply" Click="MultiplyAsync"/>
+                <Button Margin="10,0,10,10.8" Height="30" Content="Divide" Click="DivideAsync"/>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0" Height="30" Content="Brighter" Click="BrighterAsync"/>
-                    <Button Grid.Column="1" Height="30" Content="Darker" Click="DarkerAsync"/>
+                    <Button Margin="10,0,10,10.8" Grid.Column="0" Height="30" Content="Brighter" Click="BrighterAsync"/>
+                    <Button Margin="10,0,10,10.8" Grid.Column="1" Height="30" Content="Darker" Click="DarkerAsync"/>
                 </Grid>
 
-                <Button Height="30" Content="Gray scale 1" Click="GrayScaleAsync"/>
-                <Button Height="30" Content="Gray scale 2" Click="GrayScaleYUVAsync"/>
+                <Button  Margin="10,0,10,10.8" Height="30" Content="Gray scale 1" Click="GrayScaleAsync"/>
+                <Button  Margin="10,0,10,10.8" Height="30" Content="Gray scale 2" Click="GrayScaleYUVAsync"/>
+            </StackPanel>
 
-                <Label Content="Filters" FontSize="14"/>
-                <Button Height="30" Content="Smooth" />
-                <Button Height="30" Content="Sharp" />
-                <Button Height="30" Content="Median" />
-                <Button Height="30" Content="Sobel"  ToolTip="Nie ten piosenkarz"/>
-                <Button Height="30" Content="Smoothing" />
-                <Button Height="30" Content="High-pass sharp" />
-                <Button Height="30" Content="Gauss" />
+            <!--<StackPanel ClipToBounds="True" Name="ImageStackPanel" Background="White" Margin="363,-33,257,32" >-->
+            <StackPanel Margin="10,20,10,20" ClipToBounds="True" Name="ImageStackPanel" Grid.Column="1" Background="White" >
+                <Image Name="MainImage" MouseLeftButtonDown="MainImage_MouseLeftButtonDown" MouseLeftButtonUp="MainImage_MouseLeftButtonUp" MouseMove="MainImage_MouseMove"/>
+            </StackPanel>
+            <DockPanel Margin="25,35,15,10" Grid.RowSpan="2" VerticalAlignment="Bottom">
+                <ListBox Name="CommentsListBox" Margin="5,5,5,1" BorderBrush="White" Foreground="white" Background="Black" Visibility="Hidden" Padding="5,5,5,5">
+                </ListBox>
+            </DockPanel>
+            <!--<StackPanel Margin="10,20,20,1" Width="160" Background="White" Grid.Column="2">-->
+            <StackPanel Margin="10,20,10,20" Width="160" Background="White" Grid.Column="2">
+                <Label Background="White"/>
+                <Label  Margin="10,0,10,10.8" Content="Filters:" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <Button  Margin="10,0,10,10.8" Height="30" Content="Smooth" />
+                <Button  Margin="10,0,10,10.8" Height="30" Content="Sharp" />
+                <Button  Margin="10,0,10,10.8" Height="30" Content="Median" />
+                <Button  Margin="10,0,10,10.8" Height="30" Content="Sobel"  ToolTip="Nie ten piosenkarz"/>
+                <Button  Margin="10,0,10,10.8" Height="30" Content="Smoothing" />
+                <Button  Margin="10,0,10,10.8" Height="30" Content="High-pass sharp" />
+                <Button  Margin="10,0,10,10.8" Height="30" Content="Gauss" />
 
-                <Label Content="Custom convolution"/>
-                <TextBox Height="100" AcceptsReturn="True"/>
-                <Button Height="30" Content="Apply custom convolution" />
+                <Label Content="Custom convolution:" HorizontalAlignment="Center" FontWeight="Bold"/>
+                <TextBox Margin="10,10,10,10" Height="50" AcceptsReturn="True" FontWeight="Bold"/>
+                <Button  Margin="10,0,10,10.8" Height="30" Content="Apply" />
 
             </StackPanel>
         </Grid>
