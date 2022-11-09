@@ -1,4 +1,6 @@
-﻿using Microsoft.Win32;
+﻿using LiveCharts.Wpf;
+using LiveCharts;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,13 +14,15 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace GrafikaPS4
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         private System.Windows.Point _origin;  // Original Offset of MainImage
         private System.Windows.Point _start;   // Original Position of the mouse
@@ -29,9 +33,18 @@ namespace GrafikaPS4
 
         private string _windowTitle = "Jabłko Viewer";
 
+        public event PropertyChangedEventHandler? PropertyChanged;
+
         public bool IsLoading { get; set; }
 
         public bool IsImageLoaded { get => _writeableBitmap != null; }
+
+        public Bitmap CurrentBitmap { get => _writeableBitmap != null ? GetBitmapFromWritableBitmap() : new Bitmap(10, 10); }
+
+        public SeriesCollection SeriesCollection { get; set; }
+
+        public string[] Labels { get; set; }
+
 
         public MainWindow()
         {
@@ -41,6 +54,12 @@ namespace GrafikaPS4
 
             MainViewerWindow.Title = _windowTitle;
             CommentsListBox.ItemsSource = new List<string>() { "No comments" };
+
+            Labels = new string[256];
+            for (int i = 0; i < 256; i++)
+            {
+                Labels[i] = i.ToString();
+            }
         }
 
         private void OpenFileButton_Click(object sender, RoutedEventArgs e)
@@ -59,12 +78,40 @@ namespace GrafikaPS4
                     var bitmapImage = new BitmapImage(new System.Uri(openFileDialog.FileName));
                     _writeableBitmap = new WriteableBitmap(bitmapImage);
                     MainImage.Source = _writeableBitmap;
+
+                    var bitmap = GetBitmapFromWritableBitmap();
+                    var histogramData = new int[256];
+
+                    for (int i = 0; i < bitmap.Height; i++)
+                    {
+                        for (int j = 0; j < bitmap.Width; j++)
+                        {
+                            var color = bitmap.GetPixel(j, i);
+                            var index = (color.R + color.G + color.B) / 3;
+                            histogramData[index]++;
+                        }
+                    }
+
+                    SeriesCollection = new SeriesCollection
+                    {
+                        new StackedAreaSeries
+                        {
+                            Title="RGB",
+                            Values=new ChartValues<int> (histogramData)
+                        }
+                    };
+
+                    OnPropertyChanged(nameof(SeriesCollection));
                 }
                 catch
                 {
                     MessageBox.Show("Open file error");
                 }
             }
+        }
+        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
         public BitmapImage GetBitmapImage(Bitmap bitmap)
