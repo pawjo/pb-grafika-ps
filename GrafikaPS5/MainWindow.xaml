@@ -50,13 +50,34 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition/>
-                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
             <!--<StackPanel Margin="10,21,830,0" Width="160" Background="White" Grid.Column="0">-->
-            <TabControl Grid.Column="0">
-                <TabItem Header="Point Transforms">
+            <TabControl Grid.Column="0" TabStripPlacement="Left">
+                <TabControl.Resources>
+                    <Style TargetType="{x:Type TabItem}">
+                        <Setter Property="HeaderTemplate">
+                            <Setter.Value>
+                                <DataTemplate>
+                                    <ContentPresenter Content="{TemplateBinding Content}">
+                                        <ContentPresenter.LayoutTransform>
+                                            <RotateTransform Angle="270" />
+                                        </ContentPresenter.LayoutTransform>
+                                    </ContentPresenter>
+                                </DataTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Padding" Value="3" />
+                    </Style>
+                </TabControl.Resources>
+                <TabItem Header="General">
                     <StackPanel Margin="10,20,10,20"  Width="160" Background="White">
                         <Button Margin="0,10,0,10.8" Height="30" Width="120" Content="Open Image" Click="OpenFileButton_Click"/>
+                        <Button Margin="0,10,0,10.8" Height="30" Width="120" Content="Show histogram" Click="ShowHistogram_Click"/>
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="Point Transforms">
+                    <StackPanel Margin="10,20,10,20"  Width="160" Background="White">
 
                         <Label Content="Point transforms:" HorizontalAlignment="Center" FontFamily="Consolas" FontWeight="Bold"/>
                         <Grid Margin="10,10,10,10.8" >
@@ -112,12 +133,31 @@
                 <ListBox Name="CommentsListBox" Margin="5,5,5,1" BorderBrush="White" Foreground="white" Background="Black" Visibility="Hidden" Padding="5,5,5,5">
                 </ListBox>
             </DockPanel>
+            <Grid Name="HistogramGrid" Grid.Column="2" Width="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Button Width="60" Margin="10" Content="Close" Click="HideHistogram_Click"></Button>
+            <lvc:CartesianChart Grid.Row="1" Series="{Binding SeriesCollection}" >
+                        <lvc:CartesianChart.AxisX>
+                            <lvc:Axis IsEnabled="True" Labels="{Binding Labels}">
+                                <lvc:Axis.Separator>
+                                    <lvc:Separator IsEnabled="False" Step="255"></lvc:Separator>
+                                </lvc:Axis.Separator>
+                            </lvc:Axis>
+                        </lvc:CartesianChart.AxisX>
+                        <lvc:CartesianChart.AxisY>
+                            <lvc:Axis ShowLabels="False">
+                                <lvc:Axis.Separator>
+                                    <lvc:Separator IsEnabled="False"></lvc:Separator>
+                                </lvc:Axis.Separator>
+                            </lvc:Axis>
+                        </lvc:CartesianChart.AxisY>
+                    </lvc:CartesianChart>
+            </Grid>
+
             <!--<StackPanel Margin="10,20,20,1" Width="160" Background="White" Grid.Column="2">-->
-            <lvc:CartesianChart Series="{Binding SeriesCollection}" Grid.Column="2">
-                <lvc:CartesianChart.AxisX>
-                    <lvc:Axis IsEnabled="True" ShowLabels="True" Labels="{Binding Labels}"></lvc:Axis>
-                </lvc:CartesianChart.AxisX>
-            </lvc:CartesianChart>
         </Grid>
     </busyIndicator:BusyMask>
 </Window>

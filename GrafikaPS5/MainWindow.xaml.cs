@@ -526,5 +526,14 @@ namespace GrafikaPS4
             MessageBox.Show("Wrong value");
             return 0;
         }
+
+        private void ShowHistogram_Click(object sender, RoutedEventArgs e)
+        {
+            HistogramGrid.Width = 200;
+        }
+        private void HideHistogram_Click(object sender, RoutedEventArgs e)
+        {
+            HistogramGrid.Width = 0;
+        }
     }
 }
