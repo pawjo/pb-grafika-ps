@@ -535,5 +535,10 @@ namespace GrafikaPS4
         {
             HistogramGrid.Width = 0;
         }
+
+        private void TabControl_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }

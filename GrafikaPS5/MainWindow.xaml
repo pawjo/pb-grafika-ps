@@ -53,7 +53,7 @@
                 <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
             <!--<StackPanel Margin="10,21,830,0" Width="160" Background="White" Grid.Column="0">-->
-            <TabControl Grid.Column="0" TabStripPlacement="Left">
+            <TabControl Grid.Column="0" TabStripPlacement="Left" SelectionChanged="TabControl_SelectionChanged">
                 <TabControl.Resources>
                     <Style TargetType="{x:Type TabItem}">
                         <Setter Property="HeaderTemplate">
@@ -71,7 +71,7 @@
                     </Style>
                 </TabControl.Resources>
                 <TabItem Header="General">
-                    <StackPanel Margin="10,20,10,20"  Width="160" Background="White">
+                    <StackPanel Margin="10,20,10,20" Width="160" Background="White">
                         <Button Margin="0,10,0,10.8" Height="30" Width="120" Content="Open Image" Click="OpenFileButton_Click"/>
                         <Button Margin="0,10,0,10.8" Height="30" Width="120" Content="Show histogram" Click="ShowHistogram_Click"/>
                     </StackPanel>
@@ -105,7 +105,7 @@
                         <Button  Margin="10,0,10,10.8" Height="30" Content="Gray scale 2" Click="GrayScaleYUVAsync"/>
                     </StackPanel>
                 </TabItem>
-                <TabItem Header="Filters">
+                <TabItem Header="Filters" HorizontalAlignment="Left" Margin="-2,-2,0,-2" Width="22">
                     <StackPanel Margin="10,20,10,20" Width="160" Background="White">
                         <Label Background="White"/>
                         <Label  Margin="10,0,10,10.8" Content="Filters:" FontWeight="Bold" HorizontalAlignment="Center"/>
@@ -121,6 +121,41 @@
                         <TextBox Name="CustomConvolutionInput" Margin="10,10,10,10" Height="50" AcceptsReturn="True" FontWeight="Bold"/>
                         <Button  Margin="10,0,10,10.8" Height="30" Content="Apply" Click="CustomConvolutionAsync" />
 
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="Binary" RenderTransformOrigin="0.991,2.483" Margin="-2,-2,2,-2">
+                    <StackPanel Margin="10,20,10,20" Width="160" Background="White">
+                        <Label Background="White"/>
+                        <Label  Margin="10,0,10,0" Content="Basic:" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <Grid Margin="10,10,10,10.8" >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Margin="10,0,10,0" Content="Value:" FontFamily="Consolas" FontWeight="Bold"/>
+                            <TextBox  Background="Black" Grid.Column="1" Text="1" FontFamily="Consolas" Width="57" FontWeight="Bold" Margin="11,0,13,0" HorizontalAlignment="Center" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                        </Grid>
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="TEXT"  />
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="TEXT" />
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="TEXT"/>
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="TEXT" />
+
+                        <Label  Margin="10,0,10,0" Content="Advanced:" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="TEXT"  />
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="TEXT" />
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="TEXT"/>
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="TEXT" />
+
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="Morphological" RenderTransformOrigin="0.991,2.483" Margin="-2,-2,2,-2">
+                    <StackPanel Margin="10,20,10,20" Width="160" Background="White">
+                        <Label Background="White"/>
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="Dilatation"  />
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="Erosion" />
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="Openly"/>
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="Closing" />
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="Hit-or-miss"/>
                     </StackPanel>
                 </TabItem>
             </TabControl>
@@ -139,22 +174,22 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Button Width="60" Margin="10" Content="Close" Click="HideHistogram_Click"></Button>
-            <lvc:CartesianChart Grid.Row="1" Series="{Binding SeriesCollection}" >
-                        <lvc:CartesianChart.AxisX>
-                            <lvc:Axis IsEnabled="True" Labels="{Binding Labels}">
-                                <lvc:Axis.Separator>
-                                    <lvc:Separator IsEnabled="False" Step="255"></lvc:Separator>
-                                </lvc:Axis.Separator>
-                            </lvc:Axis>
-                        </lvc:CartesianChart.AxisX>
-                        <lvc:CartesianChart.AxisY>
-                            <lvc:Axis ShowLabels="False">
-                                <lvc:Axis.Separator>
-                                    <lvc:Separator IsEnabled="False"></lvc:Separator>
-                                </lvc:Axis.Separator>
-                            </lvc:Axis>
-                        </lvc:CartesianChart.AxisY>
-                    </lvc:CartesianChart>
+                <lvc:CartesianChart Grid.Row="1" Series="{Binding SeriesCollection}" >
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis IsEnabled="True" Labels="{Binding Labels}">
+                            <lvc:Axis.Separator>
+                                <lvc:Separator IsEnabled="False" Step="255"></lvc:Separator>
+                            </lvc:Axis.Separator>
+                        </lvc:Axis>
+                    </lvc:CartesianChart.AxisX>
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis ShowLabels="False">
+                            <lvc:Axis.Separator>
+                                <lvc:Separator IsEnabled="False"></lvc:Separator>
+                            </lvc:Axis.Separator>
+                        </lvc:Axis>
+                    </lvc:CartesianChart.AxisY>
+                </lvc:CartesianChart>
             </Grid>
 
             <!--<StackPanel Margin="10,20,20,1" Width="160" Background="White" Grid.Column="2">-->
