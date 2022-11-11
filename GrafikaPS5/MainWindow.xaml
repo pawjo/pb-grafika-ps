@@ -74,8 +74,8 @@
                     <StackPanel Margin="10,20,10,20" Width="160" Background="White">
                         <Button Margin="0,10,0,10.8" Height="30" Width="120" Content="Open Image" Click="OpenFileButton_Click"/>
                         <Button Margin="0,10,0,10.8" Height="30" Width="120" Content="Show histogram" Click="ShowHistogram_Click"/>
+                        <Button Margin="0,10,0,10.8" Height="30" Width="120" Content="Stretch histogram" Click="StretchHistogramAsync"/>
                         <Button Margin="0,10,0,10.8" Height="30" Width="120" Content="Align histogram" Click="AlignHistogramAsync"/>
-                        <Button Margin="0,10,0,10.8" Height="30" Width="120" Content="Show histogram" Click="ShowHistogram_Click"/>
                     </StackPanel>
                 </TabItem>
                 <TabItem Header="Point Transforms">

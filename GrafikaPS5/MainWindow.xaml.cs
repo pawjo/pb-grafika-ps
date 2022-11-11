@@ -554,6 +554,22 @@ namespace GrafikaPS4
             Loading.IsBusy = false;
         }
 
+        private async void StretchHistogramAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            Loading.IsBusy = true;
+
+            bitmap = await Task.Run(() => _histogram.Stretch(bitmap));
+
+            SetNewWriteableBitmap(bitmap);
+            Loading.IsBusy = false;
+        }
+
         private async void AlignHistogramAsync(object sender, RoutedEventArgs e)
         {
             var bitmap = GetBitmapFromWritableBitmap();

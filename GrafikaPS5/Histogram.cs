@@ -1,12 +1,7 @@
 ﻿using LiveCharts;
 using LiveCharts.Wpf;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GrafikaPS4
 {
@@ -64,43 +59,35 @@ namespace GrafikaPS4
             };
         }
 
-        //public Bitmap Align(Bitmap bitmap)
-        //{
-        //    var allPixelsCount = bitmap.Width * bitmap.Height;
+        public Bitmap Stretch(Bitmap bitmap)
+        {
+            var minRValue = GetMinIndex(_rData);
+            var minGValue = GetMinIndex(_gData);
+            var minBValue = GetMinIndex(_bData);
+            var maxRValue = GetMaxIndex(_rData);
+            var maxGValue = GetMaxIndex(_gData);
+            var maxBValue = GetMaxIndex(_bData);
 
-        //    var distributionR = new double[256];
-        //    var distributionG = new double[256];
-        //    var distributionB = new double[256];
+            var factorR = 255.0 / (maxRValue - minRValue);
+            var factorG = 255.0 / (maxGValue - minGValue);
+            var factorB = 255.0 / (maxBValue - minBValue);
 
-        //    for (int i = 0; i < 255; i++)
-        //    {
-        //        distributionR[i] = (double)_rData[i] / allPixelsCount;
-        //        distributionG[i] = (double)_gData[i] / allPixelsCount;
-        //        distributionB[i] = (double)_bData[i] / allPixelsCount;
-        //    }
+            var lutR = new int[256];
+            var lutG = new int[256];
+            var lutB = new int[256];
 
-        //    var firstNonZeroDistributionR = distributionR.First(x => x != 0);
-        //    var firstNonZeroDistributionG = distributionG.First(x => x != 0);
-        //    var firstNonZeroDistributionB = distributionB.First(x => x != 0);
+            for (int i = 0; i < 256; i++)
+            {
+                lutR[i] = (int)(factorR * (i - minRValue));
+                lutG[i] = (int)(factorG * (i - minGValue));
+                lutB[i] = (int)(factorB * (i - minBValue));
+            }
 
-        //    var dividendR = 1 - firstNonZeroDistributionR;
-        //    var dividendG = 1 - firstNonZeroDistributionG;
-        //    var dividendB = 1 - firstNonZeroDistributionB;
+            var result = LutUtils.ApplyRGBLut(bitmap, lutR, lutG, lutB);
+            return result;
+        }
 
-        //    var lutR = new int[256];
-        //    var lutG = new int[256];
-        //    var lutB = new int[256];
 
-        //    for (int i = 0; i < 256; i++)
-        //    {
-        //        lutR[i] = (int)(((distributionR[i] - firstNonZeroDistributionR) / dividendR) * 255);
-        //        lutG[i] = (int)(((distributionG[i] - firstNonZeroDistributionG) / dividendG) * 255);
-        //        lutB[i] = (int)(((distributionB[i] - firstNonZeroDistributionB) / dividendB) * 255);
-        //    }
-
-        //    var result = LutUtils.ApplyRGBLut(bitmap, lutR, lutG, lutB);
-        //    return result;
-        //}
 
         public Bitmap Align(Bitmap bitmap)
         {
@@ -140,6 +127,26 @@ namespace GrafikaPS4
 
             var result = LutUtils.ApplyRGBLut(bitmap, lutR, lutG, lutB);
             return result;
+        }
+
+        private int GetMinIndex(int[] array)
+        {
+            for (int i = 0; i < 255; i++)
+            {
+                if (array[i] != 0)
+                    return i;
+            }
+            return 255;
+        }
+
+        private int GetMaxIndex(int[] array)
+        {
+            for (int i = 255; i >= 0; i--)
+            {
+                if (array[i] != 0)
+                    return i;
+            }
+            return 0;
         }
     }
 }
