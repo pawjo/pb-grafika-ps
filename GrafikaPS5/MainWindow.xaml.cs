@@ -591,12 +591,23 @@ namespace GrafikaPS4
         {
             var bitmap = GetBitmapFromWritableBitmap();
             int value = GetInputValueInRange(ManualBinarizationTreshold, 0, 255);
-            if (bitmap == null)
+            if (bitmap == null || value == 0)
             {
                 return;
             }
 
             await RunAction(() => Binarization.PercentBlackSelection(bitmap, value, _histogram));
+        }
+
+        private async void EntropySelectionAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            await RunAction(() => Binarization.EntropySelection(bitmap, _histogram));
         }
     }
 }

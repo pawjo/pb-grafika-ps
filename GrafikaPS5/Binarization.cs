@@ -1,6 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
 using System.Drawing;
-using System.Threading;
 
 namespace GrafikaPS4
 {
@@ -38,6 +37,25 @@ namespace GrafikaPS4
             }
 
             return ApplyBinarization(bitmap, treshold);
+        }
+
+        public static Bitmap EntropySelection(Bitmap bitmap, Histogram histogram)
+        {
+            double treshold = 0;
+            var allPixelCount = bitmap.Width * bitmap.Height;
+
+            for (int i = 0; i < 256; i++)
+            {
+                var pixel = histogram.GetAverageHistogramValue(i);
+                if (pixel > 0)
+                {
+                    var probability = (double)pixel / allPixelCount;
+                    var log = Math.Log2(probability);
+                    treshold -= probability * log;
+                }
+            }
+
+            return ApplyBinarization(bitmap, (int)treshold);
         }
     }
 }

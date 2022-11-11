@@ -107,7 +107,7 @@
                         <Button  Margin="10,0,10,10.8" Height="30" Content="Gray scale 2" Click="GrayScaleYUVAsync"/>
                     </StackPanel>
                 </TabItem>
-                <TabItem Header="Filters" HorizontalAlignment="Left" Margin="-2,-2,0,-2" Width="22">
+                <TabItem Header="Filters">
                     <StackPanel Margin="10,20,10,20" Width="160" Background="White">
                         <Label Background="White"/>
                         <Label  Margin="10,0,10,10.8" Content="Filters:" FontWeight="Bold" HorizontalAlignment="Center"/>
@@ -125,7 +125,7 @@
 
                     </StackPanel>
                 </TabItem>
-                <TabItem Header="Binary" RenderTransformOrigin="0.991,2.483" Margin="-2,-2,2,-2">
+                <TabItem Header="Binary">
                     <StackPanel Margin="10,20,10,20" Width="160" Background="White">
                         <Label Background="White"/>
                         <Label  Margin="10,0,10,0" Content="Basic:" FontWeight="Bold" HorizontalAlignment="Center"/>
@@ -139,7 +139,7 @@
                         </Grid>
                         <Button  Margin="10,0,10,10.8" Height="30" Content="Manual" Click="ManualBinarizationAsync"  />
                         <Button  Margin="10,0,10,10.8" Height="30" Content="Percent Black" Click="PercentBlackSelectionAsync" />
-                        <Button  Margin="10,0,10,10.8" Height="30" Content="TEXT"/>
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="Entropy Selection" Click="EntropySelectionAsync"/>
                         <Button  Margin="10,0,10,10.8" Height="30" Content="TEXT" />
 
                         <Label  Margin="10,0,10,0" Content="Advanced:" FontWeight="Bold" HorizontalAlignment="Center"/>
@@ -150,7 +150,7 @@
 
                     </StackPanel>
                 </TabItem>
-                <TabItem Header="Morphological" RenderTransformOrigin="0.991,2.483" Margin="-2,-2,2,-2">
+                <TabItem Header="Morphological">
                     <StackPanel Margin="10,20,10,20" Width="160" Background="White">
                         <Label Background="White"/>
                         <Button  Margin="10,0,10,10.8" Height="30" Content="Dilatation"  />
