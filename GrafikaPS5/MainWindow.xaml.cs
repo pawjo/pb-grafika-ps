@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Controls;
 
 namespace GrafikaPS4
 {
@@ -33,17 +34,17 @@ namespace GrafikaPS4
 
         //public Bitmap CurrentBitmap { get => _writeableBitmap != null ? GetBitmapFromWritableBitmap() : new Bitmap(10, 10); }
 
-        public SeriesCollection SeriesCollection { get=>_series; }
+        public SeriesCollection SeriesCollection { get => _series; }
 
         public string[] Labels { get; set; }
-        
+
         private System.Windows.Point _origin;  // Original Offset of MainImage
         private System.Windows.Point _start;   // Original Position of the mouse
 
         private WriteableBitmap _writeableBitmap;
 
         private int _currentImageFormat = 0;
-        
+
         private string _windowTitle = "Jabłko Viewer";
 
         private SeriesCollection _series;
@@ -497,17 +498,34 @@ namespace GrafikaPS4
                 }
             }
 
-            Loading.IsBusy = true;
-
-            bitmap = await Task.Run(() => ConvolutionFilters.ApplyFilter(bitmap, mask, maskSize));
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
+            await RunAction(() => ConvolutionFilters.ApplyFilter(bitmap, mask, maskSize));
         }
 
         private int GetPointTransformValue()
         {
             if (int.TryParse(PointTransformsValue.Text, out int value) && value > 0)
+            {
+                return value;
+            }
+
+            MessageBox.Show("Wrong value");
+            return 0;
+        }
+
+        private int GetInputValue(TextBox input)
+        {
+            if (int.TryParse(input.Text, out int value) && value > 0)
+            {
+                return value;
+            }
+
+            MessageBox.Show("Wrong value");
+            return 0;
+        }
+
+        private int GetInputValueInRange(TextBox input, int min, int max)
+        {
+            if (int.TryParse(input.Text, out int value) && value >= min && value <= max)
             {
                 return value;
             }
@@ -525,35 +543,6 @@ namespace GrafikaPS4
             HistogramGrid.Width = 0;
         }
 
-        private void TabControl_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
-
-        }
-
-        private async void ManualBinarizationAsync(object sender, RoutedEventArgs e)
-        {
-            var bitmap = GetBitmapFromWritableBitmap();
-            var strTreshold = ManualBinarizationTreshold.Text;
-            
-            if (bitmap == null)
-            {
-                return;
-            }
-
-            if(!int.TryParse(strTreshold, out int result) || result < 0 || result > 255)
-            {
-                MessageBox.Show("Wrong value");
-                return;
-            }
-
-            Loading.IsBusy = true;
-
-            bitmap = await Task.Run(() => Binarization.Manual(bitmap, result));
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
-        }
-
         private async void StretchHistogramAsync(object sender, RoutedEventArgs e)
         {
             var bitmap = GetBitmapFromWritableBitmap();
@@ -562,12 +551,7 @@ namespace GrafikaPS4
                 return;
             }
 
-            Loading.IsBusy = true;
-
-            bitmap = await Task.Run(() => _histogram.Stretch(bitmap));
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
+            await RunAction(() => _histogram.Stretch(bitmap));
         }
 
         private async void AlignHistogramAsync(object sender, RoutedEventArgs e)
@@ -578,12 +562,41 @@ namespace GrafikaPS4
                 return;
             }
 
+            await RunAction(() => _histogram.Align(bitmap));
+        }
+
+        private async void ManualBinarizationAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            int value = GetInputValueInRange(ManualBinarizationTreshold, 0, 255);
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            await RunAction(() => Binarization.ApplyBinarization(bitmap, value));
+        }
+
+        private async Task RunAction(Func<Bitmap> action)
+        {
             Loading.IsBusy = true;
 
-            bitmap = await Task.Run(() => _histogram.Align(bitmap));
+            var bitmap = await Task.Run(action);
 
             SetNewWriteableBitmap(bitmap);
             Loading.IsBusy = false;
+        }
+
+        private async void PercentBlackSelectionAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            int value = GetInputValueInRange(ManualBinarizationTreshold, 0, 255);
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            await RunAction(() => Binarization.PercentBlackSelection(bitmap, value, _histogram));
         }
     }
 }

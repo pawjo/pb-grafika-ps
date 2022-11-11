@@ -47,6 +47,11 @@ namespace GrafikaPS4
             return result;
         }
 
+        public int GetAverageHistogramValue(int index)
+        {
+            return (_rData[index] + _gData[index] + _bData[index]) / 3;
+        }
+
         private StackedAreaSeries GetStackedAreaSeries(System.Windows.Media.Brush brush, int[] data, string title)
         {
             return new StackedAreaSeries

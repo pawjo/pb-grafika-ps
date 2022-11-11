@@ -1,10 +1,12 @@
-﻿using System.Drawing;
+﻿using System.ComponentModel;
+using System.Drawing;
+using System.Threading;
 
 namespace GrafikaPS4
 {
     public static class Binarization
     {
-        public static Bitmap Manual(Bitmap bitmap, int value)
+        public static Bitmap ApplyBinarization(Bitmap bitmap, int value)
         {
             for (int i = 0; i < bitmap.Width; i++)
             {
@@ -17,6 +19,25 @@ namespace GrafikaPS4
                 }
             }
             return bitmap;
+        }
+
+        public static Bitmap PercentBlackSelection(Bitmap bitmap, int percent, Histogram histogram)
+        {
+            var maxSum = bitmap.Width * bitmap.Height * percent / 100;
+            var treshold = 0;
+            var sum = 0;
+
+            for (; treshold < 256; treshold++)
+            {
+                var pixel = histogram.GetAverageHistogramValue(treshold);
+                sum += pixel;
+                if (sum >= maxSum)
+                {
+                    break;
+                }
+            }
+
+            return ApplyBinarization(bitmap, treshold);
         }
     }
 }

@@ -53,7 +53,7 @@
                 <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
             <!--<StackPanel Margin="10,21,830,0" Width="160" Background="White" Grid.Column="0">-->
-            <TabControl Grid.Column="0" TabStripPlacement="Left" SelectionChanged="TabControl_SelectionChanged">
+            <TabControl Grid.Column="0" TabStripPlacement="Left">
                 <TabControl.Resources>
                     <Style TargetType="{x:Type TabItem}">
                         <Setter Property="HeaderTemplate">
@@ -138,7 +138,7 @@
                             <TextBox Name="ManualBinarizationTreshold" Background="Black" Grid.Column="1" Text="1" FontFamily="Consolas" Width="57" FontWeight="Bold" Margin="11,0,13,0" HorizontalAlignment="Center" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                         </Grid>
                         <Button  Margin="10,0,10,10.8" Height="30" Content="Manual" Click="ManualBinarizationAsync"  />
-                        <Button  Margin="10,0,10,10.8" Height="30" Content="TEXT" />
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="Percent Black" Click="PercentBlackSelectionAsync" />
                         <Button  Margin="10,0,10,10.8" Height="30" Content="TEXT"/>
                         <Button  Margin="10,0,10,10.8" Height="30" Content="TEXT" />
 
