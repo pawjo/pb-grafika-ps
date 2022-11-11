@@ -24,14 +24,6 @@ namespace GrafikaPS4
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        private System.Windows.Point _origin;  // Original Offset of MainImage
-        private System.Windows.Point _start;   // Original Position of the mouse
-
-        private WriteableBitmap _writeableBitmap;
-
-        private int _currentImageFormat = 0;
-
-        private string _windowTitle = "Jabłko Viewer";
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -39,16 +31,30 @@ namespace GrafikaPS4
 
         public bool IsImageLoaded { get => _writeableBitmap != null; }
 
-        public Bitmap CurrentBitmap { get => _writeableBitmap != null ? GetBitmapFromWritableBitmap() : new Bitmap(10, 10); }
+        //public Bitmap CurrentBitmap { get => _writeableBitmap != null ? GetBitmapFromWritableBitmap() : new Bitmap(10, 10); }
 
-        public SeriesCollection SeriesCollection { get; set; }
+        public SeriesCollection SeriesCollection { get=>_series; }
 
         public string[] Labels { get; set; }
+        
+        private System.Windows.Point _origin;  // Original Offset of MainImage
+        private System.Windows.Point _start;   // Original Position of the mouse
 
+        private WriteableBitmap _writeableBitmap;
+
+        private int _currentImageFormat = 0;
+        
+        private string _windowTitle = "Jabłko Viewer";
+
+        private SeriesCollection _series;
+
+        private Histogram _histogram;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            _histogram = new Histogram();
 
             MainViewerWindow.DataContext = this;
 
@@ -80,27 +86,7 @@ namespace GrafikaPS4
                     MainImage.Source = _writeableBitmap;
 
                     var bitmap = GetBitmapFromWritableBitmap();
-                    var histogramData = new int[256];
-
-                    for (int i = 0; i < bitmap.Height; i++)
-                    {
-                        for (int j = 0; j < bitmap.Width; j++)
-                        {
-                            var color = bitmap.GetPixel(j, i);
-                            var index = (color.R + color.G + color.B) / 3;
-                            histogramData[index]++;
-                        }
-                    }
-
-                    SeriesCollection = new SeriesCollection
-                    {
-                        new StackedAreaSeries
-                        {
-                            Title="RGB",
-                            Values=new ChartValues<int> (histogramData)
-                        }
-                    };
-
+                    _series = _histogram.GetRefreshedSeriesCollection(bitmap);
                     OnPropertyChanged(nameof(SeriesCollection));
                 }
                 catch
@@ -109,6 +95,7 @@ namespace GrafikaPS4
                 }
             }
         }
+
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -216,6 +203,8 @@ namespace GrafikaPS4
 
             _writeableBitmap = new WriteableBitmap(bitmapSource);
             MainImage.Source = _writeableBitmap;
+            _series = _histogram.GetRefreshedSeriesCollection(bitmap);
+            OnPropertyChanged(nameof(SeriesCollection));
         }
 
         private WriteableBitmap GetWriteableBitmapFormBitmap(Bitmap bitmap)
@@ -539,6 +528,46 @@ namespace GrafikaPS4
         private void TabControl_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
 
+        }
+
+        private async void ManualBinarizationAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            var strTreshold = ManualBinarizationTreshold.Text;
+            
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            if(!int.TryParse(strTreshold, out int result) || result < 0 || result > 255)
+            {
+                MessageBox.Show("Wrong value");
+                return;
+            }
+
+            Loading.IsBusy = true;
+
+            bitmap = await Task.Run(() => Binarization.Manual(bitmap, result));
+
+            SetNewWriteableBitmap(bitmap);
+            Loading.IsBusy = false;
+        }
+
+        private async void AlignHistogramAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            Loading.IsBusy = true;
+
+            bitmap = await Task.Run(() => _histogram.Align(bitmap));
+
+            SetNewWriteableBitmap(bitmap);
+            Loading.IsBusy = false;
         }
     }
 }

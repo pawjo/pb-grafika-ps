@@ -127,7 +127,7 @@ namespace GrafikaPS4
                 }
             }
 
-            bitmap = SetBitmapFromLut(bitmap, lut);
+            bitmap = LutUtils.ApplyLut(bitmap, lut);
 
             return bitmap;
         }
@@ -146,28 +146,12 @@ namespace GrafikaPS4
                 }
             }
 
-            bitmap = SetBitmapFromLut(bitmap, lut);
+            bitmap = LutUtils.ApplyLut(bitmap, lut);
 
             return bitmap;
         }
 
-        private static Bitmap SetBitmapFromLut(Bitmap bitmap, int[] lut)
-        {
-            for (int i = 0; i < bitmap.Width; i++)
-            {
-                for (int j = 0; j < bitmap.Height; j++)
-                {
-                    var color = bitmap.GetPixel(i, j);
-                    var r = lut[color.R];
-                    var g = lut[color.G];
-                    var b = lut[color.B];
-
-                    bitmap.SetPixel(i, j, System.Drawing.Color.FromArgb(color.A, r, g, b));
-                }
-            }
-
-            return bitmap;
-        }
+        
 
         public static Bitmap GrayScaleAsync(Bitmap bitmap)
         {
