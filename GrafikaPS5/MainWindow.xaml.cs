@@ -609,5 +609,16 @@ namespace GrafikaPS4
 
             await RunAction(() => Binarization.EntropySelection(bitmap, _histogram));
         }
+
+        private async void MeanIterativeSelectionAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            await RunAction(() => Binarization.MeanIterativeSelection(bitmap, _histogram));
+        }
     }
 }

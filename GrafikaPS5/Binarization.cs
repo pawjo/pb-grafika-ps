@@ -23,12 +23,12 @@ namespace GrafikaPS4
         public static Bitmap PercentBlackSelection(Bitmap bitmap, int percent, Histogram histogram)
         {
             var maxSum = bitmap.Width * bitmap.Height * percent / 100;
-            var treshold = 0;
+            var threshold = 0;
             var sum = 0;
 
-            for (; treshold < 256; treshold++)
+            for (; threshold < 256; threshold++)
             {
-                var pixel = histogram.GetAverageHistogramValue(treshold);
+                var pixel = histogram.GetAverageHistogramValue(threshold);
                 sum += pixel;
                 if (sum >= maxSum)
                 {
@@ -36,12 +36,12 @@ namespace GrafikaPS4
                 }
             }
 
-            return ApplyBinarization(bitmap, treshold);
+            return ApplyBinarization(bitmap, threshold);
         }
 
         public static Bitmap EntropySelection(Bitmap bitmap, Histogram histogram)
         {
-            double treshold = 0;
+            double threshold = 0;
             var allPixelCount = bitmap.Width * bitmap.Height;
 
             for (int i = 0; i < 256; i++)
@@ -51,11 +51,68 @@ namespace GrafikaPS4
                 {
                     var probability = (double)pixel / allPixelCount;
                     var log = Math.Log2(probability);
-                    treshold -= probability * log;
+                    threshold -= probability * log;
                 }
             }
 
-            return ApplyBinarization(bitmap, (int)treshold);
+            return ApplyBinarization(bitmap, (int)threshold);
+        }
+        public static Bitmap MeanIterativeSelection(Bitmap bitmap, Histogram histogram)
+        {
+            var avgHistogram = new int[256];
+            for (int i = 0; i < 256; i++)
+            {
+                avgHistogram[i] = histogram.GetAverageHistogramValue(i);
+            }
+
+            var multipliedSum = 0;
+            var sum = 0;
+            var multipliedSumsBelow = new int[256];
+            var sumsBelow = new int[256];
+
+            for (int i = 0; i < 256; i++)
+            {
+                multipliedSum += i * avgHistogram[i];
+                multipliedSumsBelow[i] = sum;
+                sum += avgHistogram[i];
+                sumsBelow[i] = sum;
+            }
+
+            multipliedSum = 0;
+            sum = 0;
+            var multipliedSumsAbove = new int[256];
+            var sumsAbove = new int[256];
+
+            for (int i = 255; i >= 0; i--)
+            {
+                multipliedSum += i * avgHistogram[i];
+                multipliedSumsAbove[i] = multipliedSum;
+                sum += avgHistogram[i];
+                sumsAbove[i] = sum;
+            }
+
+            var grayLevels = new int[256];
+            grayLevels[0] = 128;
+            var threshold = 0;
+            for (int i = 1; i < 256; i++)
+            {
+                var previousGrayLevel = grayLevels[i - 1];
+                if (sumsBelow[previousGrayLevel] == 0 || sumsAbove[previousGrayLevel + 1] == 0)
+                    continue;
+
+                var grayLevelBelow = (double)multipliedSumsBelow[previousGrayLevel] / sumsBelow[previousGrayLevel];
+                var grayLevelAbove = (double)multipliedSumsAbove[previousGrayLevel + 1] / sumsAbove[previousGrayLevel + 1];
+
+                grayLevels[i] = (int)(grayLevelBelow + grayLevelAbove) / 2;
+
+                if (grayLevelBelow == grayLevelAbove || grayLevels[i] == previousGrayLevel)
+                {
+                    threshold = grayLevels[i];
+                    break;
+                }
+            }
+
+            return ApplyBinarization(bitmap, threshold);
         }
     }
 }
