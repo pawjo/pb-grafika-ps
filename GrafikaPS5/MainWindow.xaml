@@ -143,7 +143,7 @@
                         <Button  Margin="10,0,10,10.8" Height="30" Content="Mean Iterative"  Click="MeanIterativeSelectionAsync"/>
 
                         <Label  Margin="10,0,10,0" Content="Advanced:" FontWeight="Bold" HorizontalAlignment="Center"/>
-                        <Button  Margin="10,0,10,10.8" Height="30" Content="TEXT"  />
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="Otsu" Click="OtsuAsync" />
                         <Button  Margin="10,0,10,10.8" Height="30" Content="TEXT" />
                         <Button  Margin="10,0,10,10.8" Height="30" Content="TEXT"/>
                         <Button  Margin="10,0,10,10.8" Height="30" Content="TEXT" />

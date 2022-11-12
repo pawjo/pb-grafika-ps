@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics.Metrics;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 
 namespace GrafikaPS4
 {
@@ -60,42 +62,29 @@ namespace GrafikaPS4
 
         public static Bitmap MeanIterativeSelection(Bitmap bitmap, Histogram histogram)
         {
-            var avgHistogram = new int[256];
-            var multipliedSum = 0;
-            var sum = 0;
-            for (int i = 0; i < 256; i++)
-            {
-                avgHistogram[i] = histogram.GetAverageHistogramValue(i);
-                multipliedSum += i * avgHistogram[i];
-                sum += avgHistogram[i];
-            }
-
+            var histogramData = GetHistogramData(histogram);
             var multipliedSumBelow = 0;
-            var multipliedSumAbove = 0;
             var sumBelow = 0;
-            var sumAbove = 0;
-            var grayLevels = new int[256];
-            grayLevels[0] = 128;
-            var threshold = 0;
+            var threshold = 128;
 
             for (int i = 1; i < 256; i++)
             {
-                var previousGrayLevel = grayLevels[i - 1];
-                multipliedSumBelow += i * avgHistogram[i];
-                sumBelow += avgHistogram[i];
-                multipliedSumAbove = multipliedSum - multipliedSumBelow;
-                sumAbove = sum - sumBelow;
-
-                if (sumBelow == 0 || sumAbove == 0)
+                var previousThreshold = threshold;
+                multipliedSumBelow += i * histogramData.AvgValue[i];
+                sumBelow += histogramData.AvgValue[i];
+                if (sumBelow == 0)
                     continue;
 
-                var grayLevelBelow = (double)multipliedSumBelow / sumBelow;
-                var grayLevelAbove = (double)multipliedSumAbove / sumAbove;
-                grayLevels[i] = (int)(grayLevelBelow + grayLevelAbove) / 2;
+                var sumAbove = histogramData.Sum - sumBelow;
+                if (sumAbove == 0)
+                    break;
 
-                if (grayLevelBelow == grayLevelAbove || grayLevels[i] == previousGrayLevel)
+                var grayLevelBelow = (double)multipliedSumBelow / sumBelow;
+                var grayLevelAbove = (double)(histogramData.MultipliedSum - multipliedSumBelow) / sumAbove;
+                threshold = (int)(grayLevelBelow + grayLevelAbove) / 2;
+
+                if (grayLevelBelow == grayLevelAbove || threshold == previousThreshold)
                 {
-                    threshold = grayLevels[i];
                     break;
                 }
             }
@@ -103,9 +92,59 @@ namespace GrafikaPS4
             return ApplyBinarization(bitmap, threshold);
         }
 
-        //public Bitmap Otsu(Bitmap bitmap, Histogram histogram)
-        //{
+        public static Bitmap Otsu(Bitmap bitmap, Histogram histogram)
+        {
+            var histogramData = GetHistogramData(histogram);
+            var multipliedSumBelow = 0;
+            var sumBelow = 0;
+            var threshold = 128;
+            double varianceMax=0;
 
-        //}
+            for (int i = 1; i < 256; i++)
+            {
+                multipliedSumBelow += i * histogramData.AvgValue[i];
+                sumBelow += histogramData.AvgValue[i];
+                if (sumBelow == 0)
+                    continue;
+
+                var sumAbove = histogramData.Sum - sumBelow;
+                if (sumAbove == 0)
+                    break;
+
+                var grayLevelBelow = (double)multipliedSumBelow / sumBelow;
+                var grayLevelAbove = (double)(histogramData.MultipliedSum - multipliedSumBelow) / sumAbove;
+                var factor = grayLevelBelow - grayLevelAbove;
+                var varianceBetween = (double)grayLevelBelow * grayLevelAbove * Math.Pow(factor, 2);
+
+                if (varianceBetween > varianceMax)
+                {
+                    varianceMax = varianceBetween;
+                    threshold = i;
+                }
+            }
+
+            return ApplyBinarization(bitmap, threshold);
+        }
+
+        private class HistogramForBinarizationModel
+        {
+            public int[] AvgValue = new int[256];
+
+            public int MultipliedSum = 0;
+
+            public int Sum = 0;
+        }
+
+        private static HistogramForBinarizationModel GetHistogramData(Histogram histogram)
+        {
+            var result = new HistogramForBinarizationModel();
+            for (int i = 0; i < 256; i++)
+            {
+                result.AvgValue[i] = histogram.GetAverageHistogramValue(i);
+                result.MultipliedSum += i * result.AvgValue[i];
+                result.Sum += result.AvgValue[i];
+            }
+            return result;
+        }
     }
 }

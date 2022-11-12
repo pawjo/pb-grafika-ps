@@ -620,5 +620,16 @@ namespace GrafikaPS4
 
             await RunAction(() => Binarization.MeanIterativeSelection(bitmap, _histogram));
         }
+
+        private async void OtsuAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            await RunAction(() => Binarization.Otsu(bitmap, _histogram));
+        }
     }
 }
