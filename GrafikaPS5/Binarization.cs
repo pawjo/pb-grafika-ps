@@ -57,52 +57,40 @@ namespace GrafikaPS4
 
             return ApplyBinarization(bitmap, (int)threshold);
         }
+
         public static Bitmap MeanIterativeSelection(Bitmap bitmap, Histogram histogram)
         {
             var avgHistogram = new int[256];
+            var multipliedSum = 0;
+            var sum = 0;
             for (int i = 0; i < 256; i++)
             {
                 avgHistogram[i] = histogram.GetAverageHistogramValue(i);
-            }
-
-            var multipliedSum = 0;
-            var sum = 0;
-            var multipliedSumsBelow = new int[256];
-            var sumsBelow = new int[256];
-
-            for (int i = 0; i < 256; i++)
-            {
                 multipliedSum += i * avgHistogram[i];
-                multipliedSumsBelow[i] = sum;
                 sum += avgHistogram[i];
-                sumsBelow[i] = sum;
             }
 
-            multipliedSum = 0;
-            sum = 0;
-            var multipliedSumsAbove = new int[256];
-            var sumsAbove = new int[256];
-
-            for (int i = 255; i >= 0; i--)
-            {
-                multipliedSum += i * avgHistogram[i];
-                multipliedSumsAbove[i] = multipliedSum;
-                sum += avgHistogram[i];
-                sumsAbove[i] = sum;
-            }
-
+            var multipliedSumBelow = 0;
+            var multipliedSumAbove = 0;
+            var sumBelow = 0;
+            var sumAbove = 0;
             var grayLevels = new int[256];
             grayLevels[0] = 128;
             var threshold = 0;
+
             for (int i = 1; i < 256; i++)
             {
                 var previousGrayLevel = grayLevels[i - 1];
-                if (sumsBelow[previousGrayLevel] == 0 || sumsAbove[previousGrayLevel + 1] == 0)
+                multipliedSumBelow += i * avgHistogram[i];
+                sumBelow += avgHistogram[i];
+                multipliedSumAbove = multipliedSum - multipliedSumBelow;
+                sumAbove = sum - sumBelow;
+
+                if (sumBelow == 0 || sumAbove == 0)
                     continue;
 
-                var grayLevelBelow = (double)multipliedSumsBelow[previousGrayLevel] / sumsBelow[previousGrayLevel];
-                var grayLevelAbove = (double)multipliedSumsAbove[previousGrayLevel + 1] / sumsAbove[previousGrayLevel + 1];
-
+                var grayLevelBelow = (double)multipliedSumBelow / sumBelow;
+                var grayLevelAbove = (double)multipliedSumAbove / sumAbove;
                 grayLevels[i] = (int)(grayLevelBelow + grayLevelAbove) / 2;
 
                 if (grayLevelBelow == grayLevelAbove || grayLevels[i] == previousGrayLevel)
@@ -114,5 +102,10 @@ namespace GrafikaPS4
 
             return ApplyBinarization(bitmap, threshold);
         }
+
+        //public Bitmap Otsu(Bitmap bitmap, Histogram histogram)
+        //{
+
+        //}
     }
 }
