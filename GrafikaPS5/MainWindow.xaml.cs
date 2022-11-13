@@ -631,5 +631,16 @@ namespace GrafikaPS4
 
             await RunAction(() => Binarization.Otsu(bitmap, _histogram));
         }
+        private async void NiblackAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            await RunAction(() => Binarization.Niblack(bitmap));
+        }
+
     }
 }
