@@ -155,8 +155,8 @@
                         <Label Background="White"/>
                         <Button  Margin="10,0,10,10.8" Height="30" Content="Dilatation" Click="DilatationAsync" />
                         <Button  Margin="10,0,10,10.8" Height="30" Content="Erosion" Click="ErosionAsync"/>
-                        <Button  Margin="10,0,10,10.8" Height="30" Content="Openly"/>
-                        <Button  Margin="10,0,10,10.8" Height="30" Content="Closing" />
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="Opening" Click="OpeningAsync"/>
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="Closing" Click="ClosingAsync"/>
                         <Button  Margin="10,0,10,10.8" Height="30" Content="Hit-or-miss"/>
                     </StackPanel>
                 </TabItem>

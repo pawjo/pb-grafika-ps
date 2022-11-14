@@ -663,5 +663,27 @@ namespace GrafikaPS4
 
             await RunAction(() => Filters.Erosion(bitmap));
         }
+
+        private async void OpeningAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            await RunAction(() => Filters.Opening(bitmap));
+        }
+
+        private async void ClosingAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            await RunAction(() => Filters.Closing(bitmap));
+        }
     }
 }

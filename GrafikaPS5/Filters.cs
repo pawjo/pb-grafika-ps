@@ -51,6 +51,20 @@ namespace GrafikaPS4
             return ApplySEFilter(bitmap, action);
         }
 
+        public static Bitmap Opening(Bitmap bitmap)
+        {
+            var erosionResult = Erosion(bitmap);
+
+            return Dilatation(erosionResult);
+        }
+
+        public static Bitmap Closing(Bitmap bitmap)
+        {
+            var dilatationResult = Dilatation(bitmap);
+
+            return Erosion(dilatationResult);
+        }
+
 
         private static Bitmap ApplySEFilter(Bitmap bitmap, SetResultBuffer action)
         {
