@@ -153,8 +153,8 @@
                 <TabItem Header="Morphological">
                     <StackPanel Margin="10,20,10,20" Width="160" Background="White">
                         <Label Background="White"/>
-                        <Button  Margin="10,0,10,10.8" Height="30" Content="Dilatation"  />
-                        <Button  Margin="10,0,10,10.8" Height="30" Content="Erosion" />
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="Dilatation" Click="DilatationAsync" />
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="Erosion" Click="ErosionAsync"/>
                         <Button  Margin="10,0,10,10.8" Height="30" Content="Openly"/>
                         <Button  Margin="10,0,10,10.8" Height="30" Content="Closing" />
                         <Button  Margin="10,0,10,10.8" Height="30" Content="Hit-or-miss"/>

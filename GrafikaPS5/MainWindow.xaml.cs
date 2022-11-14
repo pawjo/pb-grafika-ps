@@ -642,5 +642,26 @@ namespace GrafikaPS4
             await RunAction(() => Binarization.Niblack(bitmap));
         }
 
+        private async void DilatationAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            await RunAction(() => Filters.Dilatation(bitmap));
+        }
+
+        private async void ErosionAsync(object sender, RoutedEventArgs e)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            if (bitmap == null)
+            {
+                return;
+            }
+
+            await RunAction(() => Filters.Erosion(bitmap));
+        }
     }
 }
