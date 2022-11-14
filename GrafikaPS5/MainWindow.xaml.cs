@@ -45,7 +45,7 @@ namespace GrafikaPS4
 
         private int _currentImageFormat = 0;
 
-        private string _windowTitle = "Jabłko Viewer";
+        private string _windowTitle = "PT PW PS5";
 
         private SeriesCollection _series;
 
@@ -67,6 +67,8 @@ namespace GrafikaPS4
             {
                 Labels[i] = i.ToString();
             }
+
+            HitOrMissInput.Text = "1, 1, -1\r\n1, 0, -1\r\n1, -1, 0";
         }
 
         private void OpenFileButton_Click(object sender, RoutedEventArgs e)
@@ -467,37 +469,13 @@ namespace GrafikaPS4
         private async void CustomConvolutionAsync(object sender, RoutedEventArgs e)
         {
             var bitmap = GetBitmapFromWritableBitmap();
-            if (bitmap == null)
+            var mask = GetMatrixFromInput(CustomConvolutionInput);
+            if (bitmap == null || mask == null)
             {
                 return;
             }
 
-            var lines = CustomConvolutionInput.Text.Split("\r\n");
-            var maskSize = lines.Length;
-            var mask = new double[maskSize, maskSize];
-
-            for (int i = 0; i < maskSize; i++)
-            {
-                var splittedLine = lines[i].Split(',', ' ');
-                var filteredSplittedLine = splittedLine.Where(x => x != "").ToList();
-                if (filteredSplittedLine.Count != maskSize)
-                {
-                    MessageBox.Show("Mask format error - wrong numbers of values in line");
-                    return;
-                }
-
-                for (int j = 0; j < maskSize; j++)
-                {
-                    if (!double.TryParse(filteredSplittedLine[j], NumberStyles.Any, CultureInfo.InvariantCulture, out double result))
-                    {
-                        MessageBox.Show("Mask format error - value cannot be parsed");
-                        return;
-                    }
-
-                    mask[i, j] = result;
-                }
-            }
-
+            var maskSize = mask.GetLength(0);
             await RunAction(() => ConvolutionFilters.ApplyFilter(bitmap, mask, maskSize));
         }
 
@@ -684,6 +662,74 @@ namespace GrafikaPS4
             }
 
             await RunAction(() => Filters.Closing(bitmap));
+        }
+
+        private async void ThinningAsync(object sender, RoutedEventArgs e)
+        {
+            await HitOrMissAsync(true);
+        }
+
+        private async void ThickingAsync(object sender, RoutedEventArgs e)
+        {
+            await HitOrMissAsync(false);
+        }
+
+        private async Task HitOrMissAsync(bool isThinning)
+        {
+            var bitmap = GetBitmapFromWritableBitmap();
+            var matrixSize = 3;
+            var matrix = GetMatrixFromInput(HitOrMissInput, matrixSize);
+            if (bitmap == null || matrix == null)
+            {
+                return;
+            }
+
+            var se = new int[matrixSize*matrixSize];
+            for (int i = 0, k=0; i < matrixSize; i++)
+            {
+                for (int j = 0; j < matrixSize; j++)
+                {
+                    se[k++] = (int)matrix[i, j];
+                }
+            }
+
+            await RunAction(() => Filters.ApplyHitOrMiss(bitmap, isThinning, se));
+        }
+
+        private double[,]? GetMatrixFromInput(TextBox textBox, int? expectedMatrixSize = null)
+        {
+            var lines = textBox.Text.Split("\r\n");
+            var matrixSize = lines.Length;
+            if (expectedMatrixSize.HasValue && expectedMatrixSize.Value != matrixSize)
+            {
+                return null;
+            }
+
+            var matrix = new double[matrixSize, matrixSize];
+
+            for (int i = 0; i < matrixSize; i++)
+            {
+                var splittedLine = lines[i].Split(',', ' ');
+                var filteredSplittedLine = splittedLine.Where(x => x != "").ToList();
+                if (filteredSplittedLine.Count != matrixSize)
+                {
+                    MessageBox.Show("Matrix format error - wrong numbers of values in line");
+                    return null;
+                }
+
+                for (int j = 0; j < matrixSize; j++)
+                {
+                    if (!double.TryParse(filteredSplittedLine[j], NumberStyles.Any, CultureInfo.InvariantCulture, out double result))
+                    {
+                        MessageBox.Show("Matrix format error - value cannot be parsed");
+                        return null;
+                    }
+
+                    matrix[i, j] = result;
+                }
+            }
+
+            return matrix;
         }
     }
 }

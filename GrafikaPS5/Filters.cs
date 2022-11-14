@@ -9,7 +9,11 @@ namespace GrafikaPS4
 {
     public class Filters
     {
-        private delegate void SetResultBuffer(byte[] buffer, int byteOffset, List<int> red, List<int> green, List<int> blue);
+        private delegate void SetResultBufferSE(byte[] buffer, int byteOffset, List<int> red, List<int> green, List<int> blue);
+
+        private delegate byte GetHitOrMissPixelByteValue(bool isFitted);
+
+        private const int _hitOrMissAreaLength = 9;
 
         public static Bitmap Median(Bitmap bitmap)
         {
@@ -65,8 +69,61 @@ namespace GrafikaPS4
             return Erosion(dilatationResult);
         }
 
+        public static Bitmap ApplyHitOrMiss(Bitmap bitmap, bool isThinning, int[] se)
+        {
+            var bitmapData = bitmap.LockBits(new Rectangle(0, 0,
+                                        bitmap.Width, bitmap.Height),
+                                        ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
 
-        private static Bitmap ApplySEFilter(Bitmap bitmap, SetResultBuffer action)
+            var pixelBuffer = new byte[bitmapData.Stride * bitmapData.Height];
+            Marshal.Copy(bitmapData.Scan0, pixelBuffer, 0, pixelBuffer.Length);
+
+            int filterOffset = 1;
+            int calcOffset = 0;
+            int byteOffset = 0;
+
+            for (int offsetY = filterOffset; offsetY < bitmap.Height - filterOffset; offsetY++)
+            {
+                for (int offsetX = filterOffset; offsetX < bitmap.Width - filterOffset; offsetX++)
+                {
+                    var area = new byte[9];
+                    var areaIndex = 0;
+                    byteOffset = offsetY * bitmapData.Stride + offsetX * 4;
+
+                    for (int filterY = -filterOffset; filterY <= filterOffset; filterY++)
+                    {
+                        for (int filterX = -filterOffset; filterX <= filterOffset; filterX++)
+                        {
+                            calcOffset = byteOffset + (filterX * 4) + (filterY * bitmapData.Stride);
+                            area[areaIndex++] = pixelBuffer[calcOffset];
+                        }
+                    }
+
+                    var isFitted = true;
+                    for (int i = 0; i < _hitOrMissAreaLength; i++)
+                    {
+                        if ((se[i] == 1 && area[i] != 255) || se[i] == 0 && area[i] != 0)
+                        {
+                            isFitted = false;
+                            break;
+                        }
+                    }
+
+                    if (isFitted)
+                    {
+                        var newValue = isThinning ? 0 : 255;
+                        pixelBuffer[byteOffset] = pixelBuffer[byteOffset + 1] = pixelBuffer[byteOffset + 2] = (byte)newValue;
+                    }
+                }
+            }
+
+            Marshal.Copy(pixelBuffer, 0, bitmapData.Scan0, pixelBuffer.Length);
+            bitmap.UnlockBits(bitmapData);
+
+            return bitmap;
+        }
+
+        private static Bitmap ApplySEFilter(Bitmap bitmap, SetResultBufferSE action)
         {
             var sourceData = bitmap.LockBits(new Rectangle(0, 0,
                                         bitmap.Width, bitmap.Height),

@@ -157,7 +157,10 @@
                         <Button  Margin="10,0,10,10.8" Height="30" Content="Erosion" Click="ErosionAsync"/>
                         <Button  Margin="10,0,10,10.8" Height="30" Content="Opening" Click="OpeningAsync"/>
                         <Button  Margin="10,0,10,10.8" Height="30" Content="Closing" Click="ClosingAsync"/>
-                        <Button  Margin="10,0,10,10.8" Height="30" Content="Hit-or-miss"/>
+                        <Label Content="Hit-or-miss SE:" HorizontalAlignment="Center" FontWeight="Bold"/>
+                        <TextBox Name="HitOrMissInput" Margin="10,10,10,10" Height="50" AcceptsReturn="True" FontWeight="Bold"/>
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="Thinning" Click="ThinningAsync"/>
+                        <Button  Margin="10,0,10,10.8" Height="30" Content="Thicking" Click="ThickingAsync"/>
                     </StackPanel>
                 </TabItem>
             </TabControl>
