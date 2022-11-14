@@ -1,22 +1,21 @@
-﻿using LiveCharts.Wpf;
-using LiveCharts;
+﻿using LiveCharts;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows.Controls;
 
 namespace GrafikaPS4
 {
@@ -94,7 +93,7 @@ namespace GrafikaPS4
                 }
                 catch
                 {
-                    MessageBox.Show("Open file error");
+                      MessageBox.Show("Open file error");
                 }
             }
         }
@@ -180,23 +179,6 @@ namespace GrafikaPS4
             }
         }
 
-        private Bitmap GetBitmapFromWritableBitmap(WriteableBitmap writeableBitmap)
-        {
-            if (writeableBitmap == null)
-            {
-                return null;
-            }
-
-            using (var outStream = new MemoryStream())
-            {
-                var enc = new BmpBitmapEncoder();
-                enc.Frames.Add(BitmapFrame.Create(writeableBitmap));
-                enc.Save(outStream);
-                var bmp = new Bitmap(outStream);
-                return bmp;
-            }
-        }
-
         private void SetNewWriteableBitmap(Bitmap bitmap)
         {
             BitmapSource bitmapSource = Imaging.CreateBitmapSourceFromHBitmap(bitmap.GetHbitmap(),
@@ -210,17 +192,6 @@ namespace GrafikaPS4
             OnPropertyChanged(nameof(SeriesCollection));
         }
 
-        private WriteableBitmap GetWriteableBitmapFormBitmap(Bitmap bitmap)
-        {
-            BitmapSource bitmapSource = Imaging.CreateBitmapSourceFromHBitmap(bitmap.GetHbitmap(),
-                IntPtr.Zero,
-                Int32Rect.Empty,
-                BitmapSizeOptions.FromEmptyOptions());
-
-            var writeableBitmap = new WriteableBitmap(bitmapSource);
-            return writeableBitmap;
-        }
-
         private async void GrayScaleAsync(object sender, RoutedEventArgs e)
         {
             var bitmap = GetBitmapFromWritableBitmap();
@@ -228,13 +199,8 @@ namespace GrafikaPS4
             {
                 return;
             }
-            Loading.IsBusy = true;
 
-
-            bitmap = await Task.Run(() => PointTransforms.GrayScaleAsync(bitmap));
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
+            await RunAction(() => PointTransforms.GrayScaleAsync(bitmap));
         }
 
         private async void GrayScaleYUVAsync(object sender, RoutedEventArgs e)
@@ -244,12 +210,8 @@ namespace GrafikaPS4
             {
                 return;
             }
-            Loading.IsBusy = true;
 
-            bitmap = await Task.Run(() => PointTransforms.GrayScaleYUVAsync(bitmap));
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
+            await RunAction(() => PointTransforms.GrayScaleYUVAsync(bitmap));
         }
 
         private async void AddAsync(object sender, RoutedEventArgs e)
@@ -261,12 +223,7 @@ namespace GrafikaPS4
                 return;
             }
 
-            Loading.IsBusy = true;
-
-            bitmap = await Task.Run(() => PointTransforms.AddAsync(bitmap, value));
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
+            await RunAction(() => PointTransforms.AddAsync(bitmap, value));
         }
 
         private async void SubtractAsync(object sender, RoutedEventArgs e)
@@ -278,12 +235,7 @@ namespace GrafikaPS4
                 return;
             }
 
-            Loading.IsBusy = true;
-
-            bitmap = await Task.Run(() => PointTransforms.SubtractAsync(bitmap, value));
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
+            await RunAction(() => PointTransforms.SubtractAsync(bitmap, value));
         }
 
         private async void MultiplyAsync(object sender, RoutedEventArgs e)
@@ -295,12 +247,7 @@ namespace GrafikaPS4
                 return;
             }
 
-            Loading.IsBusy = true;
-
-            bitmap = await Task.Run(() => PointTransforms.MultiplyAsync(bitmap, value));
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
+            await RunAction(() => PointTransforms.MultiplyAsync(bitmap, value));
         }
 
         private async void DivideAsync(object sender, RoutedEventArgs e)
@@ -312,12 +259,7 @@ namespace GrafikaPS4
                 return;
             }
 
-            Loading.IsBusy = true;
-
-            bitmap = await Task.Run(() => PointTransforms.DivideAsync(bitmap, value));
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
+            await RunAction(() => PointTransforms.DivideAsync(bitmap, value));
         }
 
         private async void BrighterAsync(object sender, RoutedEventArgs e)
@@ -329,12 +271,7 @@ namespace GrafikaPS4
                 return;
             }
 
-            Loading.IsBusy = true;
-
-            bitmap = await Task.Run(() => PointTransforms.BrighterAsync(bitmap, value));
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
+            await RunAction(() => PointTransforms.BrighterAsync(bitmap, value));
         }
 
         private async void DarkerAsync(object sender, RoutedEventArgs e)
@@ -346,12 +283,7 @@ namespace GrafikaPS4
                 return;
             }
 
-            Loading.IsBusy = true;
-
-            bitmap = await Task.Run(() => PointTransforms.DarkerAsync(bitmap, value));
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
+            await RunAction(() => PointTransforms.DarkerAsync(bitmap, value));
         }
 
         private async void SmoothAsync(object sender, RoutedEventArgs e)
@@ -362,12 +294,7 @@ namespace GrafikaPS4
                 return;
             }
 
-            Loading.IsBusy = true;
-
-            bitmap = await Task.Run(() => ConvolutionFilters.Smooth(bitmap));
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
+            await RunAction(() => ConvolutionFilters.Smooth(bitmap));
         }
 
         private async void SharpenAsync(object sender, RoutedEventArgs e)
@@ -378,12 +305,7 @@ namespace GrafikaPS4
                 return;
             }
 
-            Loading.IsBusy = true;
-
-            bitmap = await Task.Run(() => ConvolutionFilters.Sharpen(bitmap));
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
+            await RunAction(() => ConvolutionFilters.Sharpen(bitmap));
         }
 
         private async void MedianAsync(object sender, RoutedEventArgs e)
@@ -394,12 +316,7 @@ namespace GrafikaPS4
                 return;
             }
 
-            Loading.IsBusy = true;
-
-            bitmap = await Task.Run(() => Filters.Median(bitmap));
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
+            await RunAction(() => Filters.Median(bitmap));
         }
 
         private async void SobelHorizontalAsync(object sender, RoutedEventArgs e)
@@ -410,12 +327,7 @@ namespace GrafikaPS4
                 return;
             }
 
-            Loading.IsBusy = true;
-
-            bitmap = await Task.Run(() => ConvolutionFilters.SobelHorizontal(bitmap));
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
+            await RunAction(() => ConvolutionFilters.SobelHorizontal(bitmap));
         }
 
         private async void SobelVerticalAsync(object sender, RoutedEventArgs e)
@@ -426,12 +338,7 @@ namespace GrafikaPS4
                 return;
             }
 
-            Loading.IsBusy = true;
-
-            bitmap = await Task.Run(() => ConvolutionFilters.SobelVertical(bitmap));
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
+            await RunAction(() => ConvolutionFilters.SobelVertical(bitmap));
         }
 
         private async void HighPassSharpenAsync(object sender, RoutedEventArgs e)
@@ -442,12 +349,7 @@ namespace GrafikaPS4
                 return;
             }
 
-            Loading.IsBusy = true;
-
-            bitmap = await Task.Run(() => ConvolutionFilters.HighPassSharpen(bitmap));
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
+            await RunAction(() => ConvolutionFilters.HighPassSharpen(bitmap));
         }
 
         private async void GaussAsync(object sender, RoutedEventArgs e)
@@ -458,12 +360,7 @@ namespace GrafikaPS4
                 return;
             }
 
-            Loading.IsBusy = true;
-
-            bitmap = await Task.Run(() => ConvolutionFilters.Gauss(bitmap));
-
-            SetNewWriteableBitmap(bitmap);
-            Loading.IsBusy = false;
+            await RunAction(() => ConvolutionFilters.Gauss(bitmap));
         }
 
         private async void CustomConvolutionAsync(object sender, RoutedEventArgs e)
@@ -684,8 +581,8 @@ namespace GrafikaPS4
                 return;
             }
 
-            var se = new int[matrixSize*matrixSize];
-            for (int i = 0, k=0; i < matrixSize; i++)
+            var se = new int[matrixSize * matrixSize];
+            for (int i = 0, k = 0; i < matrixSize; i++)
             {
                 for (int j = 0; j < matrixSize; j++)
                 {
