@@ -45,7 +45,6 @@ const scalingTypes = {
     polygonPoint: "polygonPoint"
 };
 
-
 let mouseX = 0;
 let mouseY = 0;
 let currentElement = null;
@@ -671,3 +670,16 @@ function saveSvg() {
     downloadLink.click();
     document.body.removeChild(downloadLink);
 }
+
+// start Screem
+
+function start() {
+    
+    var container = document.getElementById('container');
+    var start = document.getElementById('startScreen');
+    console.log(start);
+
+      container.style.display = 'flex';
+      start.style.display = 'none';
+
+  }
