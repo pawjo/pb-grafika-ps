@@ -264,4 +264,19 @@ rect {
   white-space: nowrap;
 }
 
+#zoom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1% auto 0 auto;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
 
+#zoom-in-button{
+    width: 25%;
+}
+
+#zoom-out-button{
+    width: 25%;
+}
