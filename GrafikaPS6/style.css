@@ -185,6 +185,27 @@ section {
 .buttons .save-img {
   background: white;
   border: 2px solid black;
+  margin-bottom:10px;
+}
+
+#colorpicker {
+    margin-bottom:10px;
+    display: flex;
+    flex-direction: column;
+    border:none;
+}
+
+input[type="color"] {
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  cursor: pointer;
+  height: 2em;
+  padding: 0;
+  width: 10em;
+  border:none;
+
 }
 
 .save-img:hover {
@@ -242,3 +263,5 @@ rect {
   overflow: hidden;
   white-space: nowrap;
 }
+
+

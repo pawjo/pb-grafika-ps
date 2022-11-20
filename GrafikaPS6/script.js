@@ -683,3 +683,9 @@ function start() {
       start.style.display = 'none';
 
   }
+
+function changecolor(){
+  let color = document.getElementById('colorpicker').value;
+  var workspace = document.getElementById('workspace');
+  workspace.style.backgroundColor = color;
+}
