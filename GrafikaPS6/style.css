@@ -265,3 +265,12 @@ rect {
     cursor: pointer;
     margin-bottom: 10px;
 }
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  border: 1px solid black;
+  height: 30px;
+  width: 30px;
+  background: black;
+  cursor: pointer;
+}

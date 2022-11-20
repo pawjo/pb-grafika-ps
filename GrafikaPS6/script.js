@@ -73,6 +73,11 @@ let path = null;
 let strPath;
 let buffer = [];
 
+let brushWidth = 2;
+const sizeSlider = document.querySelector("#size-slider");
+
+sizeSlider.addEventListener("change", () => brushWidth = sizeSlider.value); // passing slider value as brushSize
+
 function setSelectedShape(shape) {
     selectedShape = shape;
 }
@@ -127,7 +132,7 @@ function finalizeSvgElement() {
     // currentElement.classList.add(svgElementClassName);
     currentElement.setAttribute("fill", "none");
     currentElement.setAttribute("stroke", "black");
-    currentElement.setAttribute("stroke-width", "3px");
+    currentElement.setAttribute("stroke-width", brushWidth);
     svg.appendChild(currentElement);
 }
 
@@ -507,7 +512,7 @@ function onSvgMouseDown(e) {
         path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path.setAttribute("fill", "none");
         path.setAttribute("stroke", "#000");
-        path.setAttribute("stroke-width", 2);
+        path.setAttribute("stroke-width", brushWidth);
         buffer = [];
         let pt = getMousePosition(e);
         appendToBuffer(pt);
