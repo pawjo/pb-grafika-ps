@@ -709,27 +709,6 @@ const getTransformParameters = (element) => {
 const getTransformString = (scale, x, y) =>
   "scale(" + scale + ") " + "translateX(" + x + "%) translateY(" + y + "%)";
 
-const pan = (direction) => {
-  const { scale, x, y } = getTransformParameters(svg);
-  let dx = 0,
-    dy = 0;
-  switch (direction) {
-    case "left":
-      dx = -3;
-      break;
-    case "right":
-      dx = 3;
-      break;
-    case "up":
-      dy = -3;
-      break;
-    case "down":
-      dy = 3;
-      break;
-  }
-  svg.style.transform = getTransformString(scale, x + dx, y + dy);
-};
-
 const zoom = (direction) => {
   const { scale, x, y } = getTransformParameters(svg);
   let dScale = 0.1;

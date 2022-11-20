@@ -155,7 +155,7 @@ section {
 }
 
 .options img {
-  width: 10%;
+  width: 15%;
 }
 
 .option #fill-color {
@@ -189,23 +189,16 @@ section {
 }
 
 #colorpicker {
-    margin-bottom:10px;
     display: flex;
     flex-direction: column;
     border:none;
 }
 
 input[type="color"] {
-  appearance: none;
-  -moz-appearance: none;
-  -webkit-appearance: none;
   background: none;
   cursor: pointer;
-  height: 2em;
-  padding: 0;
-  width: 10em;
+  width: 1.5em;
   border:none;
-
 }
 
 .save-img:hover {
@@ -271,12 +264,4 @@ rect {
     margin: 1% auto 0 auto;
     cursor: pointer;
     margin-bottom: 10px;
-}
-
-#zoom-in-button{
-    width: 25%;
-}
-
-#zoom-out-button{
-    width: 25%;
 }
