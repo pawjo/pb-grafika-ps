@@ -16,8 +16,103 @@ body {
   background: black;
 }
 
-.container {
-  display: flex;
+#startScreen {
+    display: inline;
+    border-style: solid;
+    border-color: white;
+    padding: 100px 150px 80px 150px;
+}
+
+#logo {
+    position:absolute;
+    top:50%;
+    left:50%;
+    animation: fill 0.5s ease forwards 2s;
+}
+
+#start {
+    background: black;
+    color: white;
+    padding: 10px;
+    padding-left:30px;
+    padding-right:30px;
+    border-style: solid;
+    border-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10% auto 0 auto;
+    font-size: 15px;
+    opacity:0%;
+    animation: line-anim 2s ease forwards 2.5s;
+    letter-spacing: 2px;
+}
+
+#start:hover {
+    transition: all .2s ease-in-out;
+    transform: scale(1.15);
+    background: white;
+    color:black;
+    font-weight:800;
+}
+
+#logo path:nth-child(1){
+    stroke-dasharray: 572;
+    stroke-dashoffset: 572;
+    animation: line-anim 2s ease forwards;
+}
+
+#logo path:nth-child(2){
+    stroke-dasharray: 463;
+    stroke-dashoffset: 463;
+    animation: line-anim 2s ease forwards 0.3s;
+}
+
+#logo path:nth-child(3){
+    stroke-dasharray: 495;
+    stroke-dashoffset: 495;
+    animation: line-anim 2s ease forwards 0.6s;
+}
+
+#logo path:nth-child(4){
+    stroke-dasharray: 227;
+    stroke-dashoffset: 227;
+    animation: line-anim 2s ease forwards 0.9s;
+}
+
+#logo path:nth-child(5){
+    stroke-dasharray: 635;
+    stroke-dashoffset: 635;
+    animation: line-anim 2s ease forwards 1.2s;
+}
+
+#logo path:nth-child(6){
+    stroke-dasharray: 604;
+    stroke-dashoffset: 604;
+    animation: line-anim 2s ease forwards 1.5s;
+}
+
+#logo path:nth-child(7){
+    stroke-dasharray: 463;
+    stroke-dashoffset: 463;
+    animation: line-anim 2s ease forwards 1.8s;
+}
+
+@keyframes line-anim{
+    to{
+        stroke-dashoffset:0;
+        opacity:100%;
+    }
+}
+
+@keyframes fill{
+    to{
+        fill: white;
+    }
+}
+
+#container {
+  display: none;
   width: 100%;
   gap: 10px;
   padding: 20px;
