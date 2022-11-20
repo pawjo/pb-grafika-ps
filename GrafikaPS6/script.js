@@ -42,9 +42,7 @@ const scalingTypes = {
     circle: "circle",
     line1: "line1",
     line2: "line2",
-    triangle1: "triangle1",
-    triangle2: "triangle2",
-    triangle3: "triangle3"
+    polygonPoint: "polygonPoint"
 };
 
 
@@ -64,6 +62,7 @@ let currentScalingType = null;
 let currentTriangleAttributes = null;
 
 let currentPolygonAttributes = null;
+let currentPolygonPointIndex = null;
 
 let currentPolyline = null;
 
@@ -186,7 +185,7 @@ function setCurrentPolygonAttributesFromCurrentElement() {
     const splitted = currentElement.getAttribute("points").split(/\,|\s/);
     const parsed = splitted.map(x => parseInt(x));
     currentPolygonAttributes = [];
-    for (let i = 0; i < parsed.len;) {
+    for (let i = 0; i < parsed.length;) {
         addPointToCurrentPolygon(parsed[i++], parsed[i++]);
     }
 }
@@ -223,6 +222,7 @@ function drawPolygonPoint(x, y) {
         currentElement.setAttribute("points", getCurrentPolygonPointsToString());
         finalizeSvgElement();
         selectedTool = null;
+        currentAction = null;
         stopDraw();
     }
     else {
@@ -240,6 +240,7 @@ function startDrawPolygon(startX, startY) {
     currentPolygonAttributes = [];
     addPointToCurrentPolygon(startX, startY);
     selectedTool = tools.drawPolygon;
+    currentAction = tools.drawPolygon;
 }
 
 function translateAttribute(element, attributeName, difference) {
@@ -323,7 +324,6 @@ function moving(dX, dY) {
 
 function checkIfIsNear(a, b, tolerance) {
     const result = Math.abs(a - b) < tolerance;
-    console.log(`compare result: ${result}`);
     return result;
 }
 
@@ -379,20 +379,11 @@ function scaling(e) {
             translateAttribute(currentElement, "x2", dX);
             translateAttribute(currentElement, "y2", dY);
             break;
-        case scalingTypes.triangle1:
-            currentTriangleAttributes.x1 += dX;
-            currentTriangleAttributes.y1 += dY;
-            setTriangleAttributes();
-            break;
-        case scalingTypes.triangle2:
-            currentTriangleAttributes.x2 += dX;
-            currentTriangleAttributes.y2 += dY;
-            setTriangleAttributes();
-            break;
-        case scalingTypes.triangle3:
-            currentTriangleAttributes.x3 += dX;
-            currentTriangleAttributes.y3 += dY;
-            setTriangleAttributes();
+        case scalingTypes.polygonPoint:
+            const point = currentPolygonAttributes[currentPolygonPointIndex];
+            point.x += dX;
+            point.y += dY;
+            currentElement.setAttribute("points", getCurrentPolygonPointsToString());
             break;
     }
 }
@@ -497,15 +488,13 @@ function onObjectMouseDown(e) {
                 }
                 break;
             case "polygon":
-                if (checkIfIsNear(currentTriangleAttributes.x1, e.offsetX, tolerance) && checkIfIsNear(currentTriangleAttributes.y1, e.offsetY, tolerance)) {
-                    currentScalingType = scalingTypes.triangle1;
+                for (let i = 0; i < currentPolygonAttributes.length; i++) {
+                    if (checkIfIsNear(currentPolygonAttributes[i].x, e.offsetX, tolerance)
+                        && checkIfIsNear(currentPolygonAttributes[i].y, e.offsetY, tolerance)) {
+                        currentPolygonPointIndex = i;
+                    }
                 }
-                else if (checkIfIsNear(currentTriangleAttributes.x2, e.offsetX, tolerance) && checkIfIsNear(currentTriangleAttributes.y2, e.offsetY, tolerance)) {
-                    currentScalingType = scalingTypes.triangle2;
-                }
-                else if (checkIfIsNear(currentTriangleAttributes.x3, e.offsetX, tolerance) && checkIfIsNear(currentTriangleAttributes.y3, e.offsetY, tolerance)) {
-                    currentScalingType = scalingTypes.triangle3;
-                }
+                currentScalingType = scalingTypes.polygonPoint;
                 break;
         }
 }
@@ -531,7 +520,6 @@ function onMouseDown(e) {
         svg.appendChild(path);
     }
     else if (selectedTool === tools.text && textField.value.length > 0) {
-        console.log(textField.value);
         textField.style.display = "none";
         currentElement = document.createElementNS(svgns, "text");
         currentElement.setAttribute("x", e.offsetX);
@@ -581,16 +569,23 @@ function onMouseUp() {
     switch (selectedTool) {
         case tools.draw:
             stopDraw();
+            currentAction = null;
             break;
         case tools.pencil:
             if (path) {
                 path = null;
             }
+            currentAction = null;
+            break;
+        case tools.move:
+            currentAction = null;
+            break;
+        case tools.scale:
+            currentAction = null;
             break;
     }
 
     // currentElement = null;
-    currentAction = null;
 }
 
 svg.addEventListener("mousedown", onMouseDown);
