@@ -749,3 +749,8 @@ const zoom = (direction) => {
 
 document.getElementById("zoom-in-button").onclick = () => zoom("in");
 document.getElementById("zoom-out-button").onclick = () => zoom("out");
+
+function clearSvg(){
+    const element = document.getElementById("workspace");
+    element.remove();
+}
