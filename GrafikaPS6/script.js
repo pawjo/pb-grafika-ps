@@ -222,7 +222,7 @@ function drawPolygonPoint(x, y) {
         finalizeSvgElement();
         selectedTool = null;
         currentAction = null;
-        stopDraw();
+        // stopDraw();
     }
     else {
         addPointToCurrentPolygon(x, y);
@@ -446,9 +446,9 @@ function startMove(e, shape) {
     // currentElementShape = shape;
 }
 
-function stopDraw() {
-    currentElement.addEventListener("mousedown", onObjectMouseDown);
-}
+// function stopDraw() {
+//     currentElement.addEventListener("mousedown", onObjectMouseDown);
+// }
 
 function onObjectMouseDown(e) {
     if (selectedTool === tools.draw) {
@@ -498,12 +498,9 @@ function onObjectMouseDown(e) {
         }
 }
 
-function onMouseDown(e) {
+function onSvgMouseDown(e) {
     if (selectedTool === tools.draw && selectedShape) {
         startDraw(e);
-    }
-    else if (selectedTool === tools.drawPolygon) {
-        drawPolygonPoint(e.offsetX, e.offsetY);
     }
     else if (selectedTool === tools.pencil) {
         currentAction = tools.pencil;
@@ -537,6 +534,18 @@ function onMouseDown(e) {
     }
 }
 
+function onMouseDown(e) {
+    if (selectedTool === tools.drawPolygon) {
+        drawPolygonPoint(e.offsetX, e.offsetY);
+    }
+    else if (e.target.tagName === "svg") {
+        onSvgMouseDown(e);
+    }
+    else {
+        onObjectMouseDown(e);
+    }
+}
+
 function onMouseMove(e) {
     if (!currentAction) {
         return;
@@ -567,7 +576,7 @@ function onMouseMove(e) {
 function onMouseUp() {
     switch (selectedTool) {
         case tools.draw:
-            stopDraw();
+            // stopDraw();
             currentAction = null;
             break;
         case tools.pencil:
