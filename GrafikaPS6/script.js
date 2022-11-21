@@ -522,7 +522,8 @@ function onSvgMouseDown(e) {
         buffer = [];
         let pt = getMousePosition(e);
         appendToBuffer(pt);
-        strPath = "M" + pt.x + " " + pt.y;
+        strPath = "M" + e.offsetX + " " + e.offsetY;
+        //strPath = "M" + pt.x + " " + pt.y;
         path.setAttribute("d", strPath);
         svg.appendChild(path);
     }
@@ -757,5 +758,5 @@ document.getElementById("zoom-out-button").onclick = () => zoom("out");
 
 function clearSvg(){
     const element = document.getElementById("workspace");
-    element.remove();
+    element.innerHTML="";
 }
