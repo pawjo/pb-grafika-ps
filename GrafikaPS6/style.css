@@ -188,7 +188,7 @@ section {
   margin-bottom:10px;
 }
 
-#colorpicker {
+#colorpicker, changeColor {
     display: flex;
     flex-direction: column;
     border:none;

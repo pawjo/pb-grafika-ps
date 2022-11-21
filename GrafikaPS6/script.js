@@ -76,7 +76,13 @@ let buffer = [];
 let brushWidth = 2;
 const sizeSlider = document.querySelector("#size-slider");
 
-sizeSlider.addEventListener("change", () => brushWidth = sizeSlider.value); // passing slider value as brushSize
+sizeSlider.addEventListener("change", () => brushWidth = sizeSlider.value);
+
+const changeColor = document.querySelector("#changeColor");
+
+changeColor.addEventListener("change", () => brushColor = changeColor.value);
+
+let brushColor = "black";
 
 function setSelectedShape(shape) {
     selectedShape = shape;
@@ -131,7 +137,7 @@ function startDraw(e) {
 function finalizeSvgElement() {
     // currentElement.classList.add(svgElementClassName);
     currentElement.setAttribute("fill", "none");
-    currentElement.setAttribute("stroke", "black");
+    currentElement.setAttribute("stroke", brushColor);
     currentElement.setAttribute("stroke-width", brushWidth);
     svg.appendChild(currentElement);
 }
@@ -511,7 +517,7 @@ function onSvgMouseDown(e) {
         currentAction = tools.pencil;
         path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path.setAttribute("fill", "none");
-        path.setAttribute("stroke", "#000");
+        path.setAttribute("stroke",brushColor);
         path.setAttribute("stroke-width", brushWidth);
         buffer = [];
         let pt = getMousePosition(e);
@@ -604,12 +610,6 @@ function onMouseUp() {
 svg.addEventListener("mousedown", onMouseDown);
 svg.addEventListener("mousemove", onMouseMove);
 svg.addEventListener("mouseup", onMouseUp);
-
-
-
-
-
-
 
 
 // pencil
