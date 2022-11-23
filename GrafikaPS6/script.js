@@ -18,7 +18,8 @@ const shapes = {
     line: "line",
     rectangle: "rectangle",
     circle: "circle",
-    polygon: "polygon"
+    polygon: "polygon",
+    bezier: "bezier"
 };
 
 const tools = {
@@ -27,7 +28,8 @@ const tools = {
     scale: "scale",
     pencil: "pencil",
     text: "text",
-    drawPolygon: "drawPolygon"
+    drawPolygon: "drawPolygon",
+    drawBezier: "drawBezier"
 };
 
 const scalingTypes = {
@@ -60,12 +62,17 @@ let currentScalingType = null;
 
 let currentTriangleAttributes = null;
 
-let currentPolygonAttributes = null;
+let currentElementPoints = null;
 let currentPolygonPointIndex = null;
 
 let currentPolyline = null;
 
 let isPolygonDrawing = false;
+
+let currentBezierGroup = null;
+let currentBezierPoints = null;
+let bezierFactorsX = null;
+let bezierFactorsY = null;
 
 const bufferSize = 8;
 let boundingRect = svg.getBoundingClientRect();
@@ -131,6 +138,9 @@ function startDraw(e) {
             // startDrawTriangle(startX, startY);
             startDrawPolygon(startX, startY);
             break;
+        case shapes.bezier:
+            startDrawBezier(startX, startY);
+            break;
     }
 }
 
@@ -163,6 +173,86 @@ function startDrawCircle(startX, startY) {
     finalizeSvgElement();
 }
 
+function addPointToBezier(x, y) {
+    const point = document.createElementNS(svgns, "circle");
+    point.setAttribute("cx", x);
+    point.setAttribute("cy", y);
+    point.setAttribute("r", 5);
+    point.setAttribute("fill", "red");
+    point.setAttribute("point-id", currentBezierPoints.length);
+    currentElement.appendChild(point);
+    currentBezierPoints.push({ x: x, y: y });
+}
+
+function startDrawBezier(startX, startY) {
+    currentElement = document.createElementNS(svgns, "g");
+    svg.appendChild(currentElement);
+    currentBezierPoints = [];
+    selectedTool = tools.drawBezier;
+    addPointToBezier(startX, startY);
+}
+
+function binomialCoefficient(n, k) {
+    if (k == 1)
+        return n;
+    if (k == 0 || k == n)
+        return 1;
+
+    let result = 1;
+    for (let i = k + 1; i <= n; i++)
+        result *= i;
+    for (let i = 2; i <= n - k; i++)
+        result /= i;
+
+    return result;
+}
+
+function drawBezierPoint(x, y) {
+
+    const stride = 0.05;
+
+    addPointToBezier(x, y);
+    if (currentBezierPoints.length < 3) {
+        return;
+    }
+
+    const n = currentBezierPoints.length - 1;
+    bezierFactorsX = [];
+    bezierFactorsY = [];
+    let tmpX = 0;
+    let tmpY = 0;
+    currentElementPoints = [];
+
+    for (let i = 0; i <= n; i++) {
+        const bc = binomialCoefficient(n, i);
+        bezierFactorsX.push(bc * currentBezierPoints[i].x);
+        bezierFactorsY.push(bc * currentBezierPoints[i].y);
+    }
+
+    for (let t = 0.0; t <= 1.001; t += stride) {
+        tmpX = 0;
+        tmpY = 0;
+        const diff = 1 - t;
+        for (let i = 0; i <= n; i++) {
+            tmpX += bezierFactorsX[i] * Math.pow(diff, n - i) * Math.pow(t, i);
+            tmpY += bezierFactorsY[i] * Math.pow(diff, n - i) * Math.pow(t, i);
+        }
+        currentElementPoints.push({ x: tmpX, y: tmpY });
+    }
+
+    for (const child of currentElement.children) {
+        if (child.tagName === 'polyline')
+            child.remove();
+    }
+
+    const curve = document.createElementNS(svgns, "polyline");
+    curve.setAttribute("points", getCurrentPolygonPointsToString());
+    curve.setAttribute("fill", "none");
+    curve.setAttribute("stroke", brushColor);
+    curve.setAttribute("stroke-width", brushWidth);
+    currentElement.appendChild(curve);
+}
+
 function setLineAttributesToStartPosition(startX, startY) {
     currentElement.setAttribute("x1", startX);
     currentElement.setAttribute("y1", startY);
@@ -188,13 +278,13 @@ function setCurrentTriangleAttributes(x1, y1, x2, y2, x3, y3) {
 }
 
 function addPointToCurrentPolygon(x, y) {
-    currentPolygonAttributes.push({ x: x, y: y });
+    currentElementPoints.push({ x: x, y: y });
 }
 
 function setCurrentPolygonAttributesFromCurrentElement() {
     const splitted = currentElement.getAttribute("points").split(/\,|\s/);
     const parsed = splitted.map(x => parseInt(x));
-    currentPolygonAttributes = [];
+    currentElementPoints = [];
     for (let i = 0; i < parsed.length;) {
         addPointToCurrentPolygon(parsed[i++], parsed[i++]);
     }
@@ -208,7 +298,7 @@ function getCurrentTriangleAttributes() {
 
 function getCurrentPolygonPointsToString() {
     let result = "";
-    currentPolygonAttributes.forEach(point => result += ` ${point.x},${point.y}`);
+    currentElementPoints.forEach(point => result += ` ${point.x},${point.y}`);
     return result.trimStart();
 }
 
@@ -224,7 +314,7 @@ function startDrawTriangle(startX, startY) {
 }
 
 function drawPolygonPoint(x, y) {
-    const firstPoint = currentPolygonAttributes[0];
+    const firstPoint = currentElementPoints[0];
     if (checkIfIsNear(x, firstPoint.x, tolerance) && checkIfIsNear(y, firstPoint.y, tolerance)) {
         currentElement.remove();
         currentPolyline.remove();
@@ -247,7 +337,7 @@ function startDrawPolygon(startX, startY) {
     finalizeSvgElement();
     currentPolyline = currentElement;
     startDrawLine(startX, startY);
-    currentPolygonAttributes = [];
+    currentElementPoints = [];
     addPointToCurrentPolygon(startX, startY);
     selectedTool = tools.drawPolygon;
     currentAction = tools.drawPolygon;
@@ -323,7 +413,7 @@ function moving(dX, dY) {
             translateAttribute(currentElement, "y2", dY);
             break;
         case "polygon":
-            currentPolygonAttributes.forEach(element => {
+            currentElementPoints.forEach(element => {
                 element.x += dX;
                 element.y += dY;
             });
@@ -390,7 +480,7 @@ function scaling(e) {
             translateAttribute(currentElement, "y2", dY);
             break;
         case scalingTypes.polygonPoint:
-            const point = currentPolygonAttributes[currentPolygonPointIndex];
+            const point = currentElementPoints[currentPolygonPointIndex];
             point.x += dX;
             point.y += dY;
             currentElement.setAttribute("points", getCurrentPolygonPointsToString());
@@ -461,6 +551,11 @@ function startMove(e, shape) {
 //     currentElement.addEventListener("mousedown", onObjectMouseDown);
 // }
 
+function startScaleCurve(e) {
+    const id = e.target.getAttribute("point-id");
+
+}
+
 function onObjectMouseDown(e) {
     if (selectedTool === tools.draw) {
         return;
@@ -498,9 +593,9 @@ function onObjectMouseDown(e) {
                 }
                 break;
             case "polygon":
-                for (let i = 0; i < currentPolygonAttributes.length; i++) {
-                    if (checkIfIsNear(currentPolygonAttributes[i].x, e.offsetX, tolerance)
-                        && checkIfIsNear(currentPolygonAttributes[i].y, e.offsetY, tolerance)) {
+                for (let i = 0; i < currentElementPoints.length; i++) {
+                    if (checkIfIsNear(currentElementPoints[i].x, e.offsetX, tolerance)
+                        && checkIfIsNear(currentElementPoints[i].y, e.offsetY, tolerance)) {
                         currentPolygonPointIndex = i;
                     }
                 }
@@ -517,7 +612,7 @@ function onSvgMouseDown(e) {
         currentAction = tools.pencil;
         path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path.setAttribute("fill", "none");
-        path.setAttribute("stroke",brushColor);
+        path.setAttribute("stroke", brushColor);
         path.setAttribute("stroke-width", brushWidth);
         buffer = [];
         let pt = getMousePosition(e);
@@ -549,6 +644,12 @@ function onSvgMouseDown(e) {
 function onMouseDown(e) {
     if (selectedTool === tools.drawPolygon) {
         drawPolygonPoint(e.offsetX, e.offsetY);
+    }
+    else if (selectedTool === tools.drawBezier) {
+        drawBezierPoint(e.offsetX, e.offsetY);
+    }
+    else if (selectedTool === tools.scale && currentElement.tagName === "g" && e.target.tagName === "circle") {
+        startScaleCurve(e);
     }
     else if (e.target.tagName === "svg") {
         onSvgMouseDown(e);
@@ -756,7 +857,7 @@ const zoom = (direction) => {
 document.getElementById("zoom-in-button").onclick = () => zoom("in");
 document.getElementById("zoom-out-button").onclick = () => zoom("out");
 
-function clearSvg(){
+function clearSvg() {
     const element = document.getElementById("workspace");
-    element.innerHTML="";
+    element.innerHTML = "";
 }
