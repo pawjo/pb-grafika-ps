@@ -29,7 +29,10 @@ const tools = {
     pencil: "pencil",
     text: "text",
     drawPolygon: "drawPolygon",
-    drawBezier: "drawBezier"
+    drawBezier: "draw-bezier",
+    modifyBezier: "modify-bezier",
+    moveBezier: "move-bezier",
+    scaleBezier: "scale-bezier"
 };
 
 const scalingTypes = {
@@ -138,9 +141,6 @@ function startDraw(e) {
             // startDrawTriangle(startX, startY);
             startDrawPolygon(startX, startY);
             break;
-        case shapes.bezier:
-            startDrawBezier(startX, startY);
-            break;
     }
 }
 
@@ -180,15 +180,14 @@ function addPointToBezier(x, y) {
     point.setAttribute("r", 5);
     point.setAttribute("fill", "red");
     point.setAttribute("point-id", currentBezierPoints.length);
-    currentElement.appendChild(point);
+    currentBezierGroup.appendChild(point);
     currentBezierPoints.push({ x: x, y: y });
 }
 
 function startDrawBezier(startX, startY) {
-    currentElement = document.createElementNS(svgns, "g");
-    svg.appendChild(currentElement);
+    currentBezierGroup = document.createElementNS(svgns, "g");
+    svg.appendChild(currentBezierGroup);
     currentBezierPoints = [];
-    selectedTool = tools.drawBezier;
     addPointToBezier(startX, startY);
 }
 
@@ -240,7 +239,7 @@ function drawBezierPoint(x, y) {
         currentElementPoints.push({ x: tmpX, y: tmpY });
     }
 
-    for (const child of currentElement.children) {
+    for (const child of currentBezierGroup.children) {
         if (child.tagName === 'polyline')
             child.remove();
     }
@@ -250,7 +249,7 @@ function drawBezierPoint(x, y) {
     curve.setAttribute("fill", "none");
     curve.setAttribute("stroke", brushColor);
     curve.setAttribute("stroke-width", brushWidth);
-    currentElement.appendChild(curve);
+    currentBezierGroup.appendChild(curve);
 }
 
 function setLineAttributesToStartPosition(startX, startY) {
@@ -608,6 +607,9 @@ function onSvgMouseDown(e) {
     if (selectedTool === tools.draw && selectedShape) {
         startDraw(e);
     }
+    else if (selectedTool === tools.drawBezier) {
+        startDrawBezier(e.offsetX, e.offsetY);
+    }
     else if (selectedTool === tools.pencil) {
         currentAction = tools.pencil;
         path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -645,7 +647,7 @@ function onMouseDown(e) {
     if (selectedTool === tools.drawPolygon) {
         drawPolygonPoint(e.offsetX, e.offsetY);
     }
-    else if (selectedTool === tools.drawBezier) {
+    else if (selectedTool === tools.drawBezier && currentBezierGroup) {
         drawBezierPoint(e.offsetX, e.offsetY);
     }
     else if (selectedTool === tools.scale && currentElement.tagName === "g" && e.target.tagName === "circle") {
