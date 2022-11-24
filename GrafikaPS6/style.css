@@ -13,7 +13,9 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: black;
+  background: url("icons/cat.jpg");
+  background-position: bottom;
+  background-size: cover;
 }
 
 #startScreen {
@@ -267,10 +269,18 @@ rect {
 }
 
 input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  border: 1px solid black;
-  height: 30px;
-  width: 30px;
-  background: black;
-  cursor: pointer;
+    -webkit-appearance: none;
+    border: 1px solid black;
+    height: 30px;
+    width: 30px;
+    background: black;
+    cursor: pointer;
+}
+
+#row-shapes {
+    display:none;
+}
+
+#row-bezier {
+    display:none;
 }

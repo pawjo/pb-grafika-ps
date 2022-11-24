@@ -863,3 +863,24 @@ function clearSvg() {
     const element = document.getElementById("workspace");
     element.innerHTML = "";
 }
+
+
+function openGeneral() {
+
+    var row = document.getElementById('row-shapes');
+    if (row.style.display === "none") {
+       row.style.display = "block";
+     } else {
+       row.style.display = "none";
+     }
+}
+
+function openBezier() {
+
+    var row = document.getElementById('row-bezier');
+    if (row.style.display === "none") {
+       row.style.display = "block";
+     } else {
+       row.style.display = "none";
+     }
+}
