@@ -14,6 +14,8 @@ const tolerance = 10;
 
 const textField = document.getElementById("text-field");
 
+const bezierStride = 0.05;
+
 const shapes = {
     line: "line",
     rectangle: "rectangle",
@@ -99,6 +101,17 @@ function setSelectedShape(shape) {
 }
 
 function setSelectedTool(tool) {
+    switch (selectedTool) {
+        case tools.drawBezier:
+        case tools.modifyBezier:
+        case tools.moveBezier:
+        case tools.scaleBezier:
+            break;
+        default:
+            currentBezierGroup = null;
+            currentBezierPoints = null;
+            break;
+    }
     selectedTool = tool;
 }
 
@@ -173,15 +186,72 @@ function startDrawCircle(startX, startY) {
     finalizeSvgElement();
 }
 
+function readPositionFromInput(parent) {
+    const inputs = parent.getElementsByTagName("input");
+    const x = inputs[0].value;
+    const y = inputs[1].value;
+
+    const circles = currentBezierGroup.getElementsByTagName("circle");
+    // const point = circles.find(x=>x.getAttribute("point-id") == )
+    console.log(el);
+}
+
+function onBezierPointControlChange(e) {
+    const parent = e.target.parentElement;
+    const inputs = parent.getElementsByTagName("input");
+    const x = inputs[0].value;
+    const y = inputs[1].value;
+    const id = parent.getAttribute("point-id");
+    const circles = currentBezierGroup.getElementsByTagName("circle");
+    for (let i = 0; i < circles.length; i++) {
+        const attr = circles[i].getAttribute("point-id");
+        if (attr === id) {
+            currentElement = circles[i];
+            break;
+        }
+    }
+    currentElement.setAttribute("cx", x);
+    currentElement.setAttribute("cy", y);
+    currentBezierPoints[id].x = x;
+    currentBezierPoints[id].y = y;
+    generateBezierCurve();
+}
+
+function createInput(value) {
+    const input = document.createElement("input");
+    input.setAttribute("type", "number");
+    input.value = value;
+    input.addEventListener("change", onBezierPointControlChange);
+    return input;
+}
+
+
+function createBezierPointControl(x, y, id) {
+    const inputX = createInput(x);
+    const inputY = createInput(y);
+    const button = document.createElement("button");
+    button.setAttribute("type", "button");
+    button.innerText = "X";
+    const newControl = document.createElement("div")
+    newControl.setAttribute("point-id", id);
+    newControl.appendChild(inputX);
+    newControl.appendChild(inputY);
+    newControl.appendChild(button);
+    const box = document.getElementById("bezier-points");
+    box.appendChild(newControl);
+}
+
 function addPointToBezier(x, y) {
     const point = document.createElementNS(svgns, "circle");
     point.setAttribute("cx", x);
     point.setAttribute("cy", y);
     point.setAttribute("r", 5);
     point.setAttribute("fill", "red");
-    point.setAttribute("point-id", currentBezierPoints.length);
+    const id = currentBezierPoints.length;
+    point.setAttribute("point-id", id);
     currentBezierGroup.appendChild(point);
     currentBezierPoints.push({ x: x, y: y });
+    createBezierPointControl(x, y, id);
 }
 
 function startDrawBezier(startX, startY) {
@@ -206,15 +276,7 @@ function binomialCoefficient(n, k) {
     return result;
 }
 
-function drawBezierPoint(x, y) {
-
-    const stride = 0.05;
-
-    addPointToBezier(x, y);
-    if (currentBezierPoints.length < 3) {
-        return;
-    }
-
+function generateBezierCurve() {
     const n = currentBezierPoints.length - 1;
     bezierFactorsX = [];
     bezierFactorsY = [];
@@ -228,7 +290,7 @@ function drawBezierPoint(x, y) {
         bezierFactorsY.push(bc * currentBezierPoints[i].y);
     }
 
-    for (let t = 0.0; t <= 1.001; t += stride) {
+    for (let t = 0.0; t <= 1.001; t += bezierStride) {
         tmpX = 0;
         tmpY = 0;
         const diff = 1 - t;
@@ -250,6 +312,22 @@ function drawBezierPoint(x, y) {
     curve.setAttribute("stroke", brushColor);
     curve.setAttribute("stroke-width", brushWidth);
     currentBezierGroup.appendChild(curve);
+}
+
+function drawBezierPoint(x, y) {
+    addPointToBezier(x, y);
+    if (currentBezierPoints.length < 3) {
+        return;
+    }
+
+    generateBezierCurve();
+}
+
+function moveBezierPoint(dX, dY, id) {
+    moving(dY, dY);
+    currentBezierPoints[id].x += dX;
+    currentBezierPoints[id].y += dY;
+    generateBezierCurve();
 }
 
 function setLineAttributesToStartPosition(startX, startY) {
@@ -562,6 +640,11 @@ function onObjectMouseDown(e) {
 
     e.stopPropagation();
     currentElement = e.target;
+
+    if (currentElement.parentElement.tagName === "g") {
+        currentBezierGroup = currentElement.parentElement;
+    }
+
     currentAction = selectedTool;
 
     if (currentElement.tagName === "polygon") {
@@ -685,30 +768,26 @@ function onMouseMove(e) {
         case tools.drawPolygon:
             drawingLine(e.movementX, e.movementY);
             break;
+        case tools.modifyBezier:
+            const id = currentElement.getAttribute("point-id");
+            moveBezierPoint(e.movementX, e.movementY, id);
+            break;
     }
 }
 
 function onMouseUp() {
     switch (selectedTool) {
-        case tools.draw:
-            // stopDraw();
-            currentAction = null;
-            break;
         case tools.pencil:
             if (path) {
                 path = null;
             }
-            currentAction = null;
-            break;
+        case tools.draw:
         case tools.move:
-            currentAction = null;
-            break;
         case tools.scale:
+        case tools.modifyBezier:
             currentAction = null;
             break;
     }
-
-    // currentElement = null;
 }
 
 svg.addEventListener("mousedown", onMouseDown);
