@@ -219,6 +219,7 @@ function onBezierPointControlChange(e) {
 
 function createInput(value) {
     const input = document.createElement("input");
+    input.classList.add("point");
     input.setAttribute("type", "number");
     input.value = value;
     input.addEventListener("change", onBezierPointControlChange);
@@ -232,6 +233,7 @@ function createBezierPointControl(x, y, id) {
     const button = document.createElement("button");
     button.setAttribute("type", "button");
     button.innerText = "X";
+    button.classList.add("x");
     const newControl = document.createElement("div")
     newControl.setAttribute("point-id", id);
     newControl.appendChild(inputX);
@@ -957,6 +959,16 @@ function openGeneral() {
 function openBezier() {
 
     var row = document.getElementById('row-bezier');
+    if (row.style.display === "none") {
+       row.style.display = "block";
+     } else {
+       row.style.display = "none";
+     }
+}
+
+function openOthers() {
+
+    var row = document.getElementById('row-others');
     if (row.style.display === "none") {
        row.style.display = "block";
      } else {

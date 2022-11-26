@@ -74,6 +74,29 @@
             <li class="option" for="fill-color" id="fill-color">
             </li>
           </ul>
+          <label class="title">Options</label>
+          <ul class="options">
+            <li class="option tool" id="draw">
+              <img src="icons/add.svg" alt="">
+              <span>Create</span>
+            </li>
+            <li class="option tool" id="move">
+              <img src="icons/move.svg" alt="">
+              <span>Move</span>
+            </li>
+            <li class="option tool" id="scale">
+              <img src="icons/scale.svg" alt="">
+              <span>Scale</span>
+            </li>
+            <li class="option tool" id="pencil">
+              <img src="icons/pencil.svg" alt="">
+              <span>Draw</span>
+            </li>
+            <li class="option tool" id="text">
+              <img src="icons/text.svg" alt="">
+              <span>Write</span>
+            </li>
+            </ul>
         </div>
         <button class="save-img" onClick="openBezier()">Bézier</button>
         <div class="row" id="row-bezier">
@@ -95,72 +118,20 @@
               <img src="icons/scale.svg" alt="">
               <span>Scale</span>
             </li>
-          </ul>
-        </div>
-        <button class="save-img" onClick="openSvg()">Option</button>
-        <button class="save-img" onClick="openSvg()">Open</button>
-        <button class="save-img" onClick="saveSvg()">Save</button>
-        <button class="save-img" onClick="clearSvg()">Clear</button>
-        </div>
-      <div class="row">
-        <label class="title">Options</label>
-        <ul class="options">
-          <li class="option tool" id="draw">
-            <img src="icons/add.svg" alt="">
-            <span>Create</span>
-          </li>
-          <li class="option tool" id="move">
-            <img src="icons/move.svg" alt="">
-            <span>Move</span>
-          </li>
-          <li class="option tool" id="scale">
-            <img src="icons/scale.svg" alt="">
-            <span>Scale</span>
-          </li>
-          <li class="option tool" id="text">
-            <input id="changeColor" type="color">
-            <span>Color</span>
-          </li>
-          <input type="range" id="size-slider" min="1" max="30" value="2">
-        </ul>
-      </div>
-      <div class="row">
-        <label class="title">Bezier Curve</label>
-        <ul class="options">
-          <li class="option tool" id="draw-bezier">
-            <img src="icons/add.svg" alt="">
-            <span>Create</span>
-          </li>
-          <li class="option tool" id="modify-bezier">
-            <img src="icons/move.svg" alt="">
-            <span>Modify</span>
-          </li>
-          <li class="option tool" id="move-bezier">
-            <img src="icons/move.svg" alt="">
-            <span>Move</span>
-          </li>
-          <li class="option tool" id="scale-bezier">
-            <img src="icons/scale.svg" alt="">
-            <span>Scale</span>
-          </li>
-        </ul>
-        <label class="title">Bezier Curve Points</label>
-        <div style="background-color: grey;">
-          <div id="bezier-points">
+          <div style="background-color: grey;">
+            <div id="bezier-points">
+            </div>
+            <button id="add-bezier-point" type="button">+</button>
           </div>
-          <button id="add-bezier-point" type="button">+</button>
-        </div>
-        <div class="row">
+          </div>
+        <button class="save-img" onClick="openOthers()">Others</button>
+        <div class="row" id="row-others">
           <label class="title">Others</label>
           <ul class="options">
-            <li class="option tool" id="pencil">
-              <img src="icons/pencil.svg" alt="">
-              <span>Draw</span>
-            </li>
-            <li class="option tool" id="text">
-              <img src="icons/text.svg" alt="">
-              <span>Write</span>
-            </li>
+              <li class="option tool" id="text">
+                <input id="changeColor" type="color">
+                <span>Color</span>
+              </li>
             <li class="option tool" id="text">
               <input id="colorpicker" type="color">
               <span onclick="changecolor();">Background</span>
@@ -173,36 +144,13 @@
               <img src="icons/minus.svg" alt="">
               <span>Zoom out</span>
             </li>
+            <input type="range" id="size-slider" min="1" max="30" value="2">
           </ul>
+          </div>
+        <button class="save-img" onClick="openSvg()">Open</button>
+        <button class="save-img" onClick="saveSvg()">Save</button>
+        <button class="save-img" onClick="clearSvg()">Clear</button>
         </div>
-        <div class="row buttons">
-          <button class="save-img" onClick="openSvg()">Open</button>
-          <button class="save-img" onClick="saveSvg()">Save</button>
-          <button class="save-img" onClick="clearSvg()">Clear</button>
-        <label class="title">Others</label>
-        <ul class="options">
-          <li class="option tool" id="pencil">
-            <img src="icons/pencil.svg" alt="">
-            <span>Draw</span>
-          </li>
-          <li class="option tool" id="text">
-            <img src="icons/text.svg" alt="">
-            <span>Write</span>
-          </li>
-          <li class="option tool" id="text">
-              <input id = "colorpicker" type = "color">
-            <span onclick = "changecolor();">Background</span>
-          </li>
-          <li class="option tool" id="zoom-in-button" id="text">
-            <img src="icons/plus.svg" alt="">
-            <span>Zoom in</span>
-          </li>
-          <li class="option tool" id="zoom-out-button" id="text">
-            <img src="icons/minus.svg" alt="">
-            <span>Zoom out</span>
-          </li>
-        </ul>
-      </div>
     </section>
   </div>
 </body>

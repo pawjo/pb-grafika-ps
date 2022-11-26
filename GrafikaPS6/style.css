@@ -278,9 +278,24 @@ input[type=range]::-webkit-slider-thumb {
 }
 
 #row-shapes {
-    display:none;
 }
 
 #row-bezier {
     display:none;
+}
+
+#row-others {
+    display:none;
+}
+
+.point{
+    width:40%;
+    float:left;
+    text-align: center;
+    border-radius: 5px;
+}
+
+.x{
+    float:right;
+    width:10%;
 }
