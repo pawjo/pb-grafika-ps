@@ -233,7 +233,7 @@ function createBezierPointControl(x, y, id) {
     const button = document.createElement("button");
     button.setAttribute("type", "button");
     button.innerText = "X";
-    button.classList.add("x");
+    button.classList.add("close");
     const newControl = document.createElement("div")
     newControl.setAttribute("point-id", id);
     newControl.appendChild(inputX);

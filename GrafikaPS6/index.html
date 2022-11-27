@@ -51,7 +51,7 @@
     </section>
     <section class="tools-board">
         <div class="row buttons">
-        <button class="save-img" onClick="openGeneral()">General</button>
+        <button id="button" class="save-img" onClick="openGeneral()">General</button>
         <div class="row" id="row-shapes">
           <label class="title">Shapes</label>
           <ul class="options">
@@ -98,7 +98,7 @@
             </li>
             </ul>
         </div>
-        <button class="save-img" onClick="openBezier()">Bézier</button>
+        <button id="button" class="save-img" onClick="openBezier()">Bézier</button>
         <div class="row" id="row-bezier">
           <label class="title">Bezier Curve</label>
           <ul class="options">
@@ -107,7 +107,7 @@
               <span>Create</span>
             </li>
             <li class="option tool" id="modify-bezier">
-              <img src="icons/move.svg" alt="">
+              <img src="icons/modify.svg" alt="">
               <span>Modify</span>
             </li>
             <li class="option tool" id="move-bezier">
@@ -118,13 +118,13 @@
               <img src="icons/scale.svg" alt="">
               <span>Scale</span>
             </li>
-          <div style="background-color: grey;">
+          <div>
             <div id="bezier-points">
             </div>
             <button id="add-bezier-point" type="button">+</button>
           </div>
           </div>
-        <button class="save-img" onClick="openOthers()">Others</button>
+        <button id="button" class="save-img" onClick="openOthers()">Others</button>
         <div class="row" id="row-others">
           <label class="title">Others</label>
           <ul class="options">
@@ -147,9 +147,9 @@
             <input type="range" id="size-slider" min="1" max="30" value="2">
           </ul>
           </div>
-        <button class="save-img" onClick="openSvg()">Open</button>
-        <button class="save-img" onClick="saveSvg()">Save</button>
-        <button class="save-img" onClick="clearSvg()">Clear</button>
+        <button id="button" class="save-img" onClick="openSvg()">Open</button>
+        <button id="button" class="save-img" onClick="saveSvg()">Save</button>
+        <button id="button" class="save-img" onClick="clearSvg()">Clear</button>
         </div>
     </section>
   </div>
