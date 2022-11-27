@@ -219,7 +219,9 @@ function onBezierPointControlChange(e) {
 
 function createInput(value) {
     const input = document.createElement("input");
+    const bezier = document.getElementById("bezier-points");
     input.classList.add("point");
+    bezier.style.display = 'block';
     input.setAttribute("type", "number");
     input.value = value;
     input.addEventListener("change", onBezierPointControlChange);
