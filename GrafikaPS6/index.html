@@ -71,8 +71,6 @@
               <img src="icons/line.svg" alt="">
               <span>Line</span>
             </li>
-            <li class="option" for="fill-color" id="fill-color">
-            </li>
           </ul>
           <label class="title">Options</label>
           <ul class="options">
@@ -145,6 +143,10 @@
               <span>Zoom out</span>
             </li>
             <input type="range" id="size-slider" min="1" max="30" value="2">
+            <li class="option tool" id="text">
+              <input type="checkbox" id="fill-color">
+              <span onclick="changeFill();">Fill color</span>
+            </li>
           </ul>
           </div>
         <button id="button" class="save-img" onClick="openSvg()">Open</button>

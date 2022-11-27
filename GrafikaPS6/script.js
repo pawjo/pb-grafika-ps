@@ -1,6 +1,5 @@
 const shapeBtns = document.querySelectorAll(".shape"),
     toolBtns = document.querySelectorAll(".tool"),
-    fillColor = document.querySelector("#fill-color"),
     saveImg = document.querySelector(".save-img"),
     svg = document.querySelector("#workspace");
 
@@ -94,7 +93,20 @@ const changeColor = document.querySelector("#changeColor");
 
 changeColor.addEventListener("change", () => brushColor = changeColor.value);
 
+
+let checkBox = document.getElementById("fill-color");
+let colorFill ="none";
 let brushColor = "black";
+
+function changeFill() {
+    let fillColor = document.getElementById('fill-color').value;
+    if (fillColor.checked == true){
+        colorFill = fillColor;
+     } else {
+         colorFill = "none";
+     }
+
+}
 
 function setSelectedShape(shape) {
     selectedShape = shape;
@@ -159,7 +171,7 @@ function startDraw(e) {
 
 function finalizeSvgElement() {
     // currentElement.classList.add(svgElementClassName);
-    currentElement.setAttribute("fill", "none");
+    currentElement.setAttribute("fill", colorFill);
     currentElement.setAttribute("stroke", brushColor);
     currentElement.setAttribute("stroke-width", brushWidth);
     svg.appendChild(currentElement);
@@ -171,7 +183,6 @@ function startDrawRect(startX, startY) {
     currentElement.setAttribute("y", startY);
     currentElement.setAttribute("width", 0);
     currentElement.setAttribute("height", 0);
-
     finalizeSvgElement();
 }
 
@@ -250,7 +261,7 @@ function addPointToBezier(x, y) {
     point.setAttribute("cx", x);
     point.setAttribute("cy", y);
     point.setAttribute("r", 5);
-    point.setAttribute("fill", "red");
+    point.setAttribute("fill", "#4A98F7");
     const id = currentBezierPoints.length;
     point.setAttribute("point-id", id);
     currentBezierGroup.appendChild(point);
@@ -700,7 +711,7 @@ function onSvgMouseDown(e) {
     else if (selectedTool === tools.pencil) {
         currentAction = tools.pencil;
         path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute("fill", "none");
+        path.setAttribute("fill", fillColor);
         path.setAttribute("stroke", brushColor);
         path.setAttribute("stroke-width", brushWidth);
         buffer = [];
