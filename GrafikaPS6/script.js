@@ -95,16 +95,16 @@ changeColor.addEventListener("change", () => brushColor = changeColor.value);
 
 
 let checkBox = document.getElementById("fill-color");
-let colorFill ="none";
+let colorFill = "none";
 let brushColor = "black";
 
 function changeFill() {
     let fillColor = document.getElementById('fill-color').value;
-    if (fillColor.checked == true){
+    if (fillColor.checked == true) {
         colorFill = fillColor;
-     } else {
-         colorFill = "none";
-     }
+    } else {
+        colorFill = "none";
+    }
 
 }
 
@@ -256,6 +256,29 @@ function createBezierPointControl(x, y, id) {
     box.appendChild(newControl);
 }
 
+function getBezierControlById(id) {
+    const box = document.getElementById("bezier-points");
+    const controls = box.getElementsByTagName("div");
+    for (let i = 0; i < controls.length; i++) {
+        if (controls[i].getAttribute("point-id") == id) {
+            return controls[i];
+        }
+    }
+    return null;
+}
+
+function updateBezierPointControl(x, y, id) {
+    const control = getBezierControlById(id);
+    const inputs = control.getElementsByTagName("input");
+    inputs[0].value = x;
+    inputs[1].value = y;
+}
+
+function deleteBezierPoint(id) {
+    const control = getBezierControlById(id);
+    control.remove();
+}
+
 function addPointToBezier(x, y) {
     const point = document.createElementNS(svgns, "circle");
     point.setAttribute("cx", x);
@@ -267,6 +290,39 @@ function addPointToBezier(x, y) {
     currentBezierGroup.appendChild(point);
     currentBezierPoints.push({ x: x, y: y });
     createBezierPointControl(x, y, id);
+}
+
+function getBezierPointsFromCurrentGroup() {
+    const points = currentBezierGroup.getElementsByTagName("circle");
+    currentBezierPoints = [];
+    for (let i = 0; i < points.length; i++) {
+        points[i].setAttribute("fill", "#4A98F7");
+        const x = parseInt(points[i].getAttribute("cx"));
+        const y = parseInt(points[i].getAttribute("cy"));
+        currentBezierPoints.push({
+            x: x,
+            y: y
+        })
+        createBezierPointControl(x, y, i);
+    }
+}
+
+function removeChildren(parent) {
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
+}
+
+function unselectCurrentBezier() {
+    const points = currentBezierGroup.getElementsByTagName("circle");
+    for (let i = 0; i < points.length; i++) {
+        points[i].removeAttribute("fill");
+    }
+    currentBezierGroup.classList.remove("current-element");
+    currentBezierGroup = null;
+    currentBezierPoints = null;
+    const box = document.getElementById("bezier-points");
+    removeChildren(box);
 }
 
 function startDrawBezier(startX, startY) {
@@ -339,10 +395,10 @@ function drawBezierPoint(x, y) {
 }
 
 function moveBezierPoint(dX, dY, id) {
-    moving(dY, dY);
+    moving(dX, dY);
     currentBezierPoints[id].x += dX;
     currentBezierPoints[id].y += dY;
-    generateBezierCurve();
+    updateBezierPointControl(currentBezierPoints[id].x, currentBezierPoints[id].y, id);
 }
 
 function setLineAttributesToStartPosition(startX, startY) {
@@ -654,13 +710,23 @@ function onObjectMouseDown(e) {
     }
 
     e.stopPropagation();
+
+    if (currentElement) {
+        currentElement.classList.remove("current-element");
+    }
     currentElement = e.target;
 
-    if (currentElement.parentElement.tagName === "g") {
+    if (!currentBezierGroup && currentElement.parentElement.tagName === "g") {
         currentBezierGroup = currentElement.parentElement;
+        currentBezierGroup.classList.add("current-element");
+        getBezierPointsFromCurrentGroup();
+    }
+    else if (!currentBezierGroup) {
+        currentElement.classList.add("current-element");
     }
 
     currentAction = selectedTool;
+
 
     if (currentElement.tagName === "polygon") {
         setCurrentPolygonAttributesFromCurrentElement();
@@ -739,6 +805,14 @@ function onSvgMouseDown(e) {
         textField.value = "";
         textField.style.position = "absolute";
     }
+    else if (currentBezierGroup) {
+        unselectCurrentBezier();
+    }
+    else if (currentElement) {
+        currentElement.classList.remove("current-element");
+        currentElement = null;
+        currentPolygonPointIndex = 0;
+    }
 }
 
 function onMouseDown(e) {
@@ -786,6 +860,16 @@ function onMouseMove(e) {
         case tools.modifyBezier:
             const id = currentElement.getAttribute("point-id");
             moveBezierPoint(e.movementX, e.movementY, id);
+            generateBezierCurve();
+            break;
+        case tools.moveBezier:
+            const points = currentBezierGroup.getElementsByTagName("circle");
+            for (let i = 0; i < points.length; i++) {
+                const id = points[i].getAttribute("point-id");
+                currentElement = points[i];
+                moveBezierPoint(e.movementX, e.movementY, id);
+                generateBezierCurve();
+            }
             break;
     }
 }
@@ -801,6 +885,10 @@ function onMouseUp() {
         case tools.scale:
         case tools.modifyBezier:
             currentAction = null;
+            break;
+        case tools.moveBezier:
+            currentAction = null;
+            currentElement = null;
             break;
     }
 }
@@ -891,6 +979,10 @@ function openSvg() {
 }
 
 function saveSvg() {
+    const activeElements = document.getElementsByClassName("current-element");
+    for (let i = 0; i < activeElements.length; i++) {
+        activeElements[i].classList.remove("current-element");
+    }
     svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
     var svgData = svg.outerHTML;
     var preface = '<?xml version="1.0" standalone="no"?>\r\n';
@@ -955,7 +1047,7 @@ document.getElementById("zoom-out-button").onclick = () => zoom("out");
 
 function clearSvg() {
     const element = document.getElementById("workspace");
-    element.innerHTML = "";
+    removeChildren(element);
 }
 
 
@@ -963,28 +1055,28 @@ function openGeneral() {
 
     var row = document.getElementById('row-shapes');
     if (row.style.display === "none") {
-       row.style.display = "block";
-     } else {
-       row.style.display = "none";
-     }
+        row.style.display = "block";
+    } else {
+        row.style.display = "none";
+    }
 }
 
 function openBezier() {
 
     var row = document.getElementById('row-bezier');
     if (row.style.display === "none") {
-       row.style.display = "block";
-     } else {
-       row.style.display = "none";
-     }
+        row.style.display = "block";
+    } else {
+        row.style.display = "none";
+    }
 }
 
 function openOthers() {
 
     var row = document.getElementById('row-others');
     if (row.style.display === "none") {
-       row.style.display = "block";
-     } else {
-       row.style.display = "none";
-     }
+        row.style.display = "block";
+    } else {
+        row.style.display = "none";
+    }
 }
