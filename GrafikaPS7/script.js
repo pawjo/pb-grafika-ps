@@ -737,6 +737,7 @@ function onObjectMouseDown(e) {
     if (currentAction === tools.scale)
         switch (currentElement.tagName) {
             case "rect":
+            case "image":
                 prepareRectToScaling(e);
                 break;
             case "circle":
@@ -824,9 +825,9 @@ function onMouseDown(e) {
     else if (selectedTool === tools.drawBezier && currentBezierGroup) {
         drawBezierPoint(e.offsetX, e.offsetY);
     }
-    else if (selectedTool === tools.scale && currentElement.tagName === "g" && e.target.tagName === "circle") {
-        startScaleCurve(e);
-    }
+    // else if (selectedTool === tools.scale && currentElement.tagName === "g" && e.target.tagName === "circle") {
+    //     startScaleCurve(e);
+    // }
     else if (e.target.tagName === "svg") {
         onSvgMouseDown(e);
     }
@@ -980,35 +981,46 @@ function openSvg() {
     input.click();
 }
 
-function fileToDataUri(field) {
-    return new Promise((resolve) => {
-        const reader = new FileReader();
+function onLoadTmpImage(e) {
+    let imageWidth = e.target.width;
+    let imageHeight = e.target.height;
 
-        reader.addEventListener("load", () => {
-            resolve(reader.result);
-        });
+    const sketch = document.getElementById("sketch");
+    const svgWidth = sketch.offsetWidth;
+    const svgHeight = sketch.offsetHeight;
 
-        reader.readAsDataURL(field);
-    });
+    if (imageWidth > svgWidth || imageHeight > svgHeight) {
+        const factor = Math.max(imageWidth / svgWidth, imageHeight / svgHeight);
+        imageWidth /= factor;
+        imageHeight /= factor;
+    }
+
+    currentElement = document.createElementNS(svgns, "image");
+    currentElement.setAttribute("href", e.target.src);
+    currentElement.setAttribute("width", imageWidth);
+    currentElement.setAttribute("height", imageHeight);
+    currentElement.setAttribute("x", 0);
+    currentElement.setAttribute("y", 0);
+    svg.appendChild(currentElement);
 }
 
 function openImage() {
     let input = document.createElement('input');
     input.type = 'file';
-    input.onchange = async _ => {
+    input.onchange = () => {
         const file = input.files[0];
         if (!file) {
             return;
         }
 
-        currentElement = document.createElementNS(svgns, "image");
-        const imageData = await fileToDataUri(file);
-        currentElement.setAttribute("href", imageData);
-        currentElement.setAttribute("height", 200);
-        currentElement.setAttribute("width", 200);
-        currentElement.setAttribute("x", 0);
-        currentElement.setAttribute("y", 0);
-        svg.appendChild(currentElement);
+        const reader = new FileReader();
+        reader.onload = e => {
+            const tmpImage = new Image();
+            tmpImage.onload = onLoadTmpImage;
+            tmpImage.src = e.target.result;
+        };
+
+        reader.readAsDataURL(file);
     };
     input.click();
 }

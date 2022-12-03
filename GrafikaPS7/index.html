@@ -50,7 +50,7 @@
       <input type="text" id="text-field" style="display: none">
     </section>
     <section class="tools-board">
-        <div class="row buttons">
+      <div class="row buttons">
         <button id="button" class="save-img" onClick="openGeneral()">General</button>
         <div class="row" id="row-shapes">
           <label class="title">Shapes</label>
@@ -98,7 +98,7 @@
               <img src="icons/text.svg" alt="">
               <span>Add image</span>
             </li>
-            </ul>
+          </ul>
         </div>
         <button id="button" class="save-img" onClick="openBezier()">Bézier</button>
         <div class="row" id="row-bezier">
@@ -120,20 +120,20 @@
               <img src="icons/scale.svg" alt="">
               <span>Scale</span>
             </li>
-          <div>
+            <div>
               <button id="add-bezier-point" type="button">+</button>
-            <div id="bezier-points">
+              <div id="bezier-points">
+              </div>
             </div>
-          </div>
-          </div>
+        </div>
         <button id="button" class="save-img" onClick="openOthers()">Others</button>
         <div class="row" id="row-others">
           <label class="title">Others</label>
           <ul class="options">
-              <li class="option tool" id="text">
-                <input id="changeColor" type="color">
-                <span>Color</span>
-              </li>
+            <li class="option tool" id="text">
+              <input id="changeColor" type="color">
+              <span>Color</span>
+            </li>
             <li class="option tool" id="text">
               <input id="colorpicker" type="color">
               <span onclick="changecolor();">Background</span>
@@ -147,17 +147,18 @@
               <span>Zoom out</span>
             </li>
             <input type="range" id="size-slider" min="1" max="30" value="2">
-<!--            <li class="option tool" id="text">-->
-<!--              <input type="checkbox" id="fill-color">-->
-<!--              <span onclick="changeFill();">Fill color</span>-->
-<!--            </li>-->
+            <!--            <li class="option tool" id="text">-->
+            <!--              <input type="checkbox" id="fill-color">-->
+            <!--              <span onclick="changeFill();">Fill color</span>-->
+            <!--            </li>-->
           </ul>
-          </div>
+        </div>
         <button id="button" class="save-img" onClick="openSvg()">Open</button>
         <button id="button" class="save-img" onClick="saveSvg()">Save</button>
         <button id="button" class="save-img" onClick="clearSvg()">Clear</button>
-        </div>
+      </div>
     </section>
+    <img id="uploadedImage" style="max-width: 100%; height: 200px;" />
   </div>
 </body>
 
