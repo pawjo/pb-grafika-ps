@@ -1127,3 +1127,132 @@ function openOthers() {
         row.style.display = "none";
     }
 }
+
+
+function filterImage(filter) {
+    if (currentElement.tagName != "image") {
+        return;
+    }
+
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+
+    const canvasWidth = currentElement.getAttribute("width");
+    const canvasHeight = currentElement.getAttribute("height");
+
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
+    context.drawImage(currentElement, 0, 0, canvasWidth, canvasHeight);
+
+    const sourceImageData = context.getImageData(0, 0, canvasWidth, canvasHeight);
+    const blankOutputImageData = context.createImageData(
+        canvasWidth,
+        canvasHeight
+    );
+
+    const outputImageData = applyFilter(
+        sourceImageData,
+        blankOutputImageData,
+        filter
+    );
+
+    context.putImageData(outputImageData, 0, 0);
+
+    currentElement.setAttribute("href", canvas.toDataURL());
+}
+
+function applyFilter(sourceImageData, outputImageData, filter) {
+    if (filter === "noFilter") {
+        return sourceImageData;
+    } else if (filter === "threshold") {
+        return applyThreshold(sourceImageData);
+    } else if (filter === "sharpen") {
+        return applyConvolution(sourceImageData, outputImageData, [
+            0,
+            -1,
+            0,
+            -1,
+            5,
+            -1,
+            0,
+            -1,
+            0
+        ]);
+    } else if (filter === "blur") {
+        return applyConvolution(sourceImageData, outputImageData, [
+            1 / 16,
+            2 / 16,
+            1 / 16,
+            2 / 16,
+            4 / 16,
+            2 / 16,
+            1 / 16,
+            2 / 16,
+            1 / 16
+        ]);
+    } else {
+        return sourceImageData;
+    }
+}
+
+function applyThreshold(sourceImageData, threshold = 127) {
+    const src = sourceImageData.data;
+
+    for (let i = 0; i < src.length; i += 4) {
+        const r = src[i];
+        const g = src[i + 1];
+        const b = src[i + 2];
+        const v = (r + g + b) / 3 >= threshold ? 255 : 0;
+        src[i] = src[i + 1] = src[i + 2] = v;
+    }
+
+    return sourceImageData;
+}
+
+function applyConvolution(sourceImageData, outputImageData, kernel) {
+    const src = sourceImageData.data;
+    const dst = outputImageData.data;
+
+    const srcWidth = sourceImageData.width;
+    const srcHeight = sourceImageData.height;
+
+    const side = Math.round(Math.sqrt(kernel.length));
+    const halfSide = Math.floor(side / 2);
+
+    const w = srcWidth;
+    const h = srcHeight;
+
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+            let r = 0,
+                g = 0,
+                b = 0,
+                a = 0;
+
+            for (let cy = 0; cy < side; cy++) {
+                for (let cx = 0; cx < side; cx++) {
+                    const scy = y + cy - halfSide;
+                    const scx = x + cx - halfSide;
+
+                    if (scy >= 0 && scy < srcHeight && scx >= 0 && scx < srcWidth) {
+                        let srcOffset = (scy * srcWidth + scx) * 4;
+                        let wt = kernel[cy * side + cx];
+                        r += src[srcOffset] * wt;
+                        g += src[srcOffset + 1] * wt;
+                        b += src[srcOffset + 2] * wt;
+                        a += src[srcOffset + 3] * wt;
+                    }
+                }
+            }
+
+            const dstOffset = (y * w + x) * 4;
+
+            dst[dstOffset] = r;
+            dst[dstOffset + 1] = g;
+            dst[dstOffset + 2] = b;
+            dst[dstOffset + 3] = a;
+        }
+    }
+    return outputImageData;
+}
