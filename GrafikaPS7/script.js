@@ -1163,37 +1163,68 @@ function filterImage(filter) {
 }
 
 function applyFilter(sourceImageData, outputImageData, filter) {
-    if (filter === "noFilter") {
-        return sourceImageData;
-    } else if (filter === "threshold") {
-        return applyThreshold(sourceImageData);
-    } else if (filter === "sharpen") {
-        return applyConvolution(sourceImageData, outputImageData, [
-            0,
-            -1,
-            0,
-            -1,
-            5,
-            -1,
-            0,
-            -1,
-            0
-        ]);
-    } else if (filter === "blur") {
-        return applyConvolution(sourceImageData, outputImageData, [
-            1 / 16,
-            2 / 16,
-            1 / 16,
-            2 / 16,
-            4 / 16,
-            2 / 16,
-            1 / 16,
-            2 / 16,
-            1 / 16
-        ]);
-    } else {
-        return sourceImageData;
+    switch (filter) {
+        case "threshold":
+            return applyThreshold(sourceImageData);
+        case "sharpen":
+            return applyConvolution(sourceImageData, outputImageData, [
+                0,
+                -1,
+                0,
+                -1,
+                5,
+                -1,
+                0,
+                -1,
+                0
+            ]);
+        case "blur":
+            return applyConvolution(sourceImageData, outputImageData, [
+                1 / 16,
+                2 / 16,
+                1 / 16,
+                2 / 16,
+                4 / 16,
+                2 / 16,
+                1 / 16,
+                2 / 16,
+                1 / 16
+            ]);
+        case "median":
+            return applyMedian(sourceImageData, outputImageData);
     }
+
+    // if (filter === "noFilter") {
+    //     return sourceImageData;
+    // } else if (filter === "threshold") {
+    //     return applyThreshold(sourceImageData);
+    // } else if (filter === "sharpen") {
+    //     return applyConvolution(sourceImageData, outputImageData, [
+    //         0,
+    //         -1,
+    //         0,
+    //         -1,
+    //         5,
+    //         -1,
+    //         0,
+    //         -1,
+    //         0
+    //     ]);
+    // } else if (filter === "blur") {
+    //     return applyConvolution(sourceImageData, outputImageData, [
+    //         1 / 16,
+    //         2 / 16,
+    //         1 / 16,
+    //         2 / 16,
+    //         4 / 16,
+    //         2 / 16,
+    //         1 / 16,
+    //         2 / 16,
+    //         1 / 16
+    //     ]);
+    // } else {
+    //     return sourceImageData;
+    // }
 }
 
 function applyThreshold(sourceImageData, threshold = 127) {
@@ -1252,6 +1283,58 @@ function applyConvolution(sourceImageData, outputImageData, kernel) {
             dst[dstOffset + 1] = g;
             dst[dstOffset + 2] = b;
             dst[dstOffset + 3] = a;
+        }
+    }
+    return outputImageData;
+}
+
+function sortNumber(a, b) {
+    return a - b;
+}
+
+function applyMedian(sourceImageData, outputImageData, kernel) {
+    const src = sourceImageData.data;
+    const dst = outputImageData.data;
+
+    const srcWidth = sourceImageData.width;
+    const srcHeight = sourceImageData.height;
+
+    const side = 3;
+    const halfSide = 1;
+
+    const w = srcWidth;
+    const h = srcHeight;
+
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+            const rArr = [];
+            const gArr = [];
+            const bArr = [];
+
+            for (let cy = 0; cy < side; cy++) {
+                for (let cx = 0; cx < side; cx++) {
+                    const scy = y + cy - halfSide;
+                    const scx = x + cx - halfSide;
+
+                    if (scy >= 0 && scy < srcHeight && scx >= 0 && scx < srcWidth) {
+                        let srcOffset = (scy * srcWidth + scx) * 4;
+                        rArr.push(src[srcOffset]);
+                        gArr.push(src[srcOffset + 1]);
+                        bArr.push(src[srcOffset + 2]);
+                    }
+                }
+            }
+
+            const dstOffset = (y * w + x) * 4;
+
+            rArr.sort(sortNumber);
+            gArr.sort(sortNumber);
+            bArr.sort(sortNumber);
+
+            dst[dstOffset] = rArr[4];
+            dst[dstOffset + 1] = gArr[4];
+            dst[dstOffset + 2] = bArr[4];
+            dst[dstOffset + 3] = src[dstOffset + 3];
         }
     }
     return outputImageData;
