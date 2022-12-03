@@ -1128,6 +1128,16 @@ function openOthers() {
     }
 }
 
+function openFilters() {
+
+    var row = document.getElementById('row-filters');
+    if (row.style.display === "none") {
+        row.style.display = "block";
+    } else {
+        row.style.display = "none";
+    }
+}
+
 
 function filterImage(filter) {
     if (currentElement.tagName != "image") {

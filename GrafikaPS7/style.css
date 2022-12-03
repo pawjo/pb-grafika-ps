@@ -287,6 +287,10 @@ input[type=range]::-webkit-slider-thumb {
     display:none;
 }
 
+#row-filters {
+    display:none;
+}
+
 .point{
     width: 35%;
     float: left;

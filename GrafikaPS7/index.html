@@ -94,25 +94,31 @@
               <img src="icons/text.svg" alt="">
               <span>Write</span>
             </li>
+            </ul>
+        </div>
+          <button id="button" class="save-img" onClick="openFilters()">Filters</button>
+          <div class="row" id="row-filters">
+            <label class="title">Filters</label>
+            <ul class="options">
             <li class="option tool" id="image" onclick="openImage()">
-              <img src="icons/text.svg" alt="">
+              <img src="icons/image.svg" alt="">
               <span>Add image</span>
             </li>
             <li class="option" id="threshold" onclick="filterImage('threshold')">
-              <img src="icons/text.svg" alt="">
+              <img src="icons/binary.svg" alt="">
               <span>Apply threshold</span>
             </li>
             <li class="option" id="sharpen" onclick="filterImage('sharpen')">
-              <img src="icons/text.svg" alt="">
+              <img src="icons/focus.svg" alt="">
               <span>Apply sharpen</span>
             </li>
             <li class="option" id="blur" onclick="filterImage('blur')">
-              <img src="icons/text.svg" alt="">
-              <span>Apply blur</span>
+              <img src="icons/blur.svg" alt="">
+              <span>Blur</span>
             </li>
             <li class="option" id="blur" onclick="filterImage('median')">
-              <img src="icons/text.svg" alt="">
-              <span>Apply median</span>
+              <img src="icons/mosaic.svg" alt="">
+              <span>Median</span>
             </li>
           </ul>
         </div>
