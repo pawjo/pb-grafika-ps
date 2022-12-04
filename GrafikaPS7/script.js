@@ -99,6 +99,11 @@ let checkBox = document.getElementById("fill-color");
 let colorFill = "none";
 let brushColor = "black";
 
+let labelingArray = null;
+let labels = null;
+let linkedLabels = null;
+let processedLabels = null;
+
 function changeFill() {
     let fillColor = document.getElementById('fill-color').value;
     if (fillColor.checked == true) {
@@ -1202,39 +1207,9 @@ function applyFilter(sourceImageData, outputImageData, filter) {
             ]);
         case "median":
             return applyMedian(sourceImageData, outputImageData);
+        case "greenArea":
+            return detectGreenAreaPercent(sourceImageData, outputImageData);
     }
-
-    // if (filter === "noFilter") {
-    //     return sourceImageData;
-    // } else if (filter === "threshold") {
-    //     return applyThreshold(sourceImageData);
-    // } else if (filter === "sharpen") {
-    //     return applyConvolution(sourceImageData, outputImageData, [
-    //         0,
-    //         -1,
-    //         0,
-    //         -1,
-    //         5,
-    //         -1,
-    //         0,
-    //         -1,
-    //         0
-    //     ]);
-    // } else if (filter === "blur") {
-    //     return applyConvolution(sourceImageData, outputImageData, [
-    //         1 / 16,
-    //         2 / 16,
-    //         1 / 16,
-    //         2 / 16,
-    //         4 / 16,
-    //         2 / 16,
-    //         1 / 16,
-    //         2 / 16,
-    //         1 / 16
-    //     ]);
-    // } else {
-    //     return sourceImageData;
-    // }
 }
 
 function applyThreshold(sourceImageData, threshold = 127) {
@@ -1302,7 +1277,7 @@ function sortNumber(a, b) {
     return a - b;
 }
 
-function applyMedian(sourceImageData, outputImageData, kernel) {
+function applyMedian(sourceImageData, outputImageData) {
     const src = sourceImageData.data;
     const dst = outputImageData.data;
 
@@ -1347,5 +1322,144 @@ function applyMedian(sourceImageData, outputImageData, kernel) {
             dst[dstOffset + 3] = src[dstOffset + 3];
         }
     }
+    return outputImageData;
+}
+
+function createArray(length) {
+    var arr = new Array(length || 0),
+        i = length;
+
+    if (arguments.length > 1) {
+        var args = Array.prototype.slice.call(arguments, 1);
+        while (i--) arr[length - 1 - i] = createArray.apply(this, args);
+    }
+
+    return arr;
+}
+
+function processLabel(label, value) {
+    if (linkedLabels[label] === 0) {
+        labels[label] += value;
+        return label;
+    }
+
+
+    linkedLabels[label] = processLabel(linkedLabels[label], labels[label] + value);
+    processedLabels[label] = 1;
+    return linkedLabels[label];
+}
+
+function detectGreenAreaPercent(sourceImageData, outputImageData) {
+    const src = sourceImageData.data;
+    const dst = outputImageData.data;
+    const srcWidth = sourceImageData.width;
+    const srcHeight = sourceImageData.height;
+    const size = srcWidth * srcHeight;
+    const binaryData = createArray(srcHeight, srcWidth);
+    labels = [];
+    labels.push(0);
+    labelingArray = createArray(srcHeight, srcWidth);
+    processedLabels = [];
+    processedLabels.push(0);
+    linkedLabels = [];
+    linkedLabels.push(0);
+
+    for (let i = 0, y = 0; y < srcHeight; y++) {
+        for (let x = 0; x < srcWidth; x++) {
+            const r = src[i++];
+            const g = src[i++];
+            const b = src[i++];
+            i++;
+            if (g > 40) {
+                isGreenMajority = (r < 0.8 * g && b < g) || (r < g && b < 0.8 * g);
+                binaryData[y][x] = isGreenMajority ? 1 : 0;
+            }
+            else
+                binaryData[y][x] = 0;
+            labelingArray[y][x] = 0;
+        }
+    }
+
+    for (let i = 0, y = 0; y < srcHeight; y++) {
+        for (let x = 0; x < srcWidth; x++) {
+            if (binaryData[y][x] === 0)
+                continue;
+
+            const west = x > 0 ? labelingArray[y][x - 1] : 0;
+            const north = y > 0 ? labelingArray[y - 1][x] : 0;
+
+            if (west > 0 && north > 0 && west !== north) {
+                const max = Math.max(west, north);
+                const min = Math.min(west, north);
+                labels[min]++;
+                labelingArray[y][x] = min;
+                linkedLabels[max] = min;
+            }
+            else if (west > 0 || north > 0) {
+                const v = Math.max(west, north);
+                labelingArray[y][x] = v;
+                labels[v]++;
+            }
+            else {
+                const v = labels.length;
+                labelingArray[y][x] = v;
+                labels.push(1);
+                linkedLabels.push(0);
+                processedLabels.push(0);
+            }
+        }
+    }
+
+    console.log("labels");
+    console.log(labels);
+    console.log("linked");
+    console.log(linkedLabels);
+    let maxCount = 0;
+    let maxLabel = 0;
+    for (let i = labels.length - 1; i > 0; i--) {
+        if (processedLabels[i] === 1) {
+            continue;
+        }
+        if (linkedLabels[i] === 0 && maxCount < labels[i]) {
+            console.log(`i = ${i}, count = ${labels[i]}`);
+            maxCount = labels[i];
+            maxLabel = i;
+        }
+        else if (linkedLabels[i] > 0) {
+            console.log(`i = ${i}, label = ${linkedLabels[i]}`);
+            linkedLabels[i] = processLabel(linkedLabels[i], labels[i]);
+            processedLabels[i] = 1;
+        }
+    }
+
+    console.log("labels");
+    console.log(labels);
+    console.log("linked");
+    console.log(linkedLabels);
+    console.log(`maxLabel = ${maxLabel}, count = ${maxCount}`);
+
+    for (let i = 0, y = 0; y < srcHeight; y++) {
+        for (let x = 0; x < srcWidth; x++) {
+
+            let v = 0;
+
+            const label = labelingArray[y][x];
+            if (label === maxLabel || linkedLabels[label] === maxLabel) {
+                v = 255;
+            }
+            else if (label > 0) {
+                v = 128;
+            }
+
+            dst[i] = 0;
+            dst[i + 1] = v;
+            dst[i + 2] = 0;
+            dst[i + 3] = src[i + 3];
+            i += 4;
+        }
+    }
+
+    console.log(binaryData);
+
     return outputImageData;
 }
