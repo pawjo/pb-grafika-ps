@@ -1192,39 +1192,9 @@ function applyFilter(sourceImageData, outputImageData, filter) {
             ]);
         case "median":
             return applyMedian(sourceImageData, outputImageData);
+        case "greenArea":
+            return detectGreenAreaPercent(sourceImageData, outputImageData);
     }
-
-    // if (filter === "noFilter") {
-    //     return sourceImageData;
-    // } else if (filter === "threshold") {
-    //     return applyThreshold(sourceImageData);
-    // } else if (filter === "sharpen") {
-    //     return applyConvolution(sourceImageData, outputImageData, [
-    //         0,
-    //         -1,
-    //         0,
-    //         -1,
-    //         5,
-    //         -1,
-    //         0,
-    //         -1,
-    //         0
-    //     ]);
-    // } else if (filter === "blur") {
-    //     return applyConvolution(sourceImageData, outputImageData, [
-    //         1 / 16,
-    //         2 / 16,
-    //         1 / 16,
-    //         2 / 16,
-    //         4 / 16,
-    //         2 / 16,
-    //         1 / 16,
-    //         2 / 16,
-    //         1 / 16
-    //     ]);
-    // } else {
-    //     return sourceImageData;
-    // }
 }
 
 function applyThreshold(sourceImageData, threshold = 127) {
@@ -1292,7 +1262,7 @@ function sortNumber(a, b) {
     return a - b;
 }
 
-function applyMedian(sourceImageData, outputImageData, kernel) {
+function applyMedian(sourceImageData, outputImageData) {
     const src = sourceImageData.data;
     const dst = outputImageData.data;
 
@@ -1337,5 +1307,143 @@ function applyMedian(sourceImageData, outputImageData, kernel) {
             dst[dstOffset + 3] = src[dstOffset + 3];
         }
     }
+    return outputImageData;
+}
+
+function createArray(length) {
+    var arr = new Array(length || 0),
+        i = length;
+
+    if (arguments.length > 1) {
+        var args = Array.prototype.slice.call(arguments, 1);
+        while (i--) arr[length - 1 - i] = createArray.apply(this, args);
+    }
+
+    return arr;
+}
+
+function detectGreenAreaPercent(sourceImageData, outputImageData) {
+    const src = sourceImageData.data;
+    const dst = outputImageData.data;
+    const srcWidth = sourceImageData.width;
+    const srcHeight = sourceImageData.height;
+    const size = srcWidth * srcHeight;
+    const binaryData = createArray(srcHeight, srcWidth);
+    const labelingArray = createArray(srcHeight, srcWidth);
+    const labels = [];
+    labels.push(0);
+    const linkedLabels = [];
+    linkedLabels.push(null);
+
+    for (let i = 0, y = 0; y < srcHeight; y++) {
+        for (let x = 0; x < srcWidth; x++) {
+            const r = src[i++];
+            const g = src[i++];
+            const b = src[i++];
+            i++;
+            binaryData[y][x] = r < 0.9 * g && b < 0.9 * g ? 1 : 0;
+            labelingArray[y][x] = 0;
+        }
+    }
+
+    for (let i = 0, y = 0; y < srcHeight; y++) {
+        for (let x = 0; x < srcWidth; x++) {
+            if (binaryData[y][x] === 0)
+                continue;
+
+            const west = x > 0 ? labelingArray[y][x - 1] : 0;
+            const north = y > 0 ? labelingArray[y - 1][x] : 0;
+
+            if (west > 0 && north > 0 && west !== north) {
+                const max = Math.max(west, north);
+                const min = Math.min(west, north);
+                labels[min]++;
+                labelingArray[y][x] = min;
+                if (!linkedLabels[min].includes(max))
+                    linkedLabels[min].push(max);
+            }
+            else if (west > 0 || north > 0) {
+                const v = Math.max(west, north);
+                labelingArray[y][x] = v;
+                labels[v]++;
+            }
+            else {
+                const v = labels.length;
+                labelingArray[y][x] = v;
+                labels.push(1);
+                linkedLabels.push(new Array());
+            }
+        }
+    }
+
+    console.log(linkedLabels);
+    let lastGroup = labels.length - 1;
+    for (let i = lastGroup; i >= 0; i--) {
+        if (!linkedLabels[i] || linkedLabels[i].length === 0) {
+            continue;
+        }
+
+        const min = Math.min(linkedLabels[i]);
+
+        // if (min > i && linkedLabels[min].length > 1) {
+        //     lastGroup = i;
+        //     break;
+        // }
+
+        console.log(`i = ${i}, min = ${min}`);
+        console.log(linkedLabels[min]);
+        if (min === 0 || min > i || isNaN(min))
+            continue;
+
+        if (linkedLabels[min].includes(i))
+            continue;
+
+        linkedLabels[i].forEach(x => {
+            if (!linkedLabels[min].includes(x)) {
+                linkedLabels[min].push(x);
+                labels[min] += labels[x];
+            }
+        });
+    }
+
+    let maxCount = 0;
+    let maxLabel = 0;
+    for (let i = 0; i < lastGroup; i++) {
+        if (maxCount < labels[i]) {
+            maxCount = labels[i];
+            maxLabel = i;
+        }
+    }
+
+    console.log(labels);
+    const factor = 255 / lastGroup;
+    const maxLabelLinkedLabels = linkedLabels[maxLabel];
+
+    for (let i = 0, y = 0; y < srcHeight; y++) {
+        for (let x = 0; x < srcWidth; x++) {
+            // const v = binaryData[y][x] === 1 ? 0 : 255;
+            // dst[i] = dst[i + 1] = dst[i + 2] = v;
+            // dst[i + 3] = src[i + 3];
+
+            let v = 0;
+
+            if (labelingArray[y][x] > 0) {
+                v = 128;
+                for (let j = 0; j < maxLabelLinkedLabels.length; j++) {
+                    if (maxLabelLinkedLabels[j] === labelingArray[y][x])
+                        v = 255;
+                }
+            }
+
+            dst[i] = 0;
+            dst[i + 1] = v;
+            dst[i + 2] = 0;
+            dst[i + 3] = src[i + 3];
+            i += 4;
+        }
+    }
+
+    console.log(binaryData);
+
     return outputImageData;
 }
