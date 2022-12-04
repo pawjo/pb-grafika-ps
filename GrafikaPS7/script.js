@@ -1360,7 +1360,12 @@ function detectGreenAreaPercent(sourceImageData, outputImageData) {
             const g = src[i++];
             const b = src[i++];
             i++;
-            binaryData[y][x] = r < 0.9 * g && b < 0.9 * g ? 1 : 0;
+            if (g > 40) {
+                isGreenMajority = (r < 0.8 * g && b < g) || (r < g && b < 0.8 * g);
+                binaryData[y][x] = isGreenMajority ? 1 : 0;
+            }
+            else
+                binaryData[y][x] = 0;
             labelingArray[y][x] = 0;
         }
     }
