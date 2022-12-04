@@ -99,6 +99,11 @@ let checkBox = document.getElementById("fill-color");
 let colorFill = "none";
 let brushColor = "black";
 
+let labelingArray = null;
+let labels = null;
+let linkedLabels = null;
+let processedLabels = null;
+
 function changeFill() {
     let fillColor = document.getElementById('fill-color').value;
     if (fillColor.checked == true) {
@@ -1322,6 +1327,18 @@ function createArray(length) {
     return arr;
 }
 
+function processLabel(label, value) {
+    if (linkedLabels[label] === 0) {
+        labels[label] += value;
+        return label;
+    }
+
+
+    linkedLabels[label] = processLabel(linkedLabels[label], labels[label] + value);
+    processedLabels[label] = 1;
+    return linkedLabels[label];
+}
+
 function detectGreenAreaPercent(sourceImageData, outputImageData) {
     const src = sourceImageData.data;
     const dst = outputImageData.data;
@@ -1329,11 +1346,13 @@ function detectGreenAreaPercent(sourceImageData, outputImageData) {
     const srcHeight = sourceImageData.height;
     const size = srcWidth * srcHeight;
     const binaryData = createArray(srcHeight, srcWidth);
-    const labelingArray = createArray(srcHeight, srcWidth);
-    const labels = [];
+    labels = [];
     labels.push(0);
-    const linkedLabels = [];
-    linkedLabels.push(null);
+    labelingArray = createArray(srcHeight, srcWidth);
+    processedLabels = [];
+    processedLabels.push(0);
+    linkedLabels = [];
+    linkedLabels.push(0);
 
     for (let i = 0, y = 0; y < srcHeight; y++) {
         for (let x = 0; x < srcWidth; x++) {
@@ -1359,8 +1378,7 @@ function detectGreenAreaPercent(sourceImageData, outputImageData) {
                 const min = Math.min(west, north);
                 labels[min]++;
                 labelingArray[y][x] = min;
-                if (!linkedLabels[min].includes(max))
-                    linkedLabels[min].push(max);
+                linkedLabels[max] = min;
             }
             else if (west > 0 || north > 0) {
                 const v = Math.max(west, north);
@@ -1371,68 +1389,51 @@ function detectGreenAreaPercent(sourceImageData, outputImageData) {
                 const v = labels.length;
                 labelingArray[y][x] = v;
                 labels.push(1);
-                linkedLabels.push(new Array());
+                linkedLabels.push(0);
+                processedLabels.push(0);
             }
         }
     }
 
+    console.log("labels");
+    console.log(labels);
+    console.log("linked");
     console.log(linkedLabels);
-    let lastGroup = labels.length - 1;
-    for (let i = lastGroup; i >= 0; i--) {
-        if (!linkedLabels[i] || linkedLabels[i].length === 0) {
-            continue;
-        }
-
-        const min = Math.min(linkedLabels[i]);
-
-        // if (min > i && linkedLabels[min].length > 1) {
-        //     lastGroup = i;
-        //     break;
-        // }
-
-        console.log(`i = ${i}, min = ${min}`);
-        console.log(linkedLabels[min]);
-        if (min === 0 || min > i || isNaN(min))
-            continue;
-
-        if (linkedLabels[min].includes(i))
-            continue;
-
-        linkedLabels[i].forEach(x => {
-            if (!linkedLabels[min].includes(x)) {
-                linkedLabels[min].push(x);
-                labels[min] += labels[x];
-            }
-        });
-    }
-
     let maxCount = 0;
     let maxLabel = 0;
-    for (let i = 0; i < lastGroup; i++) {
-        if (maxCount < labels[i]) {
+    for (let i = labels.length - 1; i > 0; i--) {
+        if (processedLabels[i] === 1) {
+            continue;
+        }
+        if (linkedLabels[i] === 0 && maxCount < labels[i]) {
+            console.log(`i = ${i}, count = ${labels[i]}`);
             maxCount = labels[i];
             maxLabel = i;
         }
+        else if (linkedLabels[i] > 0) {
+            console.log(`i = ${i}, label = ${linkedLabels[i]}`);
+            linkedLabels[i] = processLabel(linkedLabels[i], labels[i]);
+            processedLabels[i] = 1;
+        }
     }
 
+    console.log("labels");
     console.log(labels);
-    const factor = 255 / lastGroup;
-    const maxLabelLinkedLabels = linkedLabels[maxLabel];
+    console.log("linked");
+    console.log(linkedLabels);
+    console.log(`maxLabel = ${maxLabel}, count = ${maxCount}`);
 
     for (let i = 0, y = 0; y < srcHeight; y++) {
         for (let x = 0; x < srcWidth; x++) {
-            // const v = binaryData[y][x] === 1 ? 0 : 255;
-            // dst[i] = dst[i + 1] = dst[i + 2] = v;
-            // dst[i + 3] = src[i + 3];
 
             let v = 0;
 
-            if (labelingArray[y][x] > 0) {
+            const label = labelingArray[y][x];
+            if (label === maxLabel || linkedLabels[label] === maxLabel) {
+                v = 255;
+            }
+            else if (label > 0) {
                 v = 128;
-                for (let j = 0; j < maxLabelLinkedLabels.length; j++) {
-                    if (maxLabelLinkedLabels[j] === labelingArray[y][x])
-                        v = 255;
-                }
             }
 
             dst[i] = 0;
