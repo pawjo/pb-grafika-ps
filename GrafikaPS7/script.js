@@ -1446,19 +1446,22 @@ function detectGreenAreaPercent(sourceImageData, outputImageData) {
     for (let i = 0, y = 0; y < srcHeight; y++) {
         for (let x = 0; x < srcWidth; x++) {
 
-            let v = 0;
-
-            const label = labelingArray[y][x];
-            if (label === maxLabel) {
-                v = 255;
+            let g = src[i + 1];
+            if (labelingArray[y][x] === maxLabel) {
+                g = src[i + 1] * 2;
+                g = g > 255 ? 255 : g;
             }
-            else if (label > 0) {
-                v = 128;
+            else if (labelingArray[y][x] > 0) {
+                g = src[i + 1] * 1.1;
+                g = g > 255 ? 255 : g;
+            }
+            else {
+                g /= 2;
             }
 
-            dst[i] = 0;
-            dst[i + 1] = v;
-            dst[i + 2] = 0;
+            dst[i] = src[i] / 2;
+            dst[i + 1] = g;
+            dst[i + 2] = src[i + 2] / 2;
             dst[i + 3] = src[i + 3];
             i += 4;
         }
