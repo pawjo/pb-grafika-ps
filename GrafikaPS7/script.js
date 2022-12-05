@@ -142,17 +142,17 @@ function setSelectedShape(shape) {
 }
 
 function setSelectedTool(tool) {
-    switch (selectedTool) {
-        case tools.drawBezier:
-        case tools.modifyBezier:
-        case tools.moveBezier:
-        case tools.scaleBezier:
-            break;
-        default:
-            currentBezierGroup = null;
-            currentBezierPoints = null;
-            break;
-    }
+    // switch (selectedTool) {
+    //     case tools.drawBezier:
+    //     case tools.modifyBezier:
+    //     case tools.moveBezier:
+    //     case tools.scaleBezier:
+    //         break;
+    //     default:
+    //         currentBezierGroup = null;
+    //         currentBezierPoints = null;
+    //         break;
+    // }
     selectedTool = tool;
 }
 
@@ -247,13 +247,13 @@ function onBezierPointControlChange(e) {
         const attr = circles[i].getAttribute("point-id");
         if (attr === id) {
             currentElement = circles[i];
+            currentBezierPoints[i].x = x;
+            currentBezierPoints[i].y = y;
             break;
         }
     }
     currentElement.setAttribute("cx", x);
     currentElement.setAttribute("cy", y);
-    currentBezierPoints[id].x = x;
-    currentBezierPoints[id].y = y;
     generateBezierCurve();
 }
 
@@ -276,6 +276,21 @@ function createBezierPointControl(x, y, id) {
     button.setAttribute("type", "button");
     button.innerText = "X";
     button.classList.add("close");
+    button.onclick = () => {
+        const circles = currentBezierGroup.getElementsByTagName("circle");
+        for (let i = 0; i < circles.length; i++) {
+            const attr = circles[i].getAttribute("point-id");
+            if (attr == id) {
+                currentElement = circles[i];
+                currentElement.remove();
+                getBezierControlById(id).remove();
+                getBezierPointsFromCurrentGroup();
+                generateBezierCurve();
+                break;
+            }
+        }
+    }
+
     const newControl = document.createElement("div")
     newControl.setAttribute("point-id", id);
     newControl.appendChild(inputX);
@@ -314,10 +329,13 @@ function addPointToBezier(x, y) {
     point.setAttribute("cy", y);
     point.setAttribute("r", 5);
     point.setAttribute("fill", "#4A98F7");
-    const id = currentBezierPoints.length;
+    let id = 0;
+    if (currentBezierPoints.length > 0) {
+        id = currentBezierPoints[currentBezierPoints.length - 1].id + 1;
+    }
     point.setAttribute("point-id", id);
     currentBezierGroup.appendChild(point);
-    currentBezierPoints.push({ x: x, y: y });
+    currentBezierPoints.push({ x: x, y: y, id: id });
     createBezierPointControl(x, y, id);
 }
 
@@ -328,11 +346,13 @@ function getBezierPointsFromCurrentGroup() {
         points[i].setAttribute("fill", "#4A98F7");
         const x = parseInt(points[i].getAttribute("cx"));
         const y = parseInt(points[i].getAttribute("cy"));
+        const id = points[i].getAttribute("point-id");
         currentBezierPoints.push({
             x: x,
-            y: y
+            y: y,
+            id: id
         })
-        createBezierPointControl(x, y, i);
+        createBezierPointControl(x, y, id);
     }
 }
 
@@ -356,6 +376,7 @@ function unselectCurrentBezier() {
 
 function startDrawBezier(startX, startY) {
     currentBezierGroup = document.createElementNS(svgns, "g");
+    currentBezierGroup.classList.add("current-element");
     svg.appendChild(currentBezierGroup);
     currentBezierPoints = [];
     addPointToBezier(startX, startY);
@@ -425,9 +446,10 @@ function drawBezierPoint(x, y) {
 
 function moveBezierPoint(dX, dY, id) {
     moving(dX, dY);
-    currentBezierPoints[id].x += dX;
-    currentBezierPoints[id].y += dY;
-    updateBezierPointControl(currentBezierPoints[id].x, currentBezierPoints[id].y, id);
+    const point = currentBezierPoints.find(x => x.id == id);
+    point.x += dX;
+    point.y += dY;
+    updateBezierPointControl(point.x, point.y, id);
 }
 
 function setLineAttributesToStartPosition(startX, startY) {

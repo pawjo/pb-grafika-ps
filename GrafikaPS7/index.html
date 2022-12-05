@@ -95,10 +95,6 @@
               <img src="icons/pencil.svg" alt="">
               <span>Draw</span>
             </li>
-            <li class="option tool" id="text">
-              <img src="icons/text.svg" alt="">
-              <span>Write</span>
-            </li>
           </ul>
         </div>
         <button id="button" class="save-img" onClick="openFilters()">Filters</button>
@@ -169,7 +165,6 @@
               <span>Scale</span>
             </li>
             <div>
-              <button id="add-bezier-point" type="button">+</button>
               <div id="bezier-points">
               </div>
             </div>
@@ -178,19 +173,19 @@
         <div class="row" id="row-others">
           <label class="title">Others</label>
           <ul class="options">
-            <li class="option tool" id="text">
+            <li class="option">
               <input id="changeColor" type="color">
               <span>Color</span>
             </li>
-            <li class="option tool" id="text">
+            <li class="option">
               <input id="colorpicker" type="color">
               <span onclick="changecolor();">Background</span>
             </li>
-            <li class="option tool" id="zoom-in-button" id="text">
+            <li class="option" id="zoom-in-button">
               <img src="icons/plus.svg" alt="">
               <span>Zoom in</span>
             </li>
-            <li class="option tool" id="zoom-out-button" id="text">
+            <li class="option" id="zoom-out-button">
               <img src="icons/minus.svg" alt="">
               <span>Zoom out</span>
             </li>
