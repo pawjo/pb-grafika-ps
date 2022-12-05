@@ -1337,7 +1337,10 @@ function createArray(length) {
     return arr;
 }
 
+let testCounter = 0;
+let maxTestCounter = 0;
 function processLabel(label, value) {
+    testCounter++;
     if (linkedLabels[label] === 0) {
         labels[label] += value;
         return label;
@@ -1347,6 +1350,16 @@ function processLabel(label, value) {
     linkedLabels[label] = processLabel(linkedLabels[label], labels[label] + value);
     processedLabels[label] = 1;
     return linkedLabels[label];
+}
+
+function compareLabels(a, b) {
+    if (a === 0 || b === 0 || a === b)
+        return false;
+
+    if (a > b) {
+        labels[b]++;
+
+    }
 }
 
 function detectGreenAreaPercent(sourceImageData, outputImageData) {
@@ -1387,18 +1400,36 @@ function detectGreenAreaPercent(sourceImageData, outputImageData) {
 
             const west = x > 0 ? labelingArray[y][x - 1] : 0;
             const north = y > 0 ? labelingArray[y - 1][x] : 0;
+            const northWest = x > 0 && y > 0 ? labelingArray[y - 1][x - 1] : 0;
+            // const northEast y > 0 && x < srcWidth - 1 ? labelingArray[y - 1][x + 1] : 0;
 
-            if (west > 0 && north > 0 && west !== north) {
-                const max = Math.max(west, north);
-                const min = Math.min(west, north);
-                labels[min]++;
-                labelingArray[y][x] = min;
-                linkedLabels[max] = min;
+            const nonFiltered = [west, northWest, north];
+            let arr = nonFiltered.filter((element, index) =>
+                element !== 0 && nonFiltered.indexOf(element) === index);
+
+            if (arr.length > 1) {
+
+                arr.sort(sortNumber);
+
+                labels[arr[0]]++;
+                labelingArray[y][x] = arr[0];
+                linkedLabels[arr[1]] = arr[0];
+
+                if (arr.length > 2)
+                    linkedLabels[arr[2]] = arr[0];
+
             }
-            else if (west > 0 || north > 0) {
-                const v = Math.max(west, north);
-                labelingArray[y][x] = v;
-                labels[v]++;
+            else if (northWest > 0) {
+                labelingArray[y][x] = northWest;
+                labels[northWest]++;
+            }
+            else if (west > 0) {
+                labelingArray[y][x] = west;
+                labels[west]++;
+            }
+            else if (north > 0) {
+                labelingArray[y][x] = north;
+                labels[north]++;
             }
             else {
                 const v = labels.length;
@@ -1421,16 +1452,21 @@ function detectGreenAreaPercent(sourceImageData, outputImageData) {
             continue;
         }
         if (linkedLabels[i] === 0 && maxCount < labels[i]) {
-            console.log(`i = ${i}, count = ${labels[i]}`);
+            // console.log(`i = ${i}, count = ${labels[i]}`);
             maxCount = labels[i];
             maxLabel = i;
         }
         else if (linkedLabels[i] > 0) {
-            console.log(`i = ${i}, label = ${linkedLabels[i]}`);
+            // console.log(`i = ${i}, label = ${linkedLabels[i]}`);
+            testCounter = 0;
             linkedLabels[i] = processLabel(linkedLabels[i], labels[i]);
+            if (testCounter > maxTestCounter)
+                maxTestCounter = testCounter;
             processedLabels[i] = 1;
         }
     }
+
+    console.log(`width = ${srcWidth}, height = ${srcHeight}, maxTestCounter = ${maxTestCounter}`);
 
     console.log("labels");
     console.log(labels);
