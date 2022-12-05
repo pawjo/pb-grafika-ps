@@ -1072,6 +1072,18 @@ function openImage() {
 }
 
 function saveSvg() {
+    const result = prompt("Enter file name");
+    if (result === null)
+        return;
+
+    if (result === "") {
+        alert("File name cannot be empty");
+        return;
+    }
+
+    const indexOfSuffix = result.indexOf(".svg");
+    const fileName = indexOfSuffix === -1 ? result : result.substring(0, result.length - 4);
+
     const activeElements = document.getElementsByClassName("current-element");
     for (let i = 0; i < activeElements.length; i++) {
         activeElements[i].classList.remove("current-element");
@@ -1083,7 +1095,7 @@ function saveSvg() {
     var svgUrl = URL.createObjectURL(svgBlob);
     var downloadLink = document.createElement("a");
     downloadLink.href = svgUrl;
-    downloadLink.download = "example";
+    downloadLink.download = fileName;
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
@@ -1139,6 +1151,8 @@ document.getElementById("zoom-in-button").onclick = () => zoom("in");
 document.getElementById("zoom-out-button").onclick = () => zoom("out");
 
 function clearSvg() {
+    if (!confirm("Are you sure you want to clear the workspace?"))
+        return;
     const element = document.getElementById("workspace");
     removeChildren(element);
     updateAreaDetails(0, 0);
