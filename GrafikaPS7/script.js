@@ -732,13 +732,9 @@ function onObjectMouseDown(e) {
         currentBezierGroup = currentElement.parentElement;
         currentBezierGroup.classList.add("current-element");
         getBezierPointsFromCurrentGroup();
-
-        moveChildTo(currentBezierGroup);
     }
     else if (!currentBezierGroup) {
         currentElement.classList.add("current-element");
-
-        moveChildTo(currentElement);
     }
 
     if (currentElement.tagName === "image" && currentElement.hasAttribute("area-percent")) {
@@ -1530,17 +1526,25 @@ function showDetails() {
     }
 }
 
-function moveChildTo(child) {
-    if (selectedTool === tools.backward && child.previousElementSibling) {
-        svg.insertBefore(child, child.previousElementSibling);
+function moveCurrentElementTo(where) {
+    let element = null;
+    if (currentBezierGroup)
+        element = currentBezierGroup;
+    else if (currentElement)
+        element = currentElement;
+    else
+        return;
+
+    if (where === tools.backward && element.previousElementSibling) {
+        svg.insertBefore(element, element.previousElementSibling);
     }
-    else if (selectedTool === tools.forward && child.nextElementSibling) {
-        svg.insertBefore(child, child.nextElementSibling.nextElementSibling);
+    else if (where === tools.forward && element.nextElementSibling) {
+        svg.insertBefore(element, element.nextElementSibling.nextElementSibling);
     }
-    else if (selectedTool === tools.toBack && svg.firstChild) {
-        svg.insertBefore(child, firstChild);
+    else if (where === tools.toBack && svg.firstChild) {
+        svg.insertBefore(element, svg.firstChild);
     }
-    else if (selectedTool === tools.toFront) {
-        svg.insertBefore(child);
+    else if (where === tools.toFront) {
+        svg.insertBefore(element, null);
     }
 }
