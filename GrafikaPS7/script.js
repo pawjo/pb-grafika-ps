@@ -718,7 +718,7 @@ function onObjectMouseDown(e) {
 
     e.stopPropagation();
 
-    if (currentElement) {
+    if (currentElement && e.target !== currentElement) {
         currentElement.classList.remove("current-element");
     }
     currentElement = e.target;
@@ -730,6 +730,12 @@ function onObjectMouseDown(e) {
     }
     else if (!currentBezierGroup) {
         currentElement.classList.add("current-element");
+    }
+
+    if (currentElement.tagName === "image" && currentElement.hasAttribute("area-percent")) {
+        const area = parseInt(currentElement.getAttribute("area-percent"));
+        const largest = parseInt(currentElement.getAttribute("largest-area-percent"));
+        updateAreaDetails(area, largest);
     }
 
     currentAction = selectedTool;
@@ -1000,12 +1006,16 @@ function onLoadTmpImage(e) {
         imageHeight /= factor;
     }
 
+    if (currentElement)
+        currentElement.classList.remove("current-element");
+
     currentElement = document.createElementNS(svgns, "image");
     currentElement.setAttribute("href", e.target.src);
     currentElement.setAttribute("width", imageWidth);
     currentElement.setAttribute("height", imageHeight);
     currentElement.setAttribute("x", 0);
     currentElement.setAttribute("y", 0);
+    currentElement.classList.add("current-element");
     svg.appendChild(currentElement);
 }
 
@@ -1100,6 +1110,7 @@ document.getElementById("zoom-out-button").onclick = () => zoom("out");
 function clearSvg() {
     const element = document.getElementById("workspace");
     removeChildren(element);
+    updateAreaDetails(0, 0);
 }
 
 
@@ -1443,6 +1454,9 @@ function detectGreenAreaPercent(sourceImageData, outputImageData) {
 
     console.log(`maxLabel = ${maxLabel}, count = ${maxCount}`);
 
+    let area = 0;
+    let largestArea = 0;
+
     for (let i = 0, y = 0; y < srcHeight; y++) {
         for (let x = 0; x < srcWidth; x++) {
 
@@ -1450,10 +1464,13 @@ function detectGreenAreaPercent(sourceImageData, outputImageData) {
             if (labelingArray[y][x] === maxLabel) {
                 g = src[i + 1] * 2;
                 g = g > 255 ? 255 : g;
+                area++;
+                largestArea++;
             }
             else if (labelingArray[y][x] > 0) {
                 g = src[i + 1] * 1.1;
                 g = g > 255 ? 255 : g;
+                area++;
             }
             else {
                 g /= 2;
@@ -1467,9 +1484,31 @@ function detectGreenAreaPercent(sourceImageData, outputImageData) {
         }
     }
 
+    const size = srcHeight * srcWidth;
+    const areaPercent = Math.round(area / size * 100);
+    const largestAreaPercent = Math.round(largestArea / size * 100);
+
+
+    updateAreaDetails(areaPercent, largestAreaPercent);
+    currentElement.setAttribute("area-percent", areaPercent);
+    currentElement.setAttribute("largest-area-percent", largestAreaPercent);
+
     console.log(binaryData);
 
     return outputImageData;
+}
+
+function updateAreaDetails(area, largest) {
+    const areaOutput = document.getElementById("area-percent");
+    const largestOutput = document.getElementById("largest-area-percent");
+    if (area > 0) {
+        areaOutput.innerText = area;
+        largestOutput.innerText = largest;
+    }
+    else {
+        areaOutput.innerText = "";
+        largestOutput.innerText = "";
+    }
 }
 
 function showDetails() {
