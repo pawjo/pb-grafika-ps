@@ -120,13 +120,14 @@ body {
 }
 
 #container {
-  display: none;
-  width: 100%;
-  gap: 10px;
-  padding: 20px;
-  max-width: 1050px;
-  height:95%;
-  z-index: 1;
+    display: none;
+    width: 100%;
+    gap: 10px;
+    padding: 20px;
+    max-width: 1050px;
+    z-index: 1;
+    overflow: scroll;
+
 }
 
 section {
@@ -136,6 +137,12 @@ section {
 .tools-board {
   width: 180px;
   padding: 15px 22px 0;
+  overflow:auto;
+    overflow: scroll;
+    position: sticky;
+    overflow: scroll;
+    height: 700px;
+
 }
 
 .tools-board .row {
@@ -357,17 +364,6 @@ input[type=range]::-webkit-slider-thumb {
     box-sizing: border-box;
 }
 
-/*.snow_wrap{*/
-/*    height: 100vh;*/
-/*    width: 100%;*/
-/*    background-size: cover;*/
-/*    background-position: center bottom;*/
-/*    overflow: hidden;*/
-/*    position: relative;*/
-/*    z-index: -1;*/
-/**/
-/*}*/
-
 .snow, .snow:before, .snow:after {
   position: absolute;
   top: -650px;
@@ -409,4 +405,34 @@ input[type=range]::-webkit-slider-thumb {
   to {
     transform: translateY(650px);
   }
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    width: 120px;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -60px;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+#details {
+    display:none;
 }

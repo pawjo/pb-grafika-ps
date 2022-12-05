@@ -1471,3 +1471,13 @@ function detectGreenAreaPercent(sourceImageData, outputImageData) {
 
     return outputImageData;
 }
+
+function showDetails() {
+
+    var row = document.getElementById('details');
+    if (row.style.display === "none") {
+        row.style.display = "block";
+    } else {
+        row.style.display = "none";
+    }
+}

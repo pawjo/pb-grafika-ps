@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Zadanie 1</title>
+  <title>Project - PW & PT</title>
   <link rel="stylesheet" href="style.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="script.js" defer></script>
@@ -107,11 +107,11 @@
             </li>
             <li class="option" id="threshold" onclick="filterImage('threshold')">
               <img src="icons/binary.svg" alt="">
-              <span>Apply threshold</span>
+              <span>Threshold</span>
             </li>
             <li class="option" id="sharpen" onclick="filterImage('sharpen')">
               <img src="icons/focus.svg" alt="">
-              <span>Apply sharpen</span>
+              <span>Sharpen</span>
             </li>
             <li class="option" id="blur" onclick="filterImage('blur')">
               <img src="icons/blur.svg" alt="">
@@ -122,9 +122,24 @@
               <span>Median</span>
             </li>
             <li class="option" id="blur" onclick="filterImage('greenArea')">
-              <img src="icons/text.svg" alt="">
+              <img src="icons/detect.svg" alt="">
               <span>Detect green area</span>
             </li>
+            <button id="button" class="save-img" onclick="showDetails()">Show Details</button>
+            <div id="details">
+                <li class="option">
+                  <img src="icons/area.svg" alt="">
+                  <span class="tooltip">Area:
+                  <span class="tooltiptext">What % of the area is covered by green areas</span>
+                  </span>
+                </li>
+                <li class="option">
+                  <img src="icons/large.svg" alt="">
+                  <span class="tooltip">Large:
+                  <span class="tooltiptext">What % is occupied by the largest green area</span>
+                  </span>
+                </li>
+            </div>
           </ul>
         </div>
         <button id="button" class="save-img" onClick="openBezier()">Bézier</button>
