@@ -93,11 +93,29 @@ let buffer = [];
 let brushWidth = 2;
 const sizeSlider = document.querySelector("#size-slider");
 
-sizeSlider.addEventListener("change", () => brushWidth = sizeSlider.value);
+function applyBrushChange(attributeName, value) {
+    let element = currentBezierGroup ? currentBezierGroup.getElementsByTagName("polyline")[0] : null;
+
+    if (!element && currentElement) {
+        const tag = currentElement.tagName;
+        element = (tag === "rect" || tag === "circle" || tag === "polygon") ? currentElement : null;
+    }
+
+    if (element)
+        element.setAttribute(attributeName, value);
+}
+
+sizeSlider.addEventListener("change", () => {
+    brushWidth = sizeSlider.value;
+    applyBrushChange("stroke-width", brushWidth);
+});
 
 const changeColor = document.querySelector("#changeColor");
 
-changeColor.addEventListener("change", () => brushColor = changeColor.value);
+changeColor.addEventListener("change", () => {
+    brushColor = changeColor.value;
+    applyBrushChange("stroke", brushColor);
+});
 
 
 let checkBox = document.getElementById("fill-color");
@@ -716,6 +734,11 @@ function startScaleCurve(e) {
 
 }
 
+function updateBrushSizeAndColor(element) {
+    changeColor.value = element.getAttribute("stroke");
+    sizeSlider.value = element.getAttribute("stroke-width");
+}
+
 function onObjectMouseDown(e) {
     if (selectedTool === tools.draw) {
         return;
@@ -732,9 +755,12 @@ function onObjectMouseDown(e) {
         currentBezierGroup = currentElement.parentElement;
         currentBezierGroup.classList.add("current-element");
         getBezierPointsFromCurrentGroup();
+        const polyline = currentBezierGroup.getElementsByTagName("polyline")[0];
+        updateBrushSizeAndColor(polyline);
     }
     else if (!currentBezierGroup) {
         currentElement.classList.add("current-element");
+        updateBrushSizeAndColor(currentElement);
     }
 
     if (currentElement.tagName === "image" && currentElement.hasAttribute("area-percent")) {
