@@ -1150,12 +1150,24 @@ const zoom = (direction) => {
 document.getElementById("zoom-in-button").onclick = () => zoom("in");
 document.getElementById("zoom-out-button").onclick = () => zoom("out");
 
+function clearClass(className) {
+    const element = document.getElementsByClassName(className)[0];
+    if (element)
+        element.classList.remove(className);
+}
+
 function clearSvg() {
     if (!confirm("Are you sure you want to clear the workspace?"))
         return;
     const element = document.getElementById("workspace");
     removeChildren(element);
     updateAreaDetails(0, 0);
+    selectedTool = null;
+    currentAction = null;
+    currentElement = null;
+    currentBezierGroup = null;
+    clearClass("activeShape");
+    clearClass("activeTool");
 }
 
 
