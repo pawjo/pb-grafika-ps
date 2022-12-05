@@ -10,7 +10,7 @@
 </head>
 
 <body>
-        <div class="snow"></div>
+  <div class="snow"></div>
   <div id="startScreen">
     <svg width="432.1" height="71.104" viewBox="0 0 432.1 71.104" xmlns="http://www.w3.org/2000/svg">
       <g id="logo" stroke-linecap="round" fill-rule="nonzero" font-size="9pt" stroke="#ffffff" stroke-width="0.25mm"
@@ -79,6 +79,10 @@
               <img src="icons/add.svg" alt="">
               <span>Create</span>
             </li>
+            <li class="option tool" id="select">
+              <img src="icons/move.svg" alt="">
+              <span>Select</span>
+            </li>
             <li class="option tool" id="move">
               <img src="icons/move.svg" alt="">
               <span>Move</span>
@@ -95,12 +99,28 @@
               <img src="icons/text.svg" alt="">
               <span>Write</span>
             </li>
-            </ul>
+            <li class="option tool" id="toFront">
+              <img src="icons/text.svg" alt="">
+              <span>To front</span>
+            </li>
+            <li class="option tool" id="toBack">
+              <img src="icons/text.svg" alt="">
+              <span>To back</span>
+            </li>
+            <li class="option tool" id="forward">
+              <img src="icons/text.svg" alt="">
+              <span>Forward</span>
+            </li>
+            <li class="option tool" id="backward">
+              <img src="icons/text.svg" alt="">
+              <span>Backward</span>
+            </li>
+          </ul>
         </div>
-          <button id="button" class="save-img" onClick="openFilters()">Filters</button>
-          <div class="row" id="row-filters">
-            <label class="title">Filters</label>
-            <ul class="options">
+        <button id="button" class="save-img" onClick="openFilters()">Filters</button>
+        <div class="row" id="row-filters">
+          <label class="title">Filters</label>
+          <ul class="options">
             <li class="option tool" id="image" onclick="openImage()">
               <img src="icons/image.svg" alt="">
               <span>Add image</span>
@@ -127,20 +147,20 @@
             </li>
             <button id="button" class="save-img" onclick="showDetails()">Show Details</button>
             <div id="details">
-                <li class="option">
-                  <img src="icons/area.svg" alt="">
-                  <span class="tooltip">Area:
+              <li class="option">
+                <img src="icons/area.svg" alt="">
+                <span class="tooltip">Area:
                   <span class="tooltiptext">What % of the area is covered by green areas</span>
                   <span id="area-percent"></span>
-                  </span>
-                </li>
-                <li class="option">
-                  <img src="icons/large.svg" alt="">
-                  <span class="tooltip">Largest:
+                </span>
+              </li>
+              <li class="option">
+                <img src="icons/large.svg" alt="">
+                <span class="tooltip">Largest:
                   <span class="tooltiptext">What % is occupied by the largest green area</span>
                   <span id="largest-area-percent"></span>
-                  </span>
-                </li>
+                </span>
+              </li>
             </div>
           </ul>
         </div>

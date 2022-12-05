@@ -34,7 +34,12 @@ const tools = {
     modifyBezier: "modify-bezier",
     moveBezier: "move-bezier",
     scaleBezier: "scale-bezier",
-    openImage: "open-image"
+    openImage: "open-image",
+    select: "select",
+    toFront: "toFront",
+    toBack: "toBack",
+    forward: "forward",
+    backward: "backward"
 };
 
 const scalingTypes = {
@@ -727,9 +732,13 @@ function onObjectMouseDown(e) {
         currentBezierGroup = currentElement.parentElement;
         currentBezierGroup.classList.add("current-element");
         getBezierPointsFromCurrentGroup();
+
+        moveChildTo(currentBezierGroup);
     }
     else if (!currentBezierGroup) {
         currentElement.classList.add("current-element");
+
+        moveChildTo(currentElement);
     }
 
     if (currentElement.tagName === "image" && currentElement.hasAttribute("area-percent")) {
@@ -1518,5 +1527,20 @@ function showDetails() {
         row.style.display = "block";
     } else {
         row.style.display = "none";
+    }
+}
+
+function moveChildTo(child) {
+    if (selectedTool === tools.backward && child.previousElementSibling) {
+        svg.insertBefore(child, child.previousElementSibling);
+    }
+    else if (selectedTool === tools.forward && child.nextElementSibling) {
+        svg.insertBefore(child, child.nextElementSibling.nextElementSibling);
+    }
+    else if (selectedTool === tools.toBack && svg.firstChild) {
+        svg.insertBefore(child, firstChild);
+    }
+    else if (selectedTool === tools.toFront) {
+        svg.insertBefore(child);
     }
 }
