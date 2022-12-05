@@ -1017,6 +1017,17 @@ function openSvg() {
             const svgInnerStart = svgContent.indexOf(">") + 1;
             const svgInner = svgContent.substring(svgInnerStart, svgContent.length - 6);
             svg.innerHTML = svgInner;
+            const svgStart = svgContent.substring(0, svgInnerStart);
+            const indexOfStyle = svgStart.indexOf("style");
+            if (indexOfStyle !== -1) {
+                const styleStartIndex = indexOfStyle + 7;
+                const styleEndIndex = svgStart.indexOf('"', styleStartIndex);
+                const styleContent = svgStart.substring(styleStartIndex, styleEndIndex);
+                if (styleContent !== "")
+                    svg.setAttribute("style", styleContent);
+            }
+            else
+                setBackground("");
         };
         reader.readAsText(file);
     };
@@ -1156,6 +1167,10 @@ function clearClass(className) {
         element.classList.remove(className);
 }
 
+function setBackground(value) {
+    workspace.style.backgroundColor = value;
+}
+
 function clearSvg() {
     if (!confirm("Are you sure you want to clear the workspace?"))
         return;
@@ -1168,6 +1183,7 @@ function clearSvg() {
     currentBezierGroup = null;
     clearClass("activeShape");
     clearClass("activeTool");
+    setBackground("");
 }
 
 
