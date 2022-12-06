@@ -834,24 +834,29 @@ function onObjectMouseDown(e) {
         }
 }
 
+function unselectCurrentElement() {
+    if (currentBezierGroup) {
+        unselectCurrentBezier();
+    }
+    else if (currentElement) {
+        currentElement.classList.remove("current-element");
+        currentElement = null;
+        currentPolygonPointIndex = 0;
+    }
+}
+
 function onSvgMouseDown(e) {
-    if (selectedTool === tools.draw && selectedShape) {
-        startDraw(e);
-    }
-    else if (selectedTool === tools.drawBezier) {
-        startDrawBezier(e.offsetX, e.offsetY);
-    }
-    else if (selectedTool === tools.pencil) {
+    if (selectedTool === tools.pencil) {
         currentAction = tools.pencil;
         path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute("fill", fillColor);
+        // path.setAttribute("fill", fillColor);
         path.setAttribute("stroke", brushColor);
-        path.setAttribute("stroke-width", brushWidth);
+        // path.setAttribute("stroke-width", 5);
         buffer = [];
         let pt = getMousePosition(e);
         appendToBuffer(pt);
-        strPath = "M" + e.offsetX + " " + e.offsetY;
-        //strPath = "M" + pt.x + " " + pt.y;
+        // strPath = "M" + e.offsetX + " " + e.offsetY;
+        strPath = "M" + pt.x + " " + pt.y;
         path.setAttribute("d", strPath);
         svg.appendChild(path);
     }
@@ -872,13 +877,8 @@ function onSvgMouseDown(e) {
         textField.value = "";
         textField.style.position = "absolute";
     }
-    else if (currentBezierGroup) {
-        unselectCurrentBezier();
-    }
-    else if (currentElement) {
-        currentElement.classList.remove("current-element");
-        currentElement = null;
-        currentPolygonPointIndex = 0;
+    else {
+        unselectCurrentElement();
     }
 }
 
@@ -888,6 +888,14 @@ function onMouseDown(e) {
     }
     else if (selectedTool === tools.drawBezier && currentBezierGroup) {
         drawBezierPoint(e.offsetX, e.offsetY);
+    }
+    else if (selectedTool === tools.drawBezier) {
+        unselectCurrentElement();
+        startDrawBezier(e.offsetX, e.offsetY);
+    }
+    else if (selectedTool === tools.draw && selectedShape) {
+        unselectCurrentElement();
+        startDraw(e);
     }
     // else if (selectedTool === tools.scale && currentElement.tagName === "g" && e.target.tagName === "circle") {
     //     startScaleCurve(e);
@@ -969,9 +977,13 @@ svg.addEventListener("mouseup", onMouseUp);
 
 var getMousePosition = function (e) {
     return {
-        x: e.pageX - boundingRect.left,
-        y: e.pageY - boundingRect.top
+        x: e.offsetX - boundingRect.left,
+        y: e.offsetY - boundingRect.top
     }
+    // return {
+    //     x: e.offsetX,
+    //     y: e.offsetY
+    // }
 };
 
 var appendToBuffer = function (pt) {
@@ -1057,6 +1069,7 @@ function openSvg() {
 }
 
 function onLoadTmpImage(e) {
+    unselectCurrentElement();
     let imageWidth = e.target.width;
     let imageHeight = e.target.height;
 
