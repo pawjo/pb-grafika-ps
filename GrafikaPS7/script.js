@@ -284,6 +284,8 @@ function createBezierPointControl(x, y, id) {
                 currentElement = circles[i];
                 currentElement.remove();
                 getBezierControlById(id).remove();
+                const box = document.getElementById("bezier-points");
+                removeChild(box);
                 getBezierPointsFromCurrentGroup();
                 generateBezierCurve();
                 break;
