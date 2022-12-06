@@ -10,7 +10,7 @@
 </head>
 
 <body>
-        <div class="snow"></div>
+  <div class="snow"></div>
   <div id="startScreen">
     <svg width="432.1" height="71.104" viewBox="0 0 432.1 71.104" xmlns="http://www.w3.org/2000/svg">
       <g id="logo" stroke-linecap="round" fill-rule="nonzero" font-size="9pt" stroke="#ffffff" stroke-width="0.25mm"
@@ -79,6 +79,10 @@
               <img src="icons/add.svg" alt="">
               <span>Create</span>
             </li>
+            <li class="option tool" id="select">
+              <img src="icons/select-svgrepo-com.svg" alt="">
+              <span>Select</span>
+            </li>
             <li class="option tool" id="move">
               <img src="icons/move.svg" alt="">
               <span>Move</span>
@@ -87,20 +91,12 @@
               <img src="icons/scale.svg" alt="">
               <span>Scale</span>
             </li>
-            <li class="option tool" id="pencil">
-              <img src="icons/pencil.svg" alt="">
-              <span>Draw</span>
-            </li>
-            <li class="option tool" id="text">
-              <img src="icons/text.svg" alt="">
-              <span>Write</span>
-            </li>
-            </ul>
+          </ul>
         </div>
-          <button id="button" class="save-img" onClick="openFilters()">Filters</button>
-          <div class="row" id="row-filters">
-            <label class="title">Filters</label>
-            <ul class="options">
+        <button id="button" class="save-img" onClick="openFilters()">Filters</button>
+        <div class="row" id="row-filters">
+          <label class="title">Filters</label>
+          <ul class="options">
             <li class="option tool" id="image" onclick="openImage()">
               <img src="icons/image.svg" alt="">
               <span>Add image</span>
@@ -127,18 +123,22 @@
             </li>
             <button id="button" class="save-img" onclick="showDetails()">Show Details</button>
             <div id="details">
-                <li class="option">
-                  <img src="icons/area.svg" alt="">
-                  <span class="tooltip">Area:
+              <li class="option">
+                <img src="icons/area.svg" alt="">
+                <span class="tooltip">Area:
                   <span class="tooltiptext">What % of the area is covered by green areas</span>
-                  </span>
-                </li>
-                <li class="option">
-                  <img src="icons/large.svg" alt="">
-                  <span class="tooltip">Large:
+                  <span id="area-percent"></span>
+                  %
+                </span>
+              </li>
+              <li class="option">
+                <img src="icons/large.svg" alt="">
+                <span class="tooltip">Largest:
                   <span class="tooltiptext">What % is occupied by the largest green area</span>
-                  </span>
-                </li>
+                  <span id="largest-area-percent"></span>
+                  %
+                </span>
+              </li>
             </div>
           </ul>
         </div>
@@ -158,12 +158,7 @@
               <img src="icons/move.svg" alt="">
               <span>Move</span>
             </li>
-            <li class="option tool" id="scale-bezier">
-              <img src="icons/scale.svg" alt="">
-              <span>Scale</span>
-            </li>
             <div>
-              <button id="add-bezier-point" type="button">+</button>
               <div id="bezier-points">
               </div>
             </div>
@@ -172,19 +167,19 @@
         <div class="row" id="row-others">
           <label class="title">Others</label>
           <ul class="options">
-            <li class="option tool" id="text">
+            <li class="option">
               <input id="changeColor" type="color">
               <span>Color</span>
             </li>
-            <li class="option tool" id="text">
+            <li class="option">
               <input id="colorpicker" type="color">
               <span onclick="changecolor();">Background</span>
             </li>
-            <li class="option tool" id="zoom-in-button" id="text">
+            <li class="option" id="zoom-in-button">
               <img src="icons/plus.svg" alt="">
               <span>Zoom in</span>
             </li>
-            <li class="option tool" id="zoom-out-button" id="text">
+            <li class="option" id="zoom-out-button">
               <img src="icons/minus.svg" alt="">
               <span>Zoom out</span>
             </li>
@@ -193,6 +188,22 @@
             <!--              <input type="checkbox" id="fill-color">-->
             <!--              <span onclick="changeFill();">Fill color</span>-->
             <!--            </li>-->
+            <li class="option" id="toFront" onclick="moveCurrentElementTo('toFront')">
+              <img src="icons/bring-to-front-svgrepo-com.svg" alt="">
+              <span>To front</span>
+            </li>
+            <li class="option" id="toBack" onclick="moveCurrentElementTo('toBack')">
+              <img src="icons/send-to-back-svgrepo-com.svg" alt="">
+              <span>To back</span>
+            </li>
+            <li class="option" id="forward" onclick="moveCurrentElementTo('forward')">
+              <img src="icons/front-svgrepo-com.svg" alt="">
+              <span>Forward</span>
+            </li>
+            <li class="option" id="backward" onclick="moveCurrentElementTo('backward')">
+              <img src="icons/subtract-svgrepo-com.svg" alt="">
+              <span>Backward</span>
+            </li>
           </ul>
         </div>
         <button id="button" class="save-img" onClick="openSvg()">Open</button>

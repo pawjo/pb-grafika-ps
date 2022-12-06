@@ -34,7 +34,12 @@ const tools = {
     modifyBezier: "modify-bezier",
     moveBezier: "move-bezier",
     scaleBezier: "scale-bezier",
-    openImage: "open-image"
+    openImage: "open-image",
+    select: "select",
+    toFront: "toFront",
+    toBack: "toBack",
+    forward: "forward",
+    backward: "backward"
 };
 
 const scalingTypes = {
@@ -88,11 +93,29 @@ let buffer = [];
 let brushWidth = 2;
 const sizeSlider = document.querySelector("#size-slider");
 
-sizeSlider.addEventListener("change", () => brushWidth = sizeSlider.value);
+function applyBrushChange(attributeName, value) {
+    let element = currentBezierGroup ? currentBezierGroup.getElementsByTagName("polyline")[0] : null;
+
+    if (!element && currentElement) {
+        const tag = currentElement.tagName;
+        element = (tag === "rect" || tag === "circle" || tag === "polygon") ? currentElement : null;
+    }
+
+    if (element)
+        element.setAttribute(attributeName, value);
+}
+
+sizeSlider.addEventListener("change", () => {
+    brushWidth = sizeSlider.value;
+    applyBrushChange("stroke-width", brushWidth);
+});
 
 const changeColor = document.querySelector("#changeColor");
 
-changeColor.addEventListener("change", () => brushColor = changeColor.value);
+changeColor.addEventListener("change", () => {
+    brushColor = changeColor.value;
+    applyBrushChange("stroke", brushColor);
+});
 
 
 let checkBox = document.getElementById("fill-color");
@@ -119,17 +142,17 @@ function setSelectedShape(shape) {
 }
 
 function setSelectedTool(tool) {
-    switch (selectedTool) {
-        case tools.drawBezier:
-        case tools.modifyBezier:
-        case tools.moveBezier:
-        case tools.scaleBezier:
-            break;
-        default:
-            currentBezierGroup = null;
-            currentBezierPoints = null;
-            break;
-    }
+    // switch (selectedTool) {
+    //     case tools.drawBezier:
+    //     case tools.modifyBezier:
+    //     case tools.moveBezier:
+    //     case tools.scaleBezier:
+    //         break;
+    //     default:
+    //         currentBezierGroup = null;
+    //         currentBezierPoints = null;
+    //         break;
+    // }
     selectedTool = tool;
 }
 
@@ -224,13 +247,13 @@ function onBezierPointControlChange(e) {
         const attr = circles[i].getAttribute("point-id");
         if (attr === id) {
             currentElement = circles[i];
+            currentBezierPoints[i].x = x;
+            currentBezierPoints[i].y = y;
             break;
         }
     }
     currentElement.setAttribute("cx", x);
     currentElement.setAttribute("cy", y);
-    currentBezierPoints[id].x = x;
-    currentBezierPoints[id].y = y;
     generateBezierCurve();
 }
 
@@ -253,6 +276,21 @@ function createBezierPointControl(x, y, id) {
     button.setAttribute("type", "button");
     button.innerText = "X";
     button.classList.add("close");
+    button.onclick = () => {
+        const circles = currentBezierGroup.getElementsByTagName("circle");
+        for (let i = 0; i < circles.length; i++) {
+            const attr = circles[i].getAttribute("point-id");
+            if (attr == id) {
+                currentElement = circles[i];
+                currentElement.remove();
+                getBezierControlById(id).remove();
+                getBezierPointsFromCurrentGroup();
+                generateBezierCurve();
+                break;
+            }
+        }
+    }
+
     const newControl = document.createElement("div")
     newControl.setAttribute("point-id", id);
     newControl.appendChild(inputX);
@@ -291,10 +329,13 @@ function addPointToBezier(x, y) {
     point.setAttribute("cy", y);
     point.setAttribute("r", 5);
     point.setAttribute("fill", "#4A98F7");
-    const id = currentBezierPoints.length;
+    let id = 0;
+    if (currentBezierPoints.length > 0) {
+        id = currentBezierPoints[currentBezierPoints.length - 1].id + 1;
+    }
     point.setAttribute("point-id", id);
     currentBezierGroup.appendChild(point);
-    currentBezierPoints.push({ x: x, y: y });
+    currentBezierPoints.push({ x: x, y: y, id: id });
     createBezierPointControl(x, y, id);
 }
 
@@ -305,11 +346,13 @@ function getBezierPointsFromCurrentGroup() {
         points[i].setAttribute("fill", "#4A98F7");
         const x = parseInt(points[i].getAttribute("cx"));
         const y = parseInt(points[i].getAttribute("cy"));
+        const id = points[i].getAttribute("point-id");
         currentBezierPoints.push({
             x: x,
-            y: y
+            y: y,
+            id: id
         })
-        createBezierPointControl(x, y, i);
+        createBezierPointControl(x, y, id);
     }
 }
 
@@ -333,6 +376,7 @@ function unselectCurrentBezier() {
 
 function startDrawBezier(startX, startY) {
     currentBezierGroup = document.createElementNS(svgns, "g");
+    currentBezierGroup.classList.add("current-element");
     svg.appendChild(currentBezierGroup);
     currentBezierPoints = [];
     addPointToBezier(startX, startY);
@@ -402,9 +446,10 @@ function drawBezierPoint(x, y) {
 
 function moveBezierPoint(dX, dY, id) {
     moving(dX, dY);
-    currentBezierPoints[id].x += dX;
-    currentBezierPoints[id].y += dY;
-    updateBezierPointControl(currentBezierPoints[id].x, currentBezierPoints[id].y, id);
+    const point = currentBezierPoints.find(x => x.id == id);
+    point.x += dX;
+    point.y += dY;
+    updateBezierPointControl(point.x, point.y, id);
 }
 
 function setLineAttributesToStartPosition(startX, startY) {
@@ -711,6 +756,11 @@ function startScaleCurve(e) {
 
 }
 
+function updateBrushSizeAndColor(element) {
+    changeColor.value = element.getAttribute("stroke");
+    sizeSlider.value = element.getAttribute("stroke-width");
+}
+
 function onObjectMouseDown(e) {
     if (selectedTool === tools.draw) {
         return;
@@ -718,7 +768,7 @@ function onObjectMouseDown(e) {
 
     e.stopPropagation();
 
-    if (currentElement) {
+    if (currentElement && e.target !== currentElement) {
         currentElement.classList.remove("current-element");
     }
     currentElement = e.target;
@@ -727,9 +777,18 @@ function onObjectMouseDown(e) {
         currentBezierGroup = currentElement.parentElement;
         currentBezierGroup.classList.add("current-element");
         getBezierPointsFromCurrentGroup();
+        const polyline = currentBezierGroup.getElementsByTagName("polyline")[0];
+        updateBrushSizeAndColor(polyline);
     }
     else if (!currentBezierGroup) {
         currentElement.classList.add("current-element");
+        updateBrushSizeAndColor(currentElement);
+    }
+
+    if (currentElement.tagName === "image" && currentElement.hasAttribute("area-percent")) {
+        const area = parseInt(currentElement.getAttribute("area-percent"));
+        const largest = parseInt(currentElement.getAttribute("largest-area-percent"));
+        updateAreaDetails(area, largest);
     }
 
     currentAction = selectedTool;
@@ -775,24 +834,29 @@ function onObjectMouseDown(e) {
         }
 }
 
+function unselectCurrentElement() {
+    if (currentBezierGroup) {
+        unselectCurrentBezier();
+    }
+    else if (currentElement) {
+        currentElement.classList.remove("current-element");
+        currentElement = null;
+        currentPolygonPointIndex = 0;
+    }
+}
+
 function onSvgMouseDown(e) {
-    if (selectedTool === tools.draw && selectedShape) {
-        startDraw(e);
-    }
-    else if (selectedTool === tools.drawBezier) {
-        startDrawBezier(e.offsetX, e.offsetY);
-    }
-    else if (selectedTool === tools.pencil) {
+    if (selectedTool === tools.pencil) {
         currentAction = tools.pencil;
         path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute("fill", fillColor);
+        // path.setAttribute("fill", fillColor);
         path.setAttribute("stroke", brushColor);
-        path.setAttribute("stroke-width", brushWidth);
+        // path.setAttribute("stroke-width", 5);
         buffer = [];
         let pt = getMousePosition(e);
         appendToBuffer(pt);
-        strPath = "M" + e.offsetX + " " + e.offsetY;
-        //strPath = "M" + pt.x + " " + pt.y;
+        // strPath = "M" + e.offsetX + " " + e.offsetY;
+        strPath = "M" + pt.x + " " + pt.y;
         path.setAttribute("d", strPath);
         svg.appendChild(path);
     }
@@ -813,13 +877,8 @@ function onSvgMouseDown(e) {
         textField.value = "";
         textField.style.position = "absolute";
     }
-    else if (currentBezierGroup) {
-        unselectCurrentBezier();
-    }
-    else if (currentElement) {
-        currentElement.classList.remove("current-element");
-        currentElement = null;
-        currentPolygonPointIndex = 0;
+    else {
+        unselectCurrentElement();
     }
 }
 
@@ -829,6 +888,14 @@ function onMouseDown(e) {
     }
     else if (selectedTool === tools.drawBezier && currentBezierGroup) {
         drawBezierPoint(e.offsetX, e.offsetY);
+    }
+    else if (selectedTool === tools.drawBezier) {
+        unselectCurrentElement();
+        startDrawBezier(e.offsetX, e.offsetY);
+    }
+    else if (selectedTool === tools.draw && selectedShape) {
+        unselectCurrentElement();
+        startDraw(e);
     }
     // else if (selectedTool === tools.scale && currentElement.tagName === "g" && e.target.tagName === "circle") {
     //     startScaleCurve(e);
@@ -910,9 +977,13 @@ svg.addEventListener("mouseup", onMouseUp);
 
 var getMousePosition = function (e) {
     return {
-        x: e.pageX - boundingRect.left,
-        y: e.pageY - boundingRect.top
+        x: e.offsetX - boundingRect.left,
+        y: e.offsetY - boundingRect.top
     }
+    // return {
+    //     x: e.offsetX,
+    //     y: e.offsetY
+    // }
 };
 
 var appendToBuffer = function (pt) {
@@ -980,6 +1051,17 @@ function openSvg() {
             const svgInnerStart = svgContent.indexOf(">") + 1;
             const svgInner = svgContent.substring(svgInnerStart, svgContent.length - 6);
             svg.innerHTML = svgInner;
+            const svgStart = svgContent.substring(0, svgInnerStart);
+            const indexOfStyle = svgStart.indexOf("style");
+            if (indexOfStyle !== -1) {
+                const styleStartIndex = indexOfStyle + 7;
+                const styleEndIndex = svgStart.indexOf('"', styleStartIndex);
+                const styleContent = svgStart.substring(styleStartIndex, styleEndIndex);
+                if (styleContent !== "")
+                    svg.setAttribute("style", styleContent);
+            }
+            else
+                setBackground("");
         };
         reader.readAsText(file);
     };
@@ -987,6 +1069,7 @@ function openSvg() {
 }
 
 function onLoadTmpImage(e) {
+    unselectCurrentElement();
     let imageWidth = e.target.width;
     let imageHeight = e.target.height;
 
@@ -1000,12 +1083,16 @@ function onLoadTmpImage(e) {
         imageHeight /= factor;
     }
 
+    if (currentElement)
+        currentElement.classList.remove("current-element");
+
     currentElement = document.createElementNS(svgns, "image");
     currentElement.setAttribute("href", e.target.src);
     currentElement.setAttribute("width", imageWidth);
     currentElement.setAttribute("height", imageHeight);
     currentElement.setAttribute("x", 0);
     currentElement.setAttribute("y", 0);
+    currentElement.classList.add("current-element");
     svg.appendChild(currentElement);
 }
 
@@ -1031,6 +1118,18 @@ function openImage() {
 }
 
 function saveSvg() {
+    const result = prompt("Enter file name");
+    if (result === null)
+        return;
+
+    if (result === "") {
+        alert("File name cannot be empty");
+        return;
+    }
+
+    const indexOfSuffix = result.indexOf(".svg");
+    const fileName = indexOfSuffix === -1 ? result : result.substring(0, result.length - 4);
+
     const activeElements = document.getElementsByClassName("current-element");
     for (let i = 0; i < activeElements.length; i++) {
         activeElements[i].classList.remove("current-element");
@@ -1042,7 +1141,7 @@ function saveSvg() {
     var svgUrl = URL.createObjectURL(svgBlob);
     var downloadLink = document.createElement("a");
     downloadLink.href = svgUrl;
-    downloadLink.download = "example";
+    downloadLink.download = fileName;
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
@@ -1097,9 +1196,29 @@ const zoom = (direction) => {
 document.getElementById("zoom-in-button").onclick = () => zoom("in");
 document.getElementById("zoom-out-button").onclick = () => zoom("out");
 
+function clearClass(className) {
+    const element = document.getElementsByClassName(className)[0];
+    if (element)
+        element.classList.remove(className);
+}
+
+function setBackground(value) {
+    workspace.style.backgroundColor = value;
+}
+
 function clearSvg() {
+    if (!confirm("Are you sure you want to clear the workspace?"))
+        return;
     const element = document.getElementById("workspace");
     removeChildren(element);
+    updateAreaDetails(0, 0);
+    selectedTool = null;
+    currentAction = null;
+    currentElement = null;
+    currentBezierGroup = null;
+    clearClass("activeShape");
+    clearClass("activeTool");
+    setBackground("");
 }
 
 
@@ -1337,7 +1456,10 @@ function createArray(length) {
     return arr;
 }
 
+let testCounter = 0;
+let maxTestCounter = 0;
 function processLabel(label, value) {
+    testCounter++;
     if (linkedLabels[label] === 0) {
         labels[label] += value;
         return label;
@@ -1349,13 +1471,34 @@ function processLabel(label, value) {
     return linkedLabels[label];
 }
 
+function compareLabels(a, b) {
+    if (a === 0 || b === 0 || a === b)
+        return false;
+
+    if (a > b) {
+        labels[b]++;
+
+    }
+}
+
+let queue = null;
+let currentLabel = null;
+let binaryData = null;
+
+function checkAndQueue(pixel) {
+    if (binaryData[pixel.y][pixel.x] === 1 && labelingArray[pixel.y][pixel.x] === 0) {
+        labelingArray[pixel.y][pixel.x] = currentLabel;
+        labels[currentLabel]++;
+        queue.push(pixel);
+    }
+}
+
 function detectGreenAreaPercent(sourceImageData, outputImageData) {
     const src = sourceImageData.data;
     const dst = outputImageData.data;
     const srcWidth = sourceImageData.width;
     const srcHeight = sourceImageData.height;
-    const size = srcWidth * srcHeight;
-    const binaryData = createArray(srcHeight, srcWidth);
+    binaryData = createArray(srcHeight, srcWidth);
     labels = [];
     labels.push(0);
     labelingArray = createArray(srcHeight, srcWidth);
@@ -1380,88 +1523,100 @@ function detectGreenAreaPercent(sourceImageData, outputImageData) {
         }
     }
 
+    currentLabel = 0;
+    queue = [];
+
     for (let i = 0, y = 0; y < srcHeight; y++) {
         for (let x = 0; x < srcWidth; x++) {
-            if (binaryData[y][x] === 0)
-                continue;
+            currentLabel++;
+            labels.push(0);
 
-            const west = x > 0 ? labelingArray[y][x - 1] : 0;
-            const north = y > 0 ? labelingArray[y - 1][x] : 0;
+            checkAndQueue({ x: x, y: y });
 
-            if (west > 0 && north > 0 && west !== north) {
-                const max = Math.max(west, north);
-                const min = Math.min(west, north);
-                labels[min]++;
-                labelingArray[y][x] = min;
-                linkedLabels[max] = min;
-            }
-            else if (west > 0 || north > 0) {
-                const v = Math.max(west, north);
-                labelingArray[y][x] = v;
-                labels[v]++;
-            }
-            else {
-                const v = labels.length;
-                labelingArray[y][x] = v;
-                labels.push(1);
-                linkedLabels.push(0);
-                processedLabels.push(0);
+            while (queue.length > 0) {
+                const pixel = queue.pop();
+                if (pixel.y > 0)
+                    checkAndQueue({ x: pixel.x, y: pixel.y - 1 });
+                if (pixel.x < srcWidth - 1)
+                    checkAndQueue({ x: pixel.x + 1, y: pixel.y });
+                if (pixel.y < srcHeight - 1)
+                    checkAndQueue({ x: pixel.x, y: pixel.y + 1 });
+                if (pixel.x > 0)
+                    checkAndQueue({ x: pixel.x - 1, y: pixel.y });
             }
         }
     }
 
     console.log("labels");
     console.log(labels);
-    console.log("linked");
-    console.log(linkedLabels);
-    let maxCount = 0;
+
     let maxLabel = 0;
-    for (let i = labels.length - 1; i > 0; i--) {
-        if (processedLabels[i] === 1) {
-            continue;
-        }
-        if (linkedLabels[i] === 0 && maxCount < labels[i]) {
-            console.log(`i = ${i}, count = ${labels[i]}`);
-            maxCount = labels[i];
+    let maxCount = 0;
+
+    for (let i = 1; i < labels.length; i++) {
+        if (labels[i] > maxCount) {
             maxLabel = i;
-        }
-        else if (linkedLabels[i] > 0) {
-            console.log(`i = ${i}, label = ${linkedLabels[i]}`);
-            linkedLabels[i] = processLabel(linkedLabels[i], labels[i]);
-            processedLabels[i] = 1;
+            maxCount = labels[i];
         }
     }
 
-    console.log("labels");
-    console.log(labels);
-    console.log("linked");
-    console.log(linkedLabels);
     console.log(`maxLabel = ${maxLabel}, count = ${maxCount}`);
 
+    let area = 0;
+    let largestArea = 0;
+
     for (let i = 0, y = 0; y < srcHeight; y++) {
         for (let x = 0; x < srcWidth; x++) {
 
-            let v = 0;
-
-            const label = labelingArray[y][x];
-            if (label === maxLabel || linkedLabels[label] === maxLabel) {
-                v = 255;
+            let g = src[i + 1];
+            if (labelingArray[y][x] === maxLabel) {
+                g = src[i + 1] * 2;
+                g = g > 255 ? 255 : g;
+                area++;
+                largestArea++;
             }
-            else if (label > 0) {
-                v = 128;
+            else if (labelingArray[y][x] > 0) {
+                g = src[i + 1] * 1.1;
+                g = g > 255 ? 255 : g;
+                area++;
+            }
+            else {
+                g /= 2;
             }
 
-            dst[i] = 0;
-            dst[i + 1] = v;
-            dst[i + 2] = 0;
+            dst[i] = src[i] / 2;
+            dst[i + 1] = g;
+            dst[i + 2] = src[i + 2] / 2;
             dst[i + 3] = src[i + 3];
             i += 4;
         }
     }
 
+    const size = srcHeight * srcWidth;
+    const areaPercent = Math.round(area / size * 100);
+    const largestAreaPercent = Math.round(largestArea / size * 100);
+
+
+    updateAreaDetails(areaPercent, largestAreaPercent);
+    currentElement.setAttribute("area-percent", areaPercent);
+    currentElement.setAttribute("largest-area-percent", largestAreaPercent);
+
     console.log(binaryData);
 
     return outputImageData;
+}
+
+function updateAreaDetails(area, largest) {
+    const areaOutput = document.getElementById("area-percent");
+    const largestOutput = document.getElementById("largest-area-percent");
+    if (area > 0) {
+        areaOutput.innerText = area;
+        largestOutput.innerText = largest;
+    }
+    else {
+        areaOutput.innerText = "";
+        largestOutput.innerText = "";
+    }
 }
 
 function showDetails() {
@@ -1471,5 +1626,28 @@ function showDetails() {
         row.style.display = "block";
     } else {
         row.style.display = "none";
+    }
+}
+
+function moveCurrentElementTo(where) {
+    let element = null;
+    if (currentBezierGroup)
+        element = currentBezierGroup;
+    else if (currentElement)
+        element = currentElement;
+    else
+        return;
+
+    if (where === tools.backward && element.previousElementSibling) {
+        svg.insertBefore(element, element.previousElementSibling);
+    }
+    else if (where === tools.forward && element.nextElementSibling) {
+        svg.insertBefore(element, element.nextElementSibling.nextElementSibling);
+    }
+    else if (where === tools.toBack && svg.firstChild) {
+        svg.insertBefore(element, svg.firstChild);
+    }
+    else if (where === tools.toFront) {
+        svg.insertBefore(element, null);
     }
 }

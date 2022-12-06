@@ -340,7 +340,7 @@ input[type=range]::-webkit-slider-thumb {
 }
 
 #bezier-points{
-    height:35px;
+    height:70px;
     overflow:scroll;
     overflow-x:hidden;
     display:none;
